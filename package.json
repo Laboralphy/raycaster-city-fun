@@ -1,0 +1,21 @@
+{
+  "name": "city-wars",
+  "version": "1.0.0",
+  "description": "multiplayer server for playing raycasting games",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/jasmine public/scripts/dist/test.js",
+    "start": "node index.js",
+    "webpack": "node_modules/.bin/webpack --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  },
+  "devDependencies": {
+    "jasmine": "^2.8.0",
+    "webpack": "^3.10.0"
+  }
+}
