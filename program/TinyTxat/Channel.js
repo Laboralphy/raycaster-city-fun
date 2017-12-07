@@ -10,7 +10,12 @@ class Channel {
         this._events = new Events();
     }
 
-    id(id) {
+	on(sEvent, pHandler) {
+		this._events.on(sEvent, pHandler);
+		return this;
+	}
+
+	id(id) {
         return prop(this, '_id', id);
     }
 
@@ -22,30 +27,34 @@ class Channel {
         return prop(this, '_sType', s);
     }
 
+    users() {
+        return this._users;
+    }
+
     display() {
         return '#' + this.id() + ' (' + this.name() + ')';
     }
 
-    userPresent() {
+    userPresent(u) {
         return this._users.indexOf(u) >= 0;
     }
 
     addUser(u) {
         if (!this.userPresent(u)) {
             this._users.push(u);
-            this._events.emit('user-added', {channel: c, user: u});
+            this._events.emit('user-added', {channel: this, user: u});
         } else {
             throw new Error('cannot add user ' + u.display() + ' in channel ' + this.display() + ' : already registered');
         }
     }
 
     dropUser(u) {
-        if (this.userPresent()) {
+        if (this.userPresent(u)) {
             let i = this._users.indexOf(u);
             this._users.splice(i, 1);
-            this._events.emit('user-dropped', {channel: c, user: u});
+            this._events.emit('user-dropped', {channel: this, user: u});
         } else {
-            throw new Error('cannot drop user ' + u.display() + ' from channel ' + this.display() + ' : not registered');
+            throw new Error('cannot remove user ' + u.display() + ' from channel ' + this.display() + ' : user not registered in the channel');
         }
     }
 
@@ -56,12 +65,16 @@ class Channel {
     }
 
     /**
-     * diffuse un message a tous els utilisateur du canal
+     * diffuse un message a tous les utilisateur du canal
      * @param u {User}
      * @param sMessage {string}
      */
     transmitMessage(u, sMessage) {
-        this._users.forEach(udest => udest.transmitMessage(u, sMessage, this));
+        if (this.userPresent(u)) {
+			this._users.forEach(udest => udest.transmitMessage(u, sMessage, this));
+        } else {
+            throw new Error('cannot transmit message from user ' + u.display() + ' on channel ' + this.display() + ' : user not registered in the channel')
+        }
     }
 }
 

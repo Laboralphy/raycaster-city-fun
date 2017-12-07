@@ -9,7 +9,12 @@ class System {
         this._events = new Events();
     }
 
-    channelPresent(c) {
+	on(sEvent, pHandler) {
+		this._events.on(sEvent, pHandler);
+		return this;
+	}
+
+	channelPresent(c) {
         return this._channels.indexOf(c) >= 0;
     }
 
@@ -17,21 +22,21 @@ class System {
         return this._users.indexOf(u) >= 0;
     }
 
-    eventUserJoins(event) {
+    _eventUserJoins(event) {
         this._events.emit('user-joins', {
             user: event.user.id(),
             channel: event.channel.id()
         });
     }
 
-    eventUserLeaves(event) {
+    _eventUserLeaves(event) {
         this._events.emit('user-leaves', {
             user: event.user.id(),
             channel: event.channel.id()
         });
     }
 
-    eventUserGotMessage(event) {
+    _eventUserGotMessage(event) {
         this._events.emit('user-message', {
             user: event.user.id(),
             channel: event.channel ? event.channel.id() : null,
@@ -42,7 +47,7 @@ class System {
     addUser(u) {
         if (!this.userPresent(u)) {
             this._users.push(u);
-            u.on('user-receive', event => this.eventUserGotMessage(event));
+            u.on('message-received', event => this._eventUserGotMessage(event));
         } else {
             throw new Error('user ' + u.display() + ' is already registered on the system');
         }
@@ -66,8 +71,8 @@ class System {
     addChannel(c) {
         if (!this.channelPresent(c)) {
             this._channels.push(c);
-            c.on('user-added', event => this.eventUserJoins(event))
-            c.on('user-dropped', event => this.eventUserLeaves(event))
+            c.on('user-added', event => this._eventUserJoins(event));
+            c.on('user-dropped', event => this._eventUserLeaves(event))
         } else {
             throw new Error('cannot register channel ' + c.display() + ' : already registered');
         }
@@ -85,4 +90,4 @@ class System {
     }
 }
 
-modules.exports = System;
+module.exports = System;

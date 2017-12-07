@@ -9,6 +9,11 @@ class User {
         this._events = new Events();
     }
 
+    on(sEvent, pHandler) {
+        this._events.on(sEvent, pHandler);
+        return this;
+    }
+
     id(id) {
         return prop(this, '_id', id);
     }
@@ -25,8 +30,12 @@ class User {
         return '#' + this.id() + ' (' + this.name() + ')';
     }
 
+    sendMessage(oDestination, sMessage) {
+		oDestination.transmitMessage(this, sMessage);
+    }
+
     transmitMessage(uFrom, sMessage, cFrom) {
-        this._events.emit('user-receive', {from: u, channel: cFrom, message: sMessage});
+        this._events.emit('message-received', {from: uFrom, to: this, channel: cFrom, message: sMessage});
     }
 }
 
