@@ -60,19 +60,15 @@
 /******/ 	__webpack_require__.p = "/public/scripts/dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 20);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 10:
+/***/ 20:
 /***/ (function(module, exports) {
 
-describe('simple test', function() {
-	it('should work', function() {
-		expect(true).toBeTruthy();
-	})
-});
+//
 
 /***/ })
 

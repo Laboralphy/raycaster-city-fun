@@ -1,7 +1,10 @@
 <template>
     <div>
         <span v-bind:class="'user-name color-' + color" v-if="user">{{user}} : </span>
-        <span v-bind:class="'message color-' + color" v-if="message">{{message}}</span>
+        <span v-bind:class="'message color-' + color" v-if="message">
+            <i v-if="!user">{{message}}</i>
+            <span v-else>{{message}}</span>
+        </span>
     </div>
 </template>
 

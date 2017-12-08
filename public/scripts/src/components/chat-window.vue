@@ -2,7 +2,7 @@
     <div class="main-window">
         <div class="row">
             <div class="col lg-12">
-                <links :def-selected="tab" :def-items="['general', 'mission', 'vicinity']"></links>
+                <links ref="channels"></links>
             </div>
         </div>
         <div class="row">
@@ -50,7 +50,7 @@
                         lines: [],
                         newline: false
                     },
-                    viciinity: {
+                    vicinity: {
                         lines: [],
                         newline: false
                     }
