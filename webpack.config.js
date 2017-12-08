@@ -14,7 +14,11 @@ module.exports = {
         publicPath: "/public/scripts/dist/",
     },
 	module: {
-		loaders: []
+		loaders: [			{
+            test: /\.vue$/,
+            loader: 'vue-loader'
+        }
+        ]
 	},
     target: 'web'
 };

@@ -12,10 +12,17 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "session-file-store": "^1.2.0",
     "socket.io": "^2.0.4"
   },
   "devDependencies": {
+    "css-loader": "^0.28.7",
     "jasmine": "^2.8.0",
+    "style-loader": "^0.19.0",
+    "vue-html-loader": "^1.2.4",
+    "vue-loader": "^13.5.0",
+    "vue-template-compiler": "^2.5.9",
     "webpack": "^3.10.0"
   }
 }
