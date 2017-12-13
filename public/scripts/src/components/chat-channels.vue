@@ -1,9 +1,9 @@
 <template>
     <nav>
         <ul>
-            <li v-for="item in items">
+            <li v-for="item in getTabList">
                 <button
-                    :key="item.id" v-bind:class="(item.selected ? 'selected' : '') +' ' + (item.notified ? 'notify' : '')"
+                    :key="item.id" v-bind:class="(item.id === getActiveTab.id ? 'selected' : '') + ' ' + (item.notified ? 'notify' : '')"
                     v-on:click="clickHandler(item)"
                     type="button">{{ item.caption }}
                 </button>
@@ -13,14 +13,17 @@
 </template>
 
 <script>
+    import STRINGS from '../data/strings';
     export default {
         name: "links",
-        props: {
-        },
-        data: function() {
-            return {
-                items: []
-            };
+        computed: {
+            getTabList: function() {
+                return this.$store.state.chat.tabs;
+            },
+
+            getActiveTab: function() {
+                return this.$store.state.chat.activeTab;
+            }
         },
         methods: {
         	add: function(id, sCaption) {
@@ -29,7 +32,7 @@
                 }
         		this.items.push({
                     id: id,
-                    caption: sCaption,
+                    caption: STRINGS.chat.tabs[sCaption],
                     selected: false,
                     notified: false
                 });
@@ -40,7 +43,10 @@
             },
 
             select: function(id, bSelected = true) {
-                this.find(id).selected = bSelected;
+        	    this.items.forEach(t => t.selected = false);
+        	    let oTab = this.find(id);
+        	    oTab.selected = bSelected;
+        	    oTab.notified = false;
             },
 
             clickHandler: function(item) {
@@ -51,10 +57,13 @@
 </script>
 
 <style scoped>
+    button {
+        border: solid 2px transparent;
+    }
     button.selected {
-        border: solid 2px black
+        border-color: black
     }
     button.notify {
-        background-color: #0F0;
+        background-color: #080;
     }
 </style>

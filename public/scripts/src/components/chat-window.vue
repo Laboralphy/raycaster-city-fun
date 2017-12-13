@@ -2,15 +2,15 @@
     <div class="main-window">
         <div class="row">
             <div class="col lg-12">
-                <links ref="channels"></links>
+                <chat-channels ref="channels"></chat-channels>
             </div>
         </div>
         <div class="row">
             <div class="col lg-12">
                 <div class="console">
                     <chat-line
+                            v-for="line in consoleContent"
                             :key="line.id"
-                            v-for="line in tabs[tab].lines"
                             :def-user="line.user"
                             :def-color = "line.color"
                             :def-message="line.message"
@@ -29,52 +29,54 @@
 
 <script>
     import ChatLine from "./chat-line.vue";
-    import Links from "./links.vue";
+    import ChatChannels from "./chat-channels.vue";
+    import * as types from '../store/mutation-types';
+
+
     export default {
         name: "chat-window",
         components: {
-            Links,
+            ChatChannels,
             ChatLine,
         },
         data: function() {
             return {
-                idLastLine: 0,
                 inputText: '',
-                tab: 'general',
-                tabs: {
-                    general: {
-                        lines: [],
-                        newline: false
-                    },
-                    mission: {
-                        lines: [],
-                        newline: false
-                    },
-                    vicinity: {
-                        lines: [],
-                        newline: false
-                    }
-                }
+                pleaseScrollDown: true,
             };
         },
-        methods: {
-            write: function(sTab, sUser, sColor, sMessage) {
-                if (sTab in this.tabs) {
-                    this.tabs[sTab].newline = this.tab !== sTab;
-                    this.tabs[sTab].lines.push({
-                        id: ++this.idLastLine,
-                        tab: sTab,
-                        user: sUser,
-                        color: sColor,
-                        message: sMessage
-                    });
-                }
+        computed: {
+            consoleContent: function() {
+                return this.$store.getters.chatContent;
             }
         },
-        updated: function() {
-            this.$refs.lastItem.scrollIntoView();
+        methods: {
+
+            /**
+             * Si le canal qu'on consulte actuellement recoit un nouveau message
+             * on doit l'afficher en scrollant jusqu'en bas
+             * @param idTab
+             */
+            doScrollDown: function(idTab) {
+                if (idTab === this.$store.state.chat.activeTab.id) {
+                    this.pleaseScrollDown = true;
+                }
+            },
+
         },
+
+        updated: function() {
+            if (this.pleaseScrollDown) {
+                this.pleaseScrollDown = false;
+                this.$refs.lastItem.scrollIntoView();
+            }
+        },
+
         mounted: function() {
+            this.$refs.channels.$on('select', (function(item) {
+                this.$store.dispatch(types.CHAT_SELECT_TAB, {id: item.id})
+                this.doScrollDown(item.id);
+            }).bind(this));
             this.$refs.formInput.addEventListener('submit', event => event.preventDefault());
             // temporaire
             this.$refs.input.addEventListener('keypress', (function(event) {
@@ -94,6 +96,7 @@
 </script>
 
 <style scoped>
+
     .main-window {
         font-size: 10px;
         width: 40em;

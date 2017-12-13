@@ -45,9 +45,9 @@ class Application {
 			res.sendFile(path.resolve(sRoot, 'index.html'));
 		});
 		// app.js
-		httpServer.get('/scripts', function(req, res) {
-			res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js'));
-		});
+        httpServer.get('/scripts', function(req, res) {
+            res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js'));
+        });
 		httpServer.use(express.static(path.resolve(sRoot, 'resources')));
 	}
 }
