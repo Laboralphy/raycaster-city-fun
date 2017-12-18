@@ -97,5 +97,7 @@ p {
 	);
 }
 
-
-
+.skull {
+	background: transparent url('../../images/inventory/human_skeleton.svg') no-repeat center center;
+	background-size: contain;
+}

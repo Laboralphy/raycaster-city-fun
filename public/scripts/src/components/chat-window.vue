@@ -61,8 +61,7 @@
                 if (idTab === this.$store.state.chat.activeTab.id) {
                     this.pleaseScrollDown = true;
                 }
-            },
-
+            }
         },
 
         updated: function() {
@@ -91,6 +90,23 @@
                         break;
                 }
             }).bind(this));
+            this.$store.dispatch(types.CHAT_ADD_TAB, {id: 1, caption: "system"});
+            this.$store.dispatch(types.CHAT_ADD_TAB, {id: 2, caption: "global"});
+            this.$store.dispatch(types.CHAT_ADD_TAB, {id: 3, caption: "mission"});
+            this.$store.dispatch(types.CHAT_SELECT_TAB, {id: 1});
+            this.$store.dispatch(types.CLIENT_CONNECT, {id: 10, name: 'Moi'});
+            this.$store.dispatch(types.CLIENT_SET_LOCAL, {id: 10});
+
+            this.$on('send-message', (function(sMessage) {
+                let oChat = this.$store.state.chat;
+                let idTab = oChat.activeTab.id;
+                this.$store.dispatch(types.CHAT_POST_LINE, {
+                    tab: idTab,
+                    client: this.$store.getters.getLocalClient.id,
+                    message: sMessage
+                });
+                this.doScrollDown(idTab);
+            }).bind(this));
         }
     }
 </script>
@@ -102,6 +118,9 @@
         width: 40em;
         background-color: rgba(0, 0, 0, 0.2);
         border: solid thin black;
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
     }
 
     .main-window > div {
