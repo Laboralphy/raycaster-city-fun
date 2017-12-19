@@ -1,16 +1,26 @@
-const CONST = {
+export const CONST = {
     ITEMS: {
-        COMMON: {
-            COLOR: 'lightskyblue'
-        },
-        RARE: {
-            COLOR: 'chocolate'
-        },
-        EPIC: {
-            COLOR: 'mediumpurple'
-        },
-        LEGENDARY: {
-            COLOR: 'lime'
+        EMPLACEMENTS: [
+            "tete",
+            "torse",
+            "jambes",
+            "pieds",
+            "mainDroite",
+            "mainGauche"
+        ],
+        RARITY: {
+            COMMON: {
+                COLOR: 'lightskyblue'
+            },
+            RARE: {
+                COLOR: 'chocolate'
+            },
+            EPIC: {
+                COLOR: 'mediumpurple'
+            },
+            LEGENDARY: {
+                COLOR: 'lime'
+            }
         }
     },
     PROPS: {

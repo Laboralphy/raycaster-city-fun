@@ -7,15 +7,31 @@ const mutations = {
      * @param {Object} oItem informations sur l'équipement de l'item
      */
     [types.PLAYER_INVENTORY_EQUIPER]: function({inventaire}, infoEquipement) {
-        for (let i in inventaire) {
-            if (inventaire[i].emplacement === infoEquipement.emplacement) {
-                inventaire[i].emplacement = null;
+        // on équipe l'item
+        inventaire.forEach((item) => {
+            if (item.emplacement === infoEquipement.emplacement) {
+                item.emplacement = null;
             }
-            if (inventaire[i].id === infoEquipement.idItem) {
-                inventaire[i].emplacement = infoEquipement.emplacement;
+            if (item.id === infoEquipement.idItem) {
+                console.log('item équipé:', item)
+                item.emplacement = infoEquipement.emplacement;
             }
-        }
+        });
     },
+
+    /**
+     * Ranger un item
+     * @param context
+     * @param {Object} oItem informations sur l'équipement de l'item
+     */
+    [types.PLAYER_INVENTORY_RANGER]: function({inventaire}, infoRangement) {
+        inventaire.forEach((item) => {
+            if (item.id === infoRangement.idItem) {
+                item.emplacement = null;
+            }
+        });
+    },
+
     /**
      * Ranger un item
      * @param context
