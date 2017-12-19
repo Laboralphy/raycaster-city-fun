@@ -19686,6 +19686,8 @@ function transform(node) {
 //
 //
 //
+//
+//
 
     
     
@@ -19715,9 +19717,14 @@ function transform(node) {
             {
                 showFocusedItem(item, e) {
                     this.itemInfoStyle = {
-                        top: e.clientY +'px',
-                        left: e.clientX +'px',
+                        top: e.clientY +'px'
                     };
+                    if (this.$refs['itemInfo'].offsetWidth + e.clientX >= window.innerWidth) {
+                        this.itemInfoStyle.left = (e.clientX - this.$refs['itemInfo'].offsetWidth)+'px';
+                    } else {
+                        this.itemInfoStyle.left = e.clientX +'px';
+                    }
+
                     this.focusedItem = item;
                     this.showDesc = true;
                 },
@@ -20362,7 +20369,7 @@ const mutations = {
                 item.emplacement = null;
             }
             if (item.id === infoEquipement.idItem) {
-                console.log('item équipé:', item)
+                //console.log('item équipé:', item)
                 item.emplacement = infoEquipement.emplacement;
             }
         });
@@ -20410,7 +20417,9 @@ const actions = {
     [__WEBPACK_IMPORTED_MODULE_0__types__["a" /* PLAYER_INVENTORY_EQUIPER */]]: function(context, infoEquipement) {
         // @todo: Message webSocket
         const target = context.state.inventaire.find((i) => infoEquipement.idItem === i.id);
-        if (target && target.equipable.indexOf(infoEquipement.emplacement) !== -1) {
+        if (!target) return;
+        infoEquipement.emplacement = infoEquipement.emplacement || target.equipable[0];
+        if (target.equipable.indexOf(infoEquipement.emplacement) !== -1) {
             context.commit(__WEBPACK_IMPORTED_MODULE_0__types__["a" /* PLAYER_INVENTORY_EQUIPER */], infoEquipement);
         }
     },
@@ -43086,7 +43095,7 @@ exports = module.exports = __webpack_require__(11)(undefined);
 
 
 // module
-exports.push([module.i, "\n.itemSlot[data-v-05751506] {\n    display: block;\n    width: 5rem;\n    height: 5rem;\n    margin: 1rem;\n    user-select: none;\n    cursor: -webkit-grab;\n    cursor: grab;\n}\n.skull[data-v-05751506], .inventory[data-v-05751506] {\n    height: calc(80vh - 20px);\n}\n.skull[data-v-05751506] {\n    border-left: 1px dashed rgb(113, 227, 204);\n}\n.skull .itemSlot[data-v-05751506] {\n    position: absolute;\n    margin: 0;\n}\n.skull .itemWrapper[data-v-05751506] {\n    position: absolute;\n    top: 0;\n    left: 0;\n    right: 0;\n    bottom: 0;\n}\n.skull .itemSlot > *[data-v-05751506] {\n    transform: scale(0);\n}\n.skull .itemSlot > *[data-v-05751506]:last-child {\n    transform: scale(1);\n}\n.skull .itemSlot .item[data-v-05751506] {\n    position: absolute;\n    top: 0;\n    left: 0;\n    margin: 0;\n}\n.itemSlot.tete[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n}\n.itemSlot.torse[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n    top: 7.5rem;\n}\n.itemSlot.jambes[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n    top: 50%;\n}\n.itemSlot.pieds[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n    bottom: 1rem;\n}\n.itemSlot.mainDroite[data-v-05751506] {\n    top: 45%;\n    left:calc(50% - 8.5rem);\n}\n.itemSlot.mainGauche[data-v-05751506] {\n    top: calc(45%);\n    right: calc(50% - 9.5rem);\n}\n.itemInfo[data-v-05751506] {\n    position: fixed;\n}\n.itemInfo ul li[data-v-05751506] {\n    list-style: none;\n}\n/*Transtion des items*/\n.list-complete-item[data-v-05751506] {\n    padding: 4px;\n    margin-top: 4px;\n    border: solid 1px;\n    transition: all 1s;\n}\n.list-complete-enter[data-v-05751506], .list-complete-leave-active[data-v-05751506] {\n    transform: scale(0);\n}\n", ""]);
+exports.push([module.i, "\n.itemSlot[data-v-05751506] {\n    display: block;\n    width: 5rem;\n    height: 5rem;\n    margin: 1rem;\n    user-select: none;\n    cursor: -webkit-grab;\n    cursor: grab;\n}\n.skull[data-v-05751506], .inventory[data-v-05751506] {\n    height: calc(80vh - 20px);\n}\n.skull[data-v-05751506] {\n    border-left: 1px dashed rgb(113, 227, 204);\n}\n.skull .itemSlot[data-v-05751506] {\n    position: absolute;\n    margin: 0;\n}\n.skull .itemWrapper[data-v-05751506] {\n    position: absolute;\n    top: 0;\n    left: 0;\n    right: 0;\n    bottom: 0;\n}\n.skull .itemSlot > *[data-v-05751506] {\n    transform: scale(0);\n}\n.skull .itemSlot > *[data-v-05751506]:last-child {\n    transform: scale(1);\n}\n.skull .itemSlot .item[data-v-05751506] {\n    position: absolute;\n    top: 0;\n    left: 0;\n    margin: 0;\n}\n.itemSlot.tete[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n}\n.itemSlot.torse[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n    top: 7.5rem;\n}\n.itemSlot.jambes[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n    top: 50%;\n}\n.itemSlot.pieds[data-v-05751506] {\n    left: calc(50% - 2.5rem);\n    bottom: 1rem;\n}\n.itemSlot.mainDroite[data-v-05751506] {\n    top: 45%;\n    left:calc(50% - 8.5rem);\n}\n.itemSlot.mainGauche[data-v-05751506] {\n    top: calc(45%);\n    right: calc(50% - 9.5rem);\n}\n.itemInfo[data-v-05751506] {\n    position: fixed;\n}\n.itemInfo ul li[data-v-05751506] {\n    list-style: none;\n}\n/*Transtion des items*/\n.list-complete-item[data-v-05751506] {\n    padding: 4px;\n    margin-top: 4px;\n    border: solid 1px;\n    transition: all 1s;\n}\n.list-complete-enter[data-v-05751506], .list-complete-leave-active[data-v-05751506] {\n    position: absolute;\n    transform: scale(0);\n}\n", ""]);
 
 // exports
 
@@ -45076,10 +45085,7 @@ var render = function() {
                           attrs: { item: item },
                           nativeOn: {
                             dblclick: function($event) {
-                              _vm.equiper({
-                                idItem: item.id,
-                                emplacement: "tete"
-                              })
+                              _vm.equiper({ idItem: item.id })
                               _vm.showDesc = false
                             },
                             mousemove: function($event) {
@@ -45137,7 +45143,17 @@ var render = function() {
                   },
                   [
                     item.item
-                      ? _c("item", { attrs: { item: item.item } })
+                      ? _c("item", {
+                          attrs: { item: item.item },
+                          nativeOn: {
+                            mousemove: function($event) {
+                              _vm.showFocusedItem(item.item, $event)
+                            },
+                            mouseleave: function($event) {
+                              _vm.showDesc = false
+                            }
+                          }
+                        })
                       : _vm._e()
                   ],
                   1
@@ -45151,7 +45167,7 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "itemInfo", style: _vm.itemInfoStyle },
+        { ref: "itemInfo", staticClass: "itemInfo", style: _vm.itemInfoStyle },
         [
           _vm.showDesc && _vm.focusedItem
             ? _c("bordered-card", [

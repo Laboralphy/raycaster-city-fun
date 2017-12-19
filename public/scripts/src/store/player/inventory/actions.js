@@ -9,7 +9,9 @@ const actions = {
     [types.PLAYER_INVENTORY_EQUIPER]: function(context, infoEquipement) {
         // @todo: Message webSocket
         const target = context.state.inventaire.find((i) => infoEquipement.idItem === i.id);
-        if (target && target.equipable.indexOf(infoEquipement.emplacement) !== -1) {
+        if (!target) return;
+        infoEquipement.emplacement = infoEquipement.emplacement || target.equipable[0];
+        if (target.equipable.indexOf(infoEquipement.emplacement) !== -1) {
             context.commit(types.PLAYER_INVENTORY_EQUIPER, infoEquipement);
         }
     },

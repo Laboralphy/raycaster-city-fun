@@ -13,7 +13,7 @@ const mutations = {
                 item.emplacement = null;
             }
             if (item.id === infoEquipement.idItem) {
-                console.log('item équipé:', item)
+                //console.log('item équipé:', item)
                 item.emplacement = infoEquipement.emplacement;
             }
         });

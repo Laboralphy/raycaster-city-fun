@@ -12,7 +12,7 @@
                                 :item="item"
                                 :key="item.id"
                                 v-if="!item.emplacement"
-                                @dblclick.native="equiper({idItem:item.id, emplacement:'tete'}); showDesc=false;"
+                                @dblclick.native="equiper({idItem:item.id}); showDesc=false;"
                                 @mousemove.native="showFocusedItem(item, $event)"
                                 @mouseleave.native="showDesc = false">
 
@@ -35,12 +35,14 @@
                             >
                             <item v-if="item.item"
                                   :item="item.item"
-                                  class=""></item>
+                                  class=""
+                                  @mousemove.native="showFocusedItem(item.item, $event)"
+                                  @mouseleave.native="showDesc = false"></item>
                         </draggable>
                 </bordered-card>
             </div>
         </div>
-        <div class="itemInfo" :style="itemInfoStyle">
+        <div class="itemInfo" ref="itemInfo" :style="itemInfoStyle">
             <bordered-card v-if="showDesc && focusedItem" >
                 <h2 :style="{color: CONST.ITEMS.RARITY[focusedItem.rarity].COLOR}">{{focusedItem.name}}</h2>
                 <div v-if="focusedItem.props">
@@ -95,9 +97,14 @@
             {
                 showFocusedItem(item, e) {
                     this.itemInfoStyle = {
-                        top: e.clientY +'px',
-                        left: e.clientX +'px',
+                        top: e.clientY +'px'
                     };
+                    if (this.$refs['itemInfo'].offsetWidth + e.clientX >= window.innerWidth) {
+                        this.itemInfoStyle.left = (e.clientX - this.$refs['itemInfo'].offsetWidth)+'px';
+                    } else {
+                        this.itemInfoStyle.left = e.clientX +'px';
+                    }
+
                     this.focusedItem = item;
                     this.showDesc = true;
                 },
@@ -214,6 +221,7 @@
     }
 
     .list-complete-enter, .list-complete-leave-active {
+        position: absolute;
         transform: scale(0);
     }
 </style>
