@@ -5,7 +5,7 @@
                 <button
                     :key="item.id" v-bind:class="(item.id === getActiveTab.id ? 'selected' : '') + ' ' + (item.notified ? 'notify' : '')"
                     v-on:click="clickHandler(item)"
-                    type="button">{{ item.caption }}
+                    type="button">{{ getChannelDisplayName(item.caption) }}
                 </button>
             </li>
         </ul>
@@ -23,11 +23,16 @@
 
             getActiveTab: function() {
                 return this.$store.state.chat.activeTab;
-            }
+            },
+
         },
         methods: {
             clickHandler: function(item) {
                 this.$emit('select', item);
+            },
+
+            getChannelDisplayName: function(ref) {
+                return STRINGS.ui.chat.tabs[ref];
             }
         }
     }

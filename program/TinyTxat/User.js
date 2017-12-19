@@ -3,9 +3,9 @@ const Events = require('events');
 
 class User {
 
-    constructor() {
-        this._id = null;
-        this._sName = '';
+    constructor({id = null, name = null}) {
+        this._id = id;
+        this._sName = name;
         this._events = new Events();
     }
 

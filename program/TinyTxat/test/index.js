@@ -6,27 +6,27 @@ const System = require('../System');
 describe('User', function() {
 	describe('setters/getters', function() {
 		it('should set name properly', function() {
-			let u = new User();
-			u.name('johnson');
+			let u = new User({id: 1, name: "johnson"});
 			expect(u.name()).toBe('johnson');
+            u.name('joe');
+            expect(u.name()).toBe('joe');
 		});
 		it('should set id properly', function() {
-			let u = new User();
-			u.id(12);
-			expect(u.id()).toBe(12);
+			let u = new User({id: 12, name: "x"});
+            expect(u.id()).toBe(12);
+			u.id(13);
+            expect(u.id()).toBe(13);
 		});
 		it('should display properly', function() {
-			let u = new User();
-			u.name('johnson');
-			u.id(12);
+			let u = new User({id: 12, name: 'johnson'});
 			expect(u.display()).toBe('#12 (johnson)');
 		});
 	});
 
 	describe('message transmission', function() {
 		it('should transmit a message', function() {
-			let u = new User();
-			let uSender = new User();
+			let u = new User({});
+			let uSender = new User({});
 			u.name('johnson');
 			u.id(12);
 			uSender.name('joe gillian');
@@ -63,7 +63,7 @@ describe('Channel', function() {
 		it('should test if user is present', function() {
 			let c = new Channel();
 			c.name('lobby').id(12);
-			let users = [new User(), new User(), new User()];
+			let users = [new User({}), new User({}), new User({})];
 			users.forEach((u, i) => u.id(i + 1).name('name' + i));
 			c.addUser(users[0]);
 			c.addUser(users[2]);
@@ -86,7 +86,7 @@ describe('Channel', function() {
 		it('should purge the channel from all users', function() {
 			let c = new Channel();
 			c.name('lobby').id(12);
-			let users = [new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User()];
+			let users = [new User({}), new User({}), new User({}), new User({}), new User({}), new User({}), new User({}), new User({}), new User({}), new User({})];
 			users.forEach((u, i) => c.addUser(u.id(i + 1).name('name' + i)));
 			expect(users.every(u => c.userPresent(u))).toBeTruthy();
 			c.purge();
@@ -100,7 +100,7 @@ describe('Channel', function() {
 			let c = new Channel();
 			c.name('lobby').id(12);
 			let aLog = [];
-			let users = [new User(), new User(), new User()];
+			let users = [new User({}), new User({}), new User({})];
 			function evJoin(event) {
 				aLog.push('join ' + event.user.display());
 			}
@@ -125,7 +125,7 @@ describe('Channel', function() {
 			let c = new Channel();
 			c.name('lobby').id(12);
 			let aLog = [];
-			let users = [new User(), new User(), new User()];
+			let users = [new User({}), new User({}), new User({})];
 			function evMsg(event) {
 				aLog.push('message from:' + event.from.display() + ' to:' + event.to.display() + ' channel:' + event.channel.display() + ' ' + event.message);
 			}
@@ -144,7 +144,7 @@ describe('Channel', function() {
 			let c = new Channel();
 			c.name('lobby').id(12);
 			let aLog = [];
-			let users = [new User(), new User(), new User()];
+			let users = [new User({}), new User({}), new User({})];
 			function evMsg(event) {
 				aLog.push('message from:' + event.from.display() + ' to:' + event.to.display() + ' channel:' + event.channel.display() + ' ' + event.message);
 			}
