@@ -3,7 +3,7 @@
         <ul>
             <li v-for="item in getTabList">
                 <button
-                    :key="item.id" v-bind:class="(item.id === getActiveTab.id ? 'selected' : '') + ' ' + (item.notified ? 'notify' : '')"
+                    v-bind:key="item.id" v-bind:class="(item.id === getActiveTab.id ? 'selected' : '') + ' ' + (item.notified ? 'notify' : '')"
                     v-on:click="clickHandler(item)"
                     type="button">{{ getChannelDisplayName(item.caption) }}
                 </button>

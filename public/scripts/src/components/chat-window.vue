@@ -14,7 +14,7 @@
             <div class="col lg-12">
                 <div class="console">
                     <chat-line
-                            v-for="line in consoleContent"
+                            v-for="line in chatContent"
                             :key="line.id"
                             :def-user="line.user"
                             :def-color = "line.color"
@@ -53,9 +53,9 @@
             };
         },
         computed: {
-            consoleContent: function() {
-                return this.$store.getters.chatContent;
-            }
+			chatContent: function() {
+				return this.$store.getters.chatContent;
+			}
         },
         methods: {
 

@@ -1,5 +1,5 @@
 const Config = require('../Config');
-const UserManager = require('../UserManager');
+const UserManager = require('./UserManager');
 const TinyTxat = require('../TinyTxat');
 const logger = require('../Logger');
 
@@ -59,4 +59,4 @@ class Service {
     }
 }
 
-modules.exports = Service;
+module.exports = Service;
