@@ -7,6 +7,7 @@ const mutations = {
      */
     [types.GAME_MENU_OPEN]: function(state) {
         state.isOpen = true;
+        window.dispatchEvent(new Event('resize'));
     },
 
     /**
@@ -22,6 +23,7 @@ const mutations = {
      */
     [types.GAME_MENU_TOGGLE]: function(state) {
         state.isOpen = !state.isOpen;
+        window.dispatchEvent(new Event('resize'));
     },
 };
 

@@ -12,9 +12,7 @@
                 </bordered-card>
             </tab>
             <tab name="Personnage">
-                <bordered-card color="rgb(255, 0, 0)" class="game-menu-tab">
-                    Les statistiques du perso etc
-                </bordered-card>
+                <personnage></personnage>
             </tab>
         </tabs>
         <bordered-card class="btn close" @click.native="close"><strong>X</strong></bordered-card>
@@ -26,6 +24,7 @@
     import * as types from '../../store/gameMenu/mutation-types';
     import {BorderedCard, Tabs, Tab} from '../ui';
     import Inventory from './Inventory/Inventory.vue';
+    import Personnage from './Personnage.vue';
 
     const { mapState, mapMutations } = createNamespacedHelpers('gameMenu');
 
@@ -35,10 +34,12 @@
             BorderedCard,
             Tabs,
             Tab,
-            Inventory
+
+            Inventory,
+            Personnage
         },
         watch: {
-            isOpen: function(newState) {
+            isOpen(newState) {
                 this.$parent.$children.forEach((el) => {
                     if (el !== this) {
                         if (newState) {
@@ -52,7 +53,7 @@
         },
         methods: Object.assign(
             {
-                selectTab: function (selectedTabHash) {
+                selectTab(selectedTabHash) {
                     const elTab = this.$refs['game-menu-tabs'];
                     if (this.isOpen && elTab.activeTabHash !== selectedTabHash) {
                         this.$refs['game-menu-tabs'].selectTab(selectedTabHash);
@@ -73,14 +74,15 @@
                 'isOpen'
             ])
         ),
-        mounted: function () {
+        mounted() {
             window.addEventListener('keypress', (e) => {
                 switch (e.key) {
                     case '²':
+                    case 'œ':
                         this.toggle();
                         break;
                     case 'i':
-                        this.selectTab('#Inventory');
+                        this.selectTab('#inventaire');
                         break;
                     case 'c':
                         this.selectTab('#craft');
@@ -90,6 +92,10 @@
                         break;
                 }
             });
+            const elTab = this.$refs['game-menu-tabs'];
+            elTab.$on('changed', function() {
+                window.dispatchEvent(new Event('resize'));
+            })
         }
     }
 </script>
@@ -129,6 +135,7 @@
         top: 0;
         right: 0;
         text-align: right;
-        color: rgb(113, 227, 204)
+        color: rgb(113, 227, 204);
+        padding: 15px 18px 5px 18px !important;
     }
 </style>

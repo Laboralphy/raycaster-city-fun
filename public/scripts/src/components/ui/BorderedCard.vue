@@ -1,6 +1,5 @@
 <template>
     <div class="bordered-card-root"
-         ref="card-root"
          :style="'color:'+ color +';'">
         <svg    ref="card-svg"
                 :width="rootWidth + 10"
@@ -12,7 +11,7 @@
                     <polygon :points="'0 0, 0 '+ (rootHeight - edgeSize) +', '+ (rootWidth - (rootWidth - edgeSize)) +' '+ rootHeight +', '+ rootWidth +' '+ rootHeight +', '+ rootWidth +' '+ (rootHeight - (rootHeight - edgeSize)) +', '+ (rootWidth - edgeSize) +' 0'"></polygon>
                 </clipPath>
             </defs>
-                <circle v-for="circlesCoord in circlesCoords"
+                <circle v-for="circlesCoord in animatedCoords"
                         v-bind="circlesCoord"
                         :clip-path="'url(#cut-off-border'+ _uid +')'"
                         fill="transparent"
@@ -34,6 +33,8 @@
 
 <script>
     import {interpolate} from 'd3';
+    import {TweenLite, Linear} from 'gsap';
+
     export default {
         name: "bordered-card",
         props: {
@@ -46,50 +47,59 @@
                 default: 'rgb(227, 190, 88)'
             }
         },
+        watch: {
+            circlesCoords(newCoords) {
+                this.animatedCoords.forEach((circle, index) => {
+                    TweenLite.to(
+                        circle,
+                        this.updateInterval / 1000,
+                        Object.assign({ease:Linear.easeNone},newCoords[index])
+                    )
+                });
+            }
+        },
         methods: {
-            mapperTaille: function() {
-                const root = this.$refs['card-root'];
-                this.rootWidth = root.offsetWidth;
-                this.rootHeight = root.offsetHeight;
+            mapperTaille() {
+                const root = this.$el;
+                this.rootWidth = root.offsetWidth + 2;
+                this.rootHeight = root.offsetHeight + 2;
             },
-            initAnimation: function () {
-                let moveSpeed = 4000;
-                let nextChange = 0;
-                let interpolator = interpolate(this.circlesCoords, newRandomCircles.call(this));
-                let vm = this;
-                function step(timestamp) {
-                    if (timestamp >= nextChange) {
-                        nextChange = timestamp + moveSpeed;
-                        interpolator = interpolate(vm.circlesCoords, newRandomCircles.call(vm))
-                    }
-                    vm.circlesCoords = interpolator(1 - (nextChange - timestamp) / moveSpeed);
-                    requestAnimationFrame(step);
-                }
-
-                requestAnimationFrame(step);
+            randomizeCoords() {
+                this.circlesCoords = newRandomCircles.call(this);
+            },
+            initAnimation() {
+                this.randomizeCoords();
+                setInterval(() => {
+                    this.randomizeCoords()
+                }, this.updateInterval)
             }
         },
         computed: {
-            edgeSize: function() {
+            edgeSize() {
                 const longer = Math.max(this.rootWidth, this.rootHeight);
                 return longer * 0.10;
+            },
+            height() {
+                return this.$el.outerHeight;
             }
         },
         data: function() {
             return {
                 rootWidth: 0,
                 rootHeight: 0,
-                circlesCoords: newRandomCircles.call(this)
+                circlesCoords: newRandomCircles.call(this),
+                animatedCoords: newRandomCircles.call(this),
+                updateInterval: 10000
             }
         },
-        mounted: function () {
+        mounted() {
             this.mapperTaille();
             window.addEventListener('resize', () => {
                 this.mapperTaille();
             });
             this.initAnimation();
         },
-        updated: function() {
+        updated() {
             this.mapperTaille();
         }
     }
@@ -124,7 +134,7 @@
     }
     .bordered-card-root svg {
         position: absolute;
-        top: -4px;
+        top: -2px;
         left: -2px;
     }
 </style>

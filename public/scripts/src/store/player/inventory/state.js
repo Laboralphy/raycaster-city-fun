@@ -1,24 +1,50 @@
 export default {
-    inventaire: {
-        25: {
+    inventaire: [
+        {
+            id: 24,
             name: 'Flute magique',
+            props: {
+                DMG: '+1',
+            },
+            stats: {
+                AGI: '+1'
+            },
+            rarity: 'COMMON',
             equipable:['mainDroite', 'mainGauche'],
             emplacement: null
         },
-        26: {
-            name: 'Flute magique 26',
+        {
+            id: 26,
+            name: 'Flute rare',
+            stats: {
+                STR: '+2',
+                PRE: '+2'
+            },
+            rarity: 'RARE',
             equipable:['mainDroite', 'mainGauche'],
             emplacement: null
         },
-        27: {
-            name: 'Flute magique 27',
+        {
+            id: 27,
+            name: 'Flute épique',
+            stats: {
+                RES: '+3',
+                DEX: '+3'
+            },
+            rarity: 'EPIC',
             equipable:['mainDroite', 'mainGauche'],
             emplacement: null
         },
-        28: {
-            name: 'Flute magique 28',
+        {
+            id: 28,
+            name: 'Flute légendaire',
+            stats: {
+                STR: '+3',
+                PRE: '+3'
+            },
+            rarity: 'LEGENDARY',
             equipable:['mainDroite', 'mainGauche'],
             emplacement: null
         },
-    }
+    ]
 }

@@ -75,8 +75,10 @@
                 this.tabs.forEach(tab => {
                     tab.isActive = (tab.hash === selectedTab.hash);
                 });
-                this.$emit('changed', { tab: selectedTab });
                 this.activeTabHash = selectedTab.hash;
+                this.$nextTick(() => {
+                    this.$emit('changed', { tab: selectedTab });
+                });
             },
             setTabVisible(hash, visible) {
                 const tab = this.findTab(hash);
