@@ -4,3 +4,5 @@
 # node modules
 node_modules
 
+# exclude webpack dist files to be packed
+public/scripts/dist
