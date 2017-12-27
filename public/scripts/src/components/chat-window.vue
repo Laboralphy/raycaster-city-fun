@@ -35,7 +35,7 @@
 <script>
     import ChatLine from "./chat-line.vue";
     import ChatChannels from "./chat-channels.vue";
-    import * as types from '../store/mutation-types';
+    import * as types from '../store/chat/mutation-types';
     import STRINGS from '../data/strings';
 
     export default {

@@ -27,7 +27,7 @@
 
 <script>
     import STRINGS from '../data/strings';
-    import * as types from '../store/mutation-types';
+    import * as types from '../store/clients/mutation-types';
 
     export default {
         name: "login-window",
@@ -37,10 +37,9 @@
                 visible: false,
                 inputLogin: '',
                 inputPass: ''
-            }
+            };
         },
         mounted: function() {
-            console.log(this.$refs.connect);
             this.$refs.connect.addEventListener('click', (function(event) {
                 this.$store.dispatch(types.CLIENT_LOGIN, {
                     login: this.inputLogin,

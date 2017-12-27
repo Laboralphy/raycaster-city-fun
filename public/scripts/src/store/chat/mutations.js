@@ -10,7 +10,7 @@ const mutations = {
      *
      */
     [types.CHAT_ADD_TAB]: function(state, {id, caption}) {
-        state.chat.tabs.push({
+        state.tabs.push({
             id: id,
             lines: [],
             caption: caption,
@@ -24,8 +24,8 @@ const mutations = {
      * @param id {number} identifiant de l'onglet à selectionner
      */
     [types.CHAT_SELECT_TAB]: function(state, {id}) {
-        state.chat.activeTab = state.chat.tabs.find(t => t.id === id);
-        state.chat.activeTab.notified = false;
+        state.activeTab = state.tabs.find(t => t.id === id);
+        state.activeTab.notified = false;
     },
 
     /**
@@ -36,60 +36,25 @@ const mutations = {
      * @param message {string} contenu du message
      */
     [types.CHAT_POST_LINE]: function(state, {tab, client, message}) {
-        let oChat = state.chat;
-        let oTab = oChat.tabs.find(t => t.id === tab);
+        let oTab = state.tabs.find(t => t.id === tab);
         if (!oTab) {
             throw new Error('could not find tab #' + tab);
         }
-        let oClient = state.clients.find(c => c.id === client);
+        let oClient = state.$root.clients.find(c => c.id === client);
         if (!oClient) {
             throw new Error('could not find client #' + client);
         }
         oTab.lines.push({
-            id: ++oChat.lastLineId,
+            id: ++state.lastLineId,
             user: oClient.name,
             message: message,
             color: 0
         });
-        if (tab !== state.chat.activeTab.id) {
+        if (tab !== state.activeTab.id) {
             oTab.notified = true;
         }
     },
 
-    /**
-     * Ajoute un nouveau client
-     * @param state {*} etat
-     * @param id {number} identifiant du client
-     * @param name {string} nom du client
-     */
-    [types.CLIENT_CONNECT]: function(state, {id, name}) {
-        state.clients.push({
-            id: id,
-            name: name
-        });
-    },
-
-    /**
-     * supprime un client
-     * @param state
-     * @param id {number} identifiant du client qui s'en va
-     */
-    [types.CLIENT_DISCONNECT]: function(state, {id}) {
-        let iClient = state.clients.findIndex(c => c.id === id);
-        if (iClient >= 0) {
-            state.clients.splice(iClient, 1);
-        }
-    },
-
-    /**
-     * Il peut y avoir plusieurs clients. Cette methode permet de définir
-     * le client local sur lequel est installé l'appli
-     * @param state
-     * @param id {number} identifiant du client
-     */
-    [types.CLIENT_SET_LOCAL]: function(state, {id}) {
-        state.localClient = state.clients.find(c => c.id === id);
-    }
 };
 
 export default mutations;

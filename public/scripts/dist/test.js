@@ -60,12 +60,12 @@
 /******/ 	__webpack_require__.p = "/public/scripts/dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 32);
+/******/ 	return __webpack_require__(__webpack_require__.s = 22);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 32:
+/***/ 22:
 /***/ (function(module, exports) {
 
 //
