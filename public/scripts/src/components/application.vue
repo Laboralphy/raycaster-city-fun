@@ -8,8 +8,9 @@
 <script>
     import vueChatWindow from './chat-window.vue';
     import vueLoginWindow from './login-window.vue';
-    import * as types from '../store/chat/mutation-types.js';
-    import {mapActions} from 'vuex';
+	import * as chatActions from '../store/chat/mutation-types.js';
+	import * as clientsActions from '../store/clients/mutation-types.js';
+    import {mapActions, mapGetters} from 'vuex';
 
     export default {
         name: "application",
@@ -17,14 +18,20 @@
             'chat-window': vueChatWindow,
             'login-window': vueLoginWindow
         },
+        computed: Object.assign(
+        	{},
+        	mapGetters({
+				getActiveTab: 'chat/getActiveTab',
+				getLocalClient: 'clients/getLocalClient'
+			})
+        ),
         methods: Object.assign(
             {
                 chatMessageToSend: function(sMessage) {
-                    let oChat = this.$store.state.chat;
-                    let idTab = oChat.activeTab.id;
-                    this.$store.dispatch(types.CHAT_POST_LINE, {
+                	let idTab = this.getActiveTab().id;
+                    this.$store.dispatch('chat/' + chatActions.CHAT_POST_LINE, {
                         tab: idTab,
-                        client: this.$store.getters.getLocalClient.id,
+                        client: this.getLocalClient().name,
                         message: sMessage
                     });
                     this.$refs.chat.doScrollDown(idTab);
@@ -36,17 +43,16 @@
                 },
 
                 init: function() {
-                    this.$store.dispatch('chat/' + types.CHAT_ADD_TAB, {id: 1, caption: "system"});
-                    this.$store.dispatch('chat/' + types.CHAT_ADD_TAB, {id: 2, caption: "global"});
-                    this.$store.dispatch('chat/' + types.CHAT_ADD_TAB, {id: 3, caption: "mission"});
-                    this.$store.dispatch('chat/' + types.CHAT_SELECT_TAB, {id: 1});
+                    this.$store.dispatch('chat/chatAddTab', {id: 1, caption: "system"});
+                    this.$store.dispatch('chat/chatAddTab', {id: 2, caption: "global"});
+                    this.$store.dispatch('chat/chatAddTab', {id: 3, caption: "mission"});
+                    this.$store.dispatch('chat/chatSelectTab', {id: 1});
 
                     this.$refs.chat.$on('send-message', this.chatMessageToSend.bind(this));
                     this.$refs.login.$on('login', () => this.show('chat'));
                     this.show('login');
                 }
             },
-            mapActions(['clients', 'chat'])
         ),
 
         mounted: function() {

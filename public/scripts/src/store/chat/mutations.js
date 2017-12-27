@@ -40,13 +40,9 @@ const mutations = {
         if (!oTab) {
             throw new Error('could not find tab #' + tab);
         }
-        let oClient = state.$root.clients.find(c => c.id === client);
-        if (!oClient) {
-            throw new Error('could not find client #' + client);
-        }
         oTab.lines.push({
             id: ++state.lastLineId,
-            user: oClient.name,
+            user: client,
             message: message,
             color: 0
         });

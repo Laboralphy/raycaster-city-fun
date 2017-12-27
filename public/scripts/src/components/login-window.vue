@@ -41,7 +41,7 @@
         },
         mounted: function() {
             this.$refs.connect.addEventListener('click', (function(event) {
-                this.$store.dispatch(types.CLIENT_LOGIN, {
+                this.$store.dispatch('clients/' + types.CLIENT_LOGIN, {
                     login: this.inputLogin,
                     pass: this.inputPass
                 }).then(() => this.$emit('login'));
