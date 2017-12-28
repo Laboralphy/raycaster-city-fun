@@ -14,7 +14,7 @@
             <div class="col lg-12">
                 <div class="console">
                     <chat-line
-                            v-for="line in chatContent"
+                            v-for="line in getChatContent()"
                             :key="line.id"
                             :def-user="line.user"
                             :def-color = "line.color"
@@ -35,8 +35,9 @@
 <script>
     import ChatLine from "./chat-line.vue";
     import ChatChannels from "./chat-channels.vue";
-    import * as types from '../store/mutation-types';
+    import * as types from '../store/chat/mutation-types';
     import STRINGS from '../data/strings';
+    import {mapGetters} from 'vuex';
 
     export default {
         name: "chat-window",
@@ -52,11 +53,13 @@
                 pleaseScrollDown: true,
             };
         },
-        computed: {
-			chatContent: function() {
-				return this.$store.getters.chatContent;
-			}
-        },
+        computed: Object.assign(
+        	{},
+            mapGetters({
+				getChatContent: 'chat/getContent',
+				getActiveTab: 'chat/getActiveTab'
+            })
+        ),
         methods: {
 
             /**
@@ -65,7 +68,7 @@
              * @param idTab
              */
             doScrollDown: function(idTab) {
-                if (idTab === this.$store.state.chat.activeTab.id) {
+                if (idTab === this.getActiveTab().id) {
                     this.pleaseScrollDown = true;
                 }
             },
@@ -81,7 +84,7 @@
 
         mounted: function() {
             this.$refs.channels.$on('select', (function(item) {
-                this.$store.dispatch(types.CHAT_SELECT_TAB, {id: item.id})
+                this.$store.dispatch('chat/' + types.CHAT_SELECT_TAB, {id: item.id});
                 this.doScrollDown(item.id);
             }).bind(this));
             this.$refs.formInput.addEventListener('submit', event => event.preventDefault());
