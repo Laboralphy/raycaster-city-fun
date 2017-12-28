@@ -27,11 +27,11 @@ class Log {
 	 * Log les arguments dans la sortie standard
 	 */
 	log() {
-		console.log(this.buildDateString(new Date()), ' ', ...arguments);
+		console.log(this.buildDateString(new Date()), ...arguments);
 	}
 
 	err() {
-		console.error(this.buildDateString(new Date()), ' ', ...arguments);
+		console.error(this.buildDateString(new Date()), ...arguments);
 	}
 }
 

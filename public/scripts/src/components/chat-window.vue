@@ -1,5 +1,10 @@
 <template>
-    <div class="main-window">
+    <div v-show="visible" class="chat-window window">
+        <div class="row">
+            <div class="col lg-12">
+                <h2 class="title blue">{{ STRINGS.title }}</h2>
+            </div>
+        </div>
         <div class="row">
             <div class="col lg-12">
                 <chat-channels ref="channels"></chat-channels>
@@ -9,7 +14,7 @@
             <div class="col lg-12">
                 <div class="console">
                     <chat-line
-                            v-for="line in consoleContent"
+                            v-for="line in getChatContent()"
                             :key="line.id"
                             :def-user="line.user"
                             :def-color = "line.color"
@@ -21,7 +26,7 @@
         </div>
         <div class="row">
             <div class="col lg-12 input">
-                <form ref="formInput"><input ref="input" type="text" v-model="inputText" /></form>
+                <form ref="formInput"><input ref="input" type="text" v-model="inputText" :placeholder="STRINGS.placeholder" /></form>
             </div>
         </div>
     </div>
@@ -30,8 +35,9 @@
 <script>
     import ChatLine from "./chat-line.vue";
     import ChatChannels from "./chat-channels.vue";
-    import * as types from '../store/mutation-types';
-
+    import * as types from '../store/chat/mutation-types';
+    import STRINGS from '../data/strings';
+    import {mapGetters} from 'vuex';
 
     export default {
         name: "chat-window",
@@ -41,15 +47,19 @@
         },
         data: function() {
             return {
+                STRINGS: STRINGS.ui.chat,
+                visible: false,
                 inputText: '',
                 pleaseScrollDown: true,
             };
         },
-        computed: {
-            consoleContent: function() {
-                return this.$store.getters.chatContent;
-            }
-        },
+        computed: Object.assign(
+        	{},
+            mapGetters({
+				getChatContent: 'chat/getContent',
+				getActiveTab: 'chat/getActiveTab'
+            })
+        ),
         methods: {
 
             /**
@@ -58,7 +68,7 @@
              * @param idTab
              */
             doScrollDown: function(idTab) {
-                if (idTab === this.$store.state.chat.activeTab.id) {
+                if (idTab === this.getActiveTab().id) {
                     this.pleaseScrollDown = true;
                 }
             },
@@ -74,7 +84,7 @@
 
         mounted: function() {
             this.$refs.channels.$on('select', (function(item) {
-                this.$store.dispatch(types.CHAT_SELECT_TAB, {id: item.id})
+                this.$store.dispatch('chat/' + types.CHAT_SELECT_TAB, {id: item.id});
                 this.doScrollDown(item.id);
             }).bind(this));
             this.$refs.formInput.addEventListener('submit', event => event.preventDefault());
@@ -97,16 +107,8 @@
 
 <style scoped>
 
-    .main-window {
-        font-size: 10px;
+    .chat-window {
         width: 40em;
-        background-color: rgba(0, 0, 0, 0.2);
-        border: solid thin black;
-    }
-
-    .main-window > div {
-        background-color: rgba(0, 0, 0, 0.2);
-        border: solid thin black;
     }
 
     .console {
