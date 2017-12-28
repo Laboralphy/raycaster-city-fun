@@ -68,6 +68,10 @@ class System {
         }
     }
 
+    findUser(id) {
+        return this._users.find(u => u.id === id);
+    }
+
     addChannel(c) {
         if (!this.channelPresent(c)) {
             this._channels.push(c);

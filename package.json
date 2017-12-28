@@ -11,23 +11,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "d3": "^4.12.0",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
-    "gsap": "^1.20.3",
     "session-file-store": "^1.2.0",
     "socket.io": "^2.0.4",
-    "vue": "^2.5.11",
-    "vuedraggable": "^2.15.0",
+    "vue": "^2.5.13",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
     "css-loader": "^0.28.7",
     "jasmine": "^2.8.0",
-    "style-loader": "^0.19.1",
+    "style-loader": "^0.19.0",
     "vue-html-loader": "^1.2.4",
-    "vue-loader": "^13.6.0",
-    "vue-template-compiler": "^2.5.11",
+    "vue-loader": "^13.5.0",
+    "vue-template-compiler": "^2.5.13",
     "webpack": "^3.10.0"
   }
 }

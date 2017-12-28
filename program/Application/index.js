@@ -7,6 +7,7 @@ const path = require('path');
 
 const config = require('../Config');
 const logger = require('../Logger');
+const Service = require('./Service');
 
 class Application {
 
@@ -24,15 +25,11 @@ class Application {
 		});
 	}
 
-	setSocketHandlers() {
-		io.on('connection', function(socket) {
-			logger.log('a user connected');
-
-			//Whenever someone disconnects this piece of code executed
-			socket.on('disconnect', function () {
-				logger.log('a user disconnected');
-			});
-		});
+	runService() {
+        let service = new Service();
+        io.on('connection', function(socket) {
+            service.run(socket);
+        });
 	}
 
 	/**

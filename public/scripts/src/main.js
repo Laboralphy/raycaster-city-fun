@@ -1,20 +1,18 @@
 const socket = io();
 
-import store from './store';
 import Vue from 'vue';
-import App from './components/App.vue'
-import ApplicationConst from './data/const';
+import store from './store';
+import vueApplication from './components/application.vue';
 
 function main () {
-    Vue.use(ApplicationConst);
 
     const app = new Vue({
         el: '#user-interface',
         store,
         components: {
-            App
+            'application': vueApplication
         },
-        render: h => h(App)
+        render: h => h(vueApplication)
     });
 
     window.Application = app;

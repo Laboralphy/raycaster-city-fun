@@ -1,9 +1,6 @@
-import gameMenu from './gameMenu';
-import player from './player';
-
-const modules = {
-    gameMenu,
-    player
+import chat from './chat';
+import clients from './clients';
+export default {
+    chat,
+    clients
 };
-
-export default modules;
