@@ -29,7 +29,7 @@
             {
                 chatMessageToSend: function(sMessage) {
                 	let idTab = this.getActiveTab().id;
-                    this.$store.dispatch('chat/' + chatActions.CHAT_POST_LINE, {
+                    this.chatPostLine({
                         tab: idTab,
                         client: this.getLocalClient().name,
                         message: sMessage
@@ -43,16 +43,18 @@
                 },
 
                 init: function() {
-                    this.$store.dispatch('chat/chatAddTab', {id: 1, caption: "system"});
-                    this.$store.dispatch('chat/chatAddTab', {id: 2, caption: "global"});
-                    this.$store.dispatch('chat/chatAddTab', {id: 3, caption: "mission"});
-                    this.$store.dispatch('chat/chatSelectTab', {id: 1});
+                	
+                    this.chatAddTab({id: 1, caption: "system"});
+                    this.chatAddTab({id: 2, caption: "global"});
+                    this.chatAddTab({id: 3, caption: "mission"});
+                    this.chatSelectTab({id: 1});
 
                     this.$refs.chat.$on('send-message', this.chatMessageToSend.bind(this));
                     this.$refs.login.$on('login', () => this.show('chat'));
                     this.show('login');
                 }
             },
+            mapActions('chat', Object.values(chatActions))
         ),
 
         mounted: function() {
