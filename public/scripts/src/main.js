@@ -2,7 +2,7 @@ const socket = io();
 
 import Vue from 'vue';
 import store from './store';
-import vueApplication from './components/application.vue';
+import vueApplicationChat from './components/application-chat.vue';
 
 function main () {
 
@@ -10,9 +10,9 @@ function main () {
         el: '#user-interface',
         store,
         components: {
-            'application': vueApplication
+            'application': vueApplicationChat
         },
-        render: h => h(vueApplication)
+        render: h => h(vueApplicationChat)
     });
 
     window.Application = app;
