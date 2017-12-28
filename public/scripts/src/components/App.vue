@@ -6,7 +6,7 @@
 </template>
 
 <script>
-    import ChatWindow from './chat-window.vue';
+    import ChatWindow from './ChatWindow.vue';
     import GameMenuWrapper from './gameMenu/GameMenuWrapper.vue'
 
     export default {

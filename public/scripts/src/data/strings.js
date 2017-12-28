@@ -20,4 +20,4 @@ const STRINGS = {
     }
 };
 
-export default STRINGS;
+export default STRINGS.fr;

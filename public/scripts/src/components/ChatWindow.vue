@@ -33,8 +33,8 @@
 </template>
 
 <script>
-    import ChatLine from "./chat-line.vue";
-    import ChatChannels from "./chat-channels.vue";
+    import ChatLine from "./ChatLine.vue";
+    import ChatChannels from "./ChatChannels.vue";
     import * as types from '../store/chat/mutation-types';
     import STRINGS from '../data/strings';
     import {mapGetters} from 'vuex';

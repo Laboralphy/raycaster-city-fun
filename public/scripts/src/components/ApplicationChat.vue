@@ -6,10 +6,9 @@
 </template>
 
 <script>
-    import vueChatWindow from './chat-window.vue';
-    import vueLoginWindow from './login-window.vue';
+    import vueChatWindow from './ChatWindow.vue';
+    import vueLoginWindow from './LoginWindow.vue';
 	import * as chatActions from '../store/chat/mutation-types.js';
-	import * as clientsActions from '../store/clients/mutation-types.js';
     import {mapActions, mapGetters} from 'vuex';
 
     export default {

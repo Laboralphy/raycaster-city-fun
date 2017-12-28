@@ -2,7 +2,7 @@ const socket = io();
 
 import Vue from 'vue';
 import store from './store';
-import vueApplicationChat from './components/application-chat.vue';
+import vueApplicationChat from './components/ApplicationChat.vue';
 
 function main () {
 
