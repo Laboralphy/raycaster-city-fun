@@ -60,40 +60,11 @@
 /******/ 	__webpack_require__.p = "/public/scripts/dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const CHAT_ADD_TAB = 'chatAddTab';
-/* harmony export (immutable) */ __webpack_exports__["a"] = CHAT_ADD_TAB;
-
-const CHAT_POST_LINE = 'chatPostLine';
-/* harmony export (immutable) */ __webpack_exports__["b"] = CHAT_POST_LINE;
-
-const CHAT_SELECT_TAB = 'chatSelectTab';
-/* harmony export (immutable) */ __webpack_exports__["c"] = CHAT_SELECT_TAB;
-
-
-const CLIENT_CONNECT = 'clientConnect';
-/* harmony export (immutable) */ __webpack_exports__["d"] = CLIENT_CONNECT;
-
-const CLIENT_DISCONNECT = 'clientDisconnect';
-/* harmony export (immutable) */ __webpack_exports__["e"] = CLIENT_DISCONNECT;
-
-const CLIENT_SET_LOCAL = 'clientSetLocal';
-/* harmony export (immutable) */ __webpack_exports__["g"] = CLIENT_SET_LOCAL;
-
-const CLIENT_LOGIN = 'clientLogin';
-/* harmony export (immutable) */ __webpack_exports__["f"] = CLIENT_LOGIN;
-
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports) {
 
 /*
@@ -175,7 +146,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 2 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -194,7 +165,7 @@ if (typeof DEBUG !== 'undefined' && DEBUG) {
   ) }
 }
 
-var listToStyles = __webpack_require__(14)
+var listToStyles = __webpack_require__(28)
 
 /*
 type StyleObject = {
@@ -396,7 +367,7 @@ function applyToTag (styleElement, obj) {
 
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports) {
 
 /* globals __VUE_SSR_CONTEXT__ */
@@ -505,7 +476,11 @@ module.exports = function normalizeComponent (
 
 
 /***/ }),
-/* 4 */
+/* 3 */,
+/* 4 */,
+/* 5 */,
+/* 6 */,
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -534,15 +509,17 @@ const STRINGS = {
 /* harmony default export */ __webpack_exports__["a"] = (STRINGS.fr);
 
 /***/ }),
-/* 5 */
+/* 8 */,
+/* 9 */,
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store_mutation_types__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_chat_window_vue__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_login_window_vue__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store_mutation_types__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_chat_window_vue__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_login_window_vue__ = __webpack_require__(45);
 const socket = io();
 
 
@@ -599,14 +576,16 @@ function main () {
 window.addEventListener('load', main);
 
 /***/ }),
-/* 6 */
+/* 11 */,
+/* 12 */,
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__actions__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__state__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__mutations__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__getters__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__actions__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__state__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__mutations__ = __webpack_require__(55);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__getters__ = __webpack_require__(56);
 
 
 
@@ -624,210 +603,66 @@ const store = new Vuex.Store({
 /* harmony default export */ __webpack_exports__["a"] = (store);
 
 /***/ }),
-/* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 14 */,
+/* 15 */,
+/* 16 */,
+/* 17 */,
+/* 18 */,
+/* 19 */,
+/* 20 */,
+/* 21 */,
+/* 22 */,
+/* 23 */,
+/* 24 */,
+/* 25 */,
+/* 26 */,
+/* 27 */,
+/* 28 */
+/***/ (function(module, exports) {
 
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mutation_types__ = __webpack_require__(0);
-
-
-const actions = {
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["a" /* CHAT_ADD_TAB */]]: function({commit}, {id, caption}) {
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["a" /* CHAT_ADD_TAB */], {id, caption});
-    },
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["c" /* CHAT_SELECT_TAB */]]: function({commit}, {id}) {
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["c" /* CHAT_SELECT_TAB */], {id});
-    },
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["b" /* CHAT_POST_LINE */]]: function({commit}, {tab, client, message}) {
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["b" /* CHAT_POST_LINE */], {tab, client, message});
-    },
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */]]: function({commit}, {id, name}) {
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */], {id, name});
-    },
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["e" /* CLIENT_DISCONNECT */]]: function({commit}, {id}) {
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["e" /* CLIENT_DISCONNECT */], {id});
-    },
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */]]: function({commit}, {id}) {
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */], {id});
-    },
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["f" /* CLIENT_LOGIN */]]: function({commit}, {login, pass}) {
-        // Le systeme devrait efffectuer une demande de connexion
-        // Le serveur devrait renvoyer un connect et un set_local
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */], {id: 10, name: login});
-        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */], {id: 10});
-    },
-
-};
-
-/* harmony default export */ __webpack_exports__["a"] = (actions);
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = ({
-    clients: [],
-    localClient: null,
-    chat: {
-        lastLineId: 0,
-        tabs: [],
-        activeTab: null,
+/**
+ * Translates the list format produced by css-loader into something
+ * easier to manipulate.
+ */
+module.exports = function listToStyles (parentId, list) {
+  var styles = []
+  var newStyles = {}
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i]
+    var id = item[0]
+    var css = item[1]
+    var media = item[2]
+    var sourceMap = item[3]
+    var part = {
+      id: parentId + ':' + i,
+      css: css,
+      media: media,
+      sourceMap: sourceMap
     }
-});
-
-/***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mutation_types__ = __webpack_require__(0);
-
-
-const mutations = {
-    /**
-     * Ajoute un onglet dans la fenetre de discussion
-     * @param state
-     * @param id {number} identifiant du nouvel onglet
-     * @param caption {string} nom de l'onglet, fait référence à une entrée
-     * de strings.chat.tabs, sinon affiché tel quel.
-     *
-     */
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["a" /* CHAT_ADD_TAB */]]: function(state, {id, caption}) {
-        state.chat.tabs.push({
-            id: id,
-            lines: [],
-            caption: caption,
-            notified: false
-        });
-    },
-
-    /**
-     * Selectionne un nouvel onglet
-     * @param state
-     * @param id {number} identifiant de l'onglet à selectionner
-     */
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["c" /* CHAT_SELECT_TAB */]]: function(state, {id}) {
-        state.chat.activeTab = state.chat.tabs.find(t => t.id === id);
-        state.chat.activeTab.notified = false;
-    },
-
-    /**
-     * Ajoute une line dans un onglet de la fenetre de discussion
-     * @param state
-     * @param tab {number} identifiant de l'onglet
-     * @param client {number} id du client
-     * @param message {string} contenu du message
-     */
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["b" /* CHAT_POST_LINE */]]: function(state, {tab, client, message}) {
-        let oChat = state.chat;
-        let oTab = oChat.tabs.find(t => t.id === tab);
-        if (!oTab) {
-            throw new Error('could not find tab #' + tab);
-        }
-        let oClient = state.clients.find(c => c.id === client);
-        if (!oClient) {
-            throw new Error('could not find client #' + client);
-        }
-        oTab.lines.push({
-            id: ++oChat.lastLineId,
-            user: oClient.name,
-            message: message,
-            color: 0
-        });
-        if (tab !== state.chat.activeTab.id) {
-            oTab.notified = true;
-        }
-    },
-
-    /**
-     * Ajoute un nouveau client
-     * @param state {*} etat
-     * @param id {number} identifiant du client
-     * @param name {string} nom du client
-     */
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */]]: function(state, {id, name}) {
-        state.clients.push({
-            id: id,
-            name: name
-        });
-    },
-
-    /**
-     * supprime un client
-     * @param state
-     * @param id {number} identifiant du client qui s'en va
-     */
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["e" /* CLIENT_DISCONNECT */]]: function(state, {id}) {
-        let iClient = state.clients.findIndex(c => c.id === id);
-        if (iClient >= 0) {
-            state.clients.splice(iClient, 1);
-        }
-    },
-
-    /**
-     * Il peut y avoir plusieurs clients. Cette methode permet de définir
-     * le client local sur lequel est installé l'appli
-     * @param state
-     * @param id {number} identifiant du client
-     */
-    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */]]: function(state, {id}) {
-        state.localClient = state.clients.find(c => c.id === id);
+    if (!newStyles[id]) {
+      styles.push(newStyles[id] = { id: id, parts: [part] })
+    } else {
+      newStyles[id].parts.push(part)
     }
-};
+  }
+  return styles
+}
 
-/* harmony default export */ __webpack_exports__["a"] = (mutations);
 
 /***/ }),
-/* 10 */
+/* 29 */,
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-const getters = {
-    /**
-     * Renvoie ce qu'il faut afficher dans la fenetre de discussion
-     */
-    chatContent: function(state) {
-        return state.chat.activeTab ? state.chat.activeTab.lines : [];
-    },
-
-
-    getTab: function(state) {
-        return function(id) {
-            return state.chat.tabs.find(t => t.id === id);
-        };
-    },
-
-    /**
-     * Renvoie les données concernant un client
-     * @param id {number} identifiant du client
-     */
-    client: function(state) {
-        return function(id) {
-            return state.clients.find(c => c.id === id);
-        };
-    },
-
-    getLocalClient: function(state) {
-        return state.localClient;
-    }
-};
-
-/* harmony default export */ __webpack_exports__["a"] = (getters);
-
-/***/ }),
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_chat_window_vue__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_63010646_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_chat_window_vue__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_chat_window_vue__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_63010646_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_chat_window_vue__ = __webpack_require__(44);
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(12)
+  __webpack_require__(31)
 }
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
 
 /* template */
@@ -871,17 +706,17 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 12 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(13);
+var content = __webpack_require__(32);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(2)("91840a9e", content, false);
+var update = __webpack_require__(1)("91840a9e", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -897,10 +732,10 @@ if(false) {
 }
 
 /***/ }),
-/* 13 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(1)(undefined);
+exports = module.exports = __webpack_require__(0)(undefined);
 // imports
 
 
@@ -911,47 +746,14 @@ exports.push([module.i, "\n.chat-window[data-v-63010646] {\n    width: 40em;\n}\
 
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports) {
-
-/**
- * Translates the list format produced by css-loader into something
- * easier to manipulate.
- */
-module.exports = function listToStyles (parentId, list) {
-  var styles = []
-  var newStyles = {}
-  for (var i = 0; i < list.length; i++) {
-    var item = list[i]
-    var id = item[0]
-    var css = item[1]
-    var media = item[2]
-    var sourceMap = item[3]
-    var part = {
-      id: parentId + ':' + i,
-      css: css,
-      media: media,
-      sourceMap: sourceMap
-    }
-    if (!newStyles[id]) {
-      styles.push(newStyles[id] = { id: id, parts: [part] })
-    } else {
-      newStyles[id].parts.push(part)
-    }
-  }
-  return styles
-}
-
-
-/***/ }),
-/* 15 */
+/* 33 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__chat_line_vue__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chat_channels_vue__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store_mutation_types__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__data_strings__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__chat_line_vue__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chat_channels_vue__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store_mutation_types__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__data_strings__ = __webpack_require__(7);
 //
 //
 //
@@ -1057,18 +859,18 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 16 */
+/* 34 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_chat_line_vue__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_186b0fca_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_chat_line_vue__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_chat_line_vue__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_186b0fca_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_chat_line_vue__ = __webpack_require__(38);
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(17)
+  __webpack_require__(35)
 }
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
 
 /* template */
@@ -1112,17 +914,17 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 17 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(18);
+var content = __webpack_require__(36);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(2)("a8787364", content, false);
+var update = __webpack_require__(1)("a8787364", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -1138,10 +940,10 @@ if(false) {
 }
 
 /***/ }),
-/* 18 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(1)(undefined);
+exports = module.exports = __webpack_require__(0)(undefined);
 // imports
 
 
@@ -1152,7 +954,7 @@ exports.push([module.i, "\n.user-name[data-v-186b0fca] {\n    font-weight: bold;
 
 
 /***/ }),
-/* 19 */
+/* 37 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1181,7 +983,7 @@ exports.push([module.i, "\n.user-name[data-v-186b0fca] {\n    font-weight: bold;
 
 
 /***/ }),
-/* 20 */
+/* 38 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1217,18 +1019,18 @@ if (false) {
 }
 
 /***/ }),
-/* 21 */
+/* 39 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_chat_channels_vue__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_247566a6_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_chat_channels_vue__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_chat_channels_vue__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_247566a6_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_chat_channels_vue__ = __webpack_require__(43);
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(22)
+  __webpack_require__(40)
 }
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
 
 /* template */
@@ -1272,17 +1074,17 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 22 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(23);
+var content = __webpack_require__(41);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(2)("419e9960", content, false);
+var update = __webpack_require__(1)("419e9960", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -1298,10 +1100,10 @@ if(false) {
 }
 
 /***/ }),
-/* 23 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(1)(undefined);
+exports = module.exports = __webpack_require__(0)(undefined);
 // imports
 
 
@@ -1312,11 +1114,11 @@ exports.push([module.i, "\nbutton[data-v-247566a6] {\n    border: solid 2px tran
 
 
 /***/ }),
-/* 24 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__data_strings__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__data_strings__ = __webpack_require__(7);
 //
 //
 //
@@ -1358,7 +1160,7 @@ exports.push([module.i, "\nbutton[data-v-247566a6] {\n    border: solid 2px tran
 
 
 /***/ }),
-/* 25 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1410,7 +1212,7 @@ if (false) {
 }
 
 /***/ }),
-/* 26 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1515,18 +1317,18 @@ if (false) {
 }
 
 /***/ }),
-/* 27 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_login_window_vue__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_e8b8a33a_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_login_window_vue__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_selector_type_script_index_0_bustCache_login_window_vue__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_e8b8a33a_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_bustCache_login_window_vue__ = __webpack_require__(49);
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(28)
+  __webpack_require__(46)
 }
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
 
 /* template */
@@ -1570,17 +1372,17 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 28 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(29);
+var content = __webpack_require__(47);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(2)("7a85f007", content, false);
+var update = __webpack_require__(1)("7a85f007", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -1596,10 +1398,10 @@ if(false) {
 }
 
 /***/ }),
-/* 29 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(1)(undefined);
+exports = module.exports = __webpack_require__(0)(undefined);
 // imports
 
 
@@ -1610,12 +1412,12 @@ exports.push([module.i, "\n.login-window[data-v-e8b8a33a] {\n    width: 40em;\n 
 
 
 /***/ }),
-/* 30 */
+/* 48 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__data_strings__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store_mutation_types__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__data_strings__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store_mutation_types__ = __webpack_require__(52);
 //
 //
 //
@@ -1670,7 +1472,7 @@ exports.push([module.i, "\n.login-window[data-v-e8b8a33a] {\n    width: 40em;\n 
 
 
 /***/ }),
-/* 31 */
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1784,6 +1586,229 @@ if (false) {
     require("vue-hot-reload-api")      .rerender("data-v-e8b8a33a", esExports)
   }
 }
+
+/***/ }),
+/* 50 */,
+/* 51 */,
+/* 52 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const CHAT_ADD_TAB = 'chatAddTab';
+/* harmony export (immutable) */ __webpack_exports__["a"] = CHAT_ADD_TAB;
+
+const CHAT_POST_LINE = 'chatPostLine';
+/* harmony export (immutable) */ __webpack_exports__["b"] = CHAT_POST_LINE;
+
+const CHAT_SELECT_TAB = 'chatSelectTab';
+/* harmony export (immutable) */ __webpack_exports__["c"] = CHAT_SELECT_TAB;
+
+
+const CLIENT_CONNECT = 'clientConnect';
+/* harmony export (immutable) */ __webpack_exports__["d"] = CLIENT_CONNECT;
+
+const CLIENT_DISCONNECT = 'clientDisconnect';
+/* harmony export (immutable) */ __webpack_exports__["e"] = CLIENT_DISCONNECT;
+
+const CLIENT_SET_LOCAL = 'clientSetLocal';
+/* harmony export (immutable) */ __webpack_exports__["g"] = CLIENT_SET_LOCAL;
+
+const CLIENT_LOGIN = 'clientLogin';
+/* harmony export (immutable) */ __webpack_exports__["f"] = CLIENT_LOGIN;
+
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mutation_types__ = __webpack_require__(52);
+
+
+const actions = {
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["a" /* CHAT_ADD_TAB */]]: function({commit}, {id, caption}) {
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["a" /* CHAT_ADD_TAB */], {id, caption});
+    },
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["c" /* CHAT_SELECT_TAB */]]: function({commit}, {id}) {
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["c" /* CHAT_SELECT_TAB */], {id});
+    },
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["b" /* CHAT_POST_LINE */]]: function({commit}, {tab, client, message}) {
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["b" /* CHAT_POST_LINE */], {tab, client, message});
+    },
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */]]: function({commit}, {id, name}) {
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */], {id, name});
+    },
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["e" /* CLIENT_DISCONNECT */]]: function({commit}, {id}) {
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["e" /* CLIENT_DISCONNECT */], {id});
+    },
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */]]: function({commit}, {id}) {
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */], {id});
+    },
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["f" /* CLIENT_LOGIN */]]: function({commit}, {login, pass}) {
+        // Le systeme devrait efffectuer une demande de connexion
+        // Le serveur devrait renvoyer un connect et un set_local
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */], {id: 10, name: login});
+        commit(__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */], {id: 10});
+    },
+
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (actions);
+
+/***/ }),
+/* 54 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = ({
+    clients: [],
+    localClient: null,
+    chat: {
+        lastLineId: 0,
+        tabs: [],
+        activeTab: null,
+    }
+});
+
+/***/ }),
+/* 55 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mutation_types__ = __webpack_require__(52);
+
+
+const mutations = {
+    /**
+     * Ajoute un onglet dans la fenetre de discussion
+     * @param state
+     * @param id {number} identifiant du nouvel onglet
+     * @param caption {string} nom de l'onglet, fait référence à une entrée
+     * de strings.chat.tabs, sinon affiché tel quel.
+     *
+     */
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["a" /* CHAT_ADD_TAB */]]: function(state, {id, caption}) {
+        state.chat.tabs.push({
+            id: id,
+            lines: [],
+            caption: caption,
+            notified: false
+        });
+    },
+
+    /**
+     * Selectionne un nouvel onglet
+     * @param state
+     * @param id {number} identifiant de l'onglet à selectionner
+     */
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["c" /* CHAT_SELECT_TAB */]]: function(state, {id}) {
+        state.chat.activeTab = state.chat.tabs.find(t => t.id === id);
+        state.chat.activeTab.notified = false;
+    },
+
+    /**
+     * Ajoute une line dans un onglet de la fenetre de discussion
+     * @param state
+     * @param tab {number} identifiant de l'onglet
+     * @param client {number} id du client
+     * @param message {string} contenu du message
+     */
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["b" /* CHAT_POST_LINE */]]: function(state, {tab, client, message}) {
+        let oChat = state.chat;
+        let oTab = oChat.tabs.find(t => t.id === tab);
+        if (!oTab) {
+            throw new Error('could not find tab #' + tab);
+        }
+        let oClient = state.clients.find(c => c.id === client);
+        if (!oClient) {
+            throw new Error('could not find client #' + client);
+        }
+        oTab.lines.push({
+            id: ++oChat.lastLineId,
+            user: oClient.name,
+            message: message,
+            color: 0
+        });
+        if (tab !== state.chat.activeTab.id) {
+            oTab.notified = true;
+        }
+    },
+
+    /**
+     * Ajoute un nouveau client
+     * @param state {*} etat
+     * @param id {number} identifiant du client
+     * @param name {string} nom du client
+     */
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["d" /* CLIENT_CONNECT */]]: function(state, {id, name}) {
+        state.clients.push({
+            id: id,
+            name: name
+        });
+    },
+
+    /**
+     * supprime un client
+     * @param state
+     * @param id {number} identifiant du client qui s'en va
+     */
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["e" /* CLIENT_DISCONNECT */]]: function(state, {id}) {
+        let iClient = state.clients.findIndex(c => c.id === id);
+        if (iClient >= 0) {
+            state.clients.splice(iClient, 1);
+        }
+    },
+
+    /**
+     * Il peut y avoir plusieurs clients. Cette methode permet de définir
+     * le client local sur lequel est installé l'appli
+     * @param state
+     * @param id {number} identifiant du client
+     */
+    [__WEBPACK_IMPORTED_MODULE_0__mutation_types__["g" /* CLIENT_SET_LOCAL */]]: function(state, {id}) {
+        state.localClient = state.clients.find(c => c.id === id);
+    }
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (mutations);
+
+/***/ }),
+/* 56 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const getters = {
+    /**
+     * Renvoie ce qu'il faut afficher dans la fenetre de discussion
+     */
+    chatContent: function(state) {
+        return state.chat.activeTab ? state.chat.activeTab.lines : [];
+    },
+
+
+    getTab: function(state) {
+        return function(id) {
+            return state.chat.tabs.find(t => t.id === id);
+        };
+    },
+
+    /**
+     * Renvoie les données concernant un client
+     * @param id {number} identifiant du client
+     */
+    client: function(state) {
+        return function(id) {
+            return state.clients.find(c => c.id === id);
+        };
+    },
+
+    getLocalClient: function(state) {
+        return state.localClient;
+    }
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (getters);
 
 /***/ })
 /******/ ]);

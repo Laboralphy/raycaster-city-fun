@@ -4,3 +4,6 @@
 # node modules
 node_modules
 
+# webpack
+public/scripts/dist
+
