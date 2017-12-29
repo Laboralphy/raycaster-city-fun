@@ -2,23 +2,23 @@
     <div v-show="visible" class="login-window window">
         <div class="row">
             <div class="col lg-12">
-                <h2 class="title blue">{{ STRINGS.title }}</h2>
+                <h2 class="title blue">{{ STRINGS.ui.login.title }}</h2>
             </div>
         </div>
         <form>
             <div class="row">
                 <div class="col lg-12">
-                    <label>{{ STRINGS.login }}<input v-model="inputLogin" type="text"/></label>
+                    <label>{{ STRINGS.ui.login.login }}<input v-model="inputLogin" type="text"/></label>
                 </div>
             </div>
             <div class="row">
                 <div class="col lg-12">
-                    <label>{{ STRINGS.pass }}<input v-model="inputPass" type="text"/></label>
+                    <label>{{ STRINGS.ui.login.pass }}<input v-model="inputPass" type="text"/></label>
                 </div>
             </div>
             <div class="row">
                 <div class="col lg-offset-8 lg-4">
-                    <button ref="connect" type="button" class="connect">{{ STRINGS.connect }}</button>
+                    <button ref="connect" type="button" class="connect">{{ STRINGS.ui.login.connect }}</button>
                 </div>
             </div>
         </form>
@@ -26,14 +26,12 @@
 </template>
 
 <script>
-    import STRINGS from '../data/strings';
     import * as types from '../store/clients/mutation-types';
 
     export default {
         name: "login-window",
         data: function() {
             return {
-                STRINGS: STRINGS.ui.login,
                 visible: false,
                 inputLogin: '',
                 inputPass: ''

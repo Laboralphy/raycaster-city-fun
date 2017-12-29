@@ -2,7 +2,7 @@
     <div v-show="visible" class="chat-window window">
         <div class="row">
             <div class="col lg-12">
-                <h2 class="title blue">{{ STRINGS.title }}</h2>
+                <h2 class="title blue">{{ STRINGS.ui.chat.title }}</h2>
             </div>
         </div>
         <div class="row">
@@ -26,7 +26,7 @@
         </div>
         <div class="row">
             <div class="col lg-12 input">
-                <form ref="formInput"><input ref="input" type="text" v-model="inputText" :placeholder="STRINGS.placeholder" /></form>
+                <form ref="formInput"><input ref="input" type="text" v-model="inputText" :placeholder="STRINGS.ui.chat.placeholder" /></form>
             </div>
         </div>
     </div>
@@ -36,7 +36,6 @@
     import ChatLine from "./ChatLine.vue";
     import ChatChannels from "./ChatChannels.vue";
     import * as types from '../store/chat/mutation-types';
-    import STRINGS from '../data/strings';
     import {mapGetters} from 'vuex';
 
     export default {
@@ -47,7 +46,6 @@
         },
         data: function() {
             return {
-                STRINGS: STRINGS.ui.chat,
                 visible: false,
                 inputText: '',
                 pleaseScrollDown: true,

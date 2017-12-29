@@ -1,4 +1,4 @@
-const STRINGS = {
+const STRINGS_DB = {
     fr: {
         ui: {
             chat: {
@@ -20,4 +20,13 @@ const STRINGS = {
     }
 };
 
-export default STRINGS.fr;
+export const STRINGS = STRINGS_DB.fr;
+
+
+const ApplicationStrings = {
+	install(Vue, options) {
+		Vue.prototype.STRINGS = STRINGS;
+	}
+};
+
+export default ApplicationStrings;

@@ -11,11 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "d3": "^4.12.2",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
+    "gsap": "^1.20.3",
     "session-file-store": "^1.2.0",
     "socket.io": "^2.0.4",
     "vue": "^2.5.13",
+    "vuedraggable": "^2.15.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
