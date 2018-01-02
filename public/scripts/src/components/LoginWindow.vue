@@ -26,8 +26,6 @@
 </template>
 
 <script>
-    import * as types from '../store/clients/mutation-types';
-
     export default {
         name: "login-window",
         data: function() {
@@ -39,10 +37,7 @@
         },
         mounted: function() {
             this.$refs.connect.addEventListener('click', (function(event) {
-                this.$store.dispatch('clients/' + types.CLIENT_LOGIN, {
-                    login: this.inputLogin,
-                    pass: this.inputPass
-                }).then(() => this.$emit('login'));
+            	this.$emit('login', this.inputLogin, this.inputPass);
             }).bind(this));
         }
     }

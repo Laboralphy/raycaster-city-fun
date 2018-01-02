@@ -1,13 +1,10 @@
-const socket = io();
-
 import Vue from 'vue';
 import store from './store';
 import vueApplicationChat from './components/ApplicationChat.vue';
 import App from './components/App.vue';
 import ApplicationConst from './data/const';
 import ApplicationStrings from './data/strings';
-
-
+import Network from './network/index';
 
 /**
  * DEMO : Instancie l'application pour une utilisation chat
@@ -17,13 +14,26 @@ function createApplicationChat() {
 	Vue.use(ApplicationConst);
 	Vue.use(ApplicationStrings);
 
+	let network = new Network();
+
 	const app = new Vue({
 		el: '#user-interface',
 		store,
 		components: {
 			'application': vueApplicationChat
 		},
-		render: h => h(vueApplicationChat)
+
+		render: h => h(vueApplicationChat),
+
+		mounted: function() {
+			window.NETWORK = network;
+			const oApp = this.$children[0];
+			const store = oApp.$store;
+
+			oApp.$on('login', function(name, pass) {
+				network.req_login(name, pass);
+			});
+		}
 	});
 
 	return app;

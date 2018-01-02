@@ -12,7 +12,7 @@ const getters = {
     },
 
     getLocalClient: function(state) {
-		return function(id) {
+		return function() {
 			return state.localClient;
 		};
     }

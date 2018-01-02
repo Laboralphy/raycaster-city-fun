@@ -49,7 +49,7 @@
                     this.chatSelectTab({id: 1});
 
                     this.$refs.chat.$on('send-message', this.chatMessageToSend.bind(this));
-                    this.$refs.login.$on('login', () => this.show('chat'));
+                    this.$refs.login.$on('login', (name, pass) => this.$emit('login', name, pass));
                     this.show('login');
                 }
             },

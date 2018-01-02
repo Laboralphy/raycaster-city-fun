@@ -1,4 +1,7 @@
 {
+	"general": {
+		"lang": "en"
+	},
 	"server": {
 		"port": 3000
 	},
