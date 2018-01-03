@@ -52,7 +52,6 @@
             };
         },
         computed: Object.assign(
-        	{},
             mapGetters({
 				getChatContent: 'chat/getContent',
 				getActiveTab: 'chat/getActiveTab'

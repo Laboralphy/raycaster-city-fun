@@ -47,35 +47,44 @@ class Service {
 		let client = this.clientManager.register(socket.client.id);
 		client.socket = socket;
 
+
 		/**
          * Evènement : lorsqu'un client se déconnecte
 		 */
-		socket.on('disconnect', (function () {
+		socket.on('disconnect', () => {
 		    let id = socket.client.id;
             logger.log(STRINGS.service.user.disconnected, id);
             this.destroyClient(id);
-        }).bind(this));
+        });
 
 
 
         /**
 		 * ### LOGIN
          * Un client souhaite s'identifier après s'etre connecté. Il doit transmettre son nom et son mot de passe.
+		 * Le serveur retransmet immédiatement un identifiant client
 		 * @param login {string} nom du client
 		 * @param pass {string} mot de passe du client
          */
-        socket.on('LOGIN', function({login, pass}) {
-            client.name = login;
-			logger.log(util.format(STRINGS.service.user.assign_name, socket.client.id, client.name));
-			this.send_login({client: client.id, id: client.id, name: client.name});
+        socket.on('LOGIN', ({name, pass}, ack) => {
+        	if (name.length > 2) {
+				client.name = name;
+				client.id = socket.client.id;
+				logger.log(util.format(STRINGS.service.user.assign_name, client.id, client.name));
+				ack({id: client.id});
 
-			// ajouter le client au canal public
-			let oTxatUser = new TinyTxat.User(client);
-			this.txat.addUser(oTxatUser);
-			let oChannel = this.txat.findChannel(2);
-			oChannel.addUser(oTxatUser);
+				// ajouter le client au canal public
+				let oTxatUser = new TinyTxat.User(client);
+				this.txat.addUser(oTxatUser);
+				let oChannel = this.txat.findChannel(2);
+				oChannel.addUser(oTxatUser);
+			} else {
+        		client.id = null;
+				ack({id: client.id});
+			}
         });
     }
+
 
 	/**
 	 * Renvoie la socket d'un client
@@ -86,6 +95,11 @@ class Service {
     	return this.clientManager.client(idClient).socket;
 	}
 
+	_emit(idClient, sEvent, data) {
+		logger.log('emit', sEvent, 'to', idClient);
+		this._socket(idClient).emit(sEvent, data);
+	}
+
 
 	/**
 	 * Envoie la confirmation d'identification à un client
@@ -94,7 +108,7 @@ class Service {
 	 * @param name
 	 */
 	send_login(client, id, name) {
-		this._socket.emit('LOGIN', {id, name});
+		this._emit(client, 'LOGIN', {id, name});
 	}
 
 
@@ -105,8 +119,7 @@ class Service {
 	 * @param channel {string} identifiant du canal concerné
 	 */
 	send_ms_user_joins(client, user, channel) {
-		logger.log('to', client, ': user', user, 'joins', channel);
-		this._socket.emit('MS_USER_JOINS', {user, channel});
+		this._emit(client, 'MS_USER_JOINS', {user, channel});
 	}
 
 	/**
@@ -116,7 +129,7 @@ class Service {
 	 * @param channel {string} identifiant du canal concerné
 	 */
 	send_ms_user_leaves(client, user, channel) {
-		this._socket.emit('MS_USER_LEAVES', {user, channel});
+		this._emit(client, 'MS_USER_LEAVES', {user, channel});
 	}
 
 	/**
@@ -127,7 +140,7 @@ class Service {
 	 * @param message {string} contenu du message
 	 */
 	send_ms_user_message(client, user, channel, message) {
-		this._socket.emit('MS_USER_MESSAGE', {user, channel, message});
+		this._emit(client, 'MS_USER_MESSAGE', {user, channel, message});
 	}
 
 }

@@ -30,8 +30,14 @@ function createApplicationChat() {
 			const oApp = this.$children[0];
 			const store = oApp.$store;
 
-			oApp.$on('login', function(name, pass) {
-				network.req_login(name, pass);
+			oApp.$on('login', async function(name, pass) {
+				let id = await network.send_login(name, pass);
+				if (id) {
+					console.log('your id is', id);
+					oApp.show('chat');
+				} else {
+					oApp.$refs.login.raiseError();
+				}
 			});
 		}
 	});

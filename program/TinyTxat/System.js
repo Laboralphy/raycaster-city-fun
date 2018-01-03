@@ -85,7 +85,7 @@ class System {
     }
 
     findUser(id) {
-        return this._users.find(u => u.id === id);
+        return this._users.find(u => u.id() === id);
     }
 
     addChannel(c) {
@@ -99,7 +99,7 @@ class System {
     }
 
     findChannel(id) {
-	    return this._channels.find(c => c.id === id);
+	    return this._channels.find(c => c.id() === id);
     }
 
     dropChannel(c) {

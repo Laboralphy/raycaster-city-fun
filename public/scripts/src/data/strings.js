@@ -14,7 +14,8 @@ const STRINGS_DB = {
                 title: 'Connexion',
                 login: 'Identifiant',
                 pass: 'Mot de passe',
-                connect: 'Se connecter'
+                connect: 'Se connecter',
+                error: 'Connexion impossible...'
             }
         }
     }

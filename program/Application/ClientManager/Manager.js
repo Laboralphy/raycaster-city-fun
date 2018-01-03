@@ -17,6 +17,7 @@ class Manager {
 		}
 		let oClient = new Client();
 		this.clients[id] = oClient;
+		oClient.id = id;
 		return oClient;
 	}
 
@@ -35,7 +36,11 @@ class Manager {
 	 * @param id {string} identifiant client recherché
 	 */
 	client(id) {
-		return this.clients[id];
+		if (id in this.clients) {
+			return this.clients[id];
+		} else {
+			throw new Error('client ' + id + ' not found');
+		}
 	}
 }
 
