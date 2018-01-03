@@ -36,10 +36,6 @@ class Network {
 	req_ms_list() {
 		this.socket.emit('MS_LIST');
 	}
-
-
-
-
 }
 
 export default Network;
