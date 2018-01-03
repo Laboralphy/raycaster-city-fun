@@ -3,6 +3,7 @@ const socket = io();
 import Vue from 'vue';
 import store from './store';
 import vueApplicationChat from './components/ApplicationChat.vue';
+import vueApplicationNeo from './components/ApplicationNeo.vue';
 import App from './components/App.vue';
 import ApplicationConst from './data/const';
 import ApplicationStrings from './data/strings';
@@ -51,8 +52,26 @@ function createApplicationUI() {
 }
 
 
+
+function createApplicationNeo() {
+	Vue.use(ApplicationConst);
+	Vue.use(ApplicationStrings);
+
+	const app = new Vue({
+		el: '#user-interface',
+		store,
+		components: {
+			vueApplicationNeo
+		},
+		render: h => h(vueApplicationNeo)
+	});
+
+	return app;
+}
+
+
 function main () {
-    window.Application = createApplicationChat();
+    window.Application = createApplicationNeo();
 }
 
 window.addEventListener('load', main);
