@@ -34,7 +34,103 @@ function createApplicationChat() {
 
 		methods: {
 
-            /**
+			/**
+			 * Renvoie true si l'identifiant est celui du client local
+			 * sinon renvoie false
+			 * @param id {string}
+			 * @return {boolean}
+			 */
+			isLocalClient: function(id) {
+				return id === this.idLocalClient;
+			},
+
+
+
+			initNetwork: function() {
+				// #####   ######   ####   ######     #    #    #     #    #    #   ####
+				// #    #  #       #    #  #          #    #    #     #    ##   #  #    #
+				// #    #  #####   #       #####      #    #    #     #    # #  #  #
+				// #####   #       #       #          #    #    #     #    #  # #  #  ###
+				// #   #   #       #    #  #          #     #  #      #    #   ##  #    #
+				// #    #  ######   ####   ######     #      ##       #    #    #   ####
+
+				// ECOUTEURS PERMETTANT DE CAPTER LES MESSAGES RESEAUX VENANT DU SERVEUR
+
+
+
+
+				// GENERAL PURPOSE
+				// GENERAL PURPOSE
+				// GENERAL PURPOSE
+
+				/**
+				 * Serveur : "Déconnexion du client"
+				 */
+				network.on('disconnect', () => {
+					this.base.show('login');
+					this.base.chatReset();
+				});
+
+
+
+
+				// MS : MESSAGE SYSTEM
+				// MS : MESSAGE SYSTEM
+				// MS : MESSAGE SYSTEM
+
+				/**
+				 * Serveur : "vous venez de rejoindre un canal"
+				 */
+				network.on('MS_YOU_JOIN', async ({id}) => {
+					let oChannel = await network.req_ms_chan_info(id);
+					if (oChannel) {
+						this.base.createAndSelectTab(oChannel.id, oChannel.name);
+					}
+				});
+
+				/**
+				 * Serveur : "un utilisateur a rejoin l'un des canaux auxquels vous êtes connecté"
+				 */
+				network.on('MS_USER_JOINS', async ({user, channel}) => {
+					let oUser = await network.req_ms_user_info(user);
+					let oChannel = await network.req_ms_chan_info(channel);
+					this.base.print(oChannel.id, '', oUser.name + ' à rejoin le canal ' + oChannel.name);
+				});
+
+				/**
+				 * Serveur : "un utilisateur a quitté l'un des canaux auxquels vous êtes connecté"
+				 */
+				network.on('MS_USER_LEAVES', async ({user, channel}) => {
+					let oUser = await network.req_ms_user_info(user);
+					let oChannel = await network.req_ms_chan_info(channel);
+					this.base.print(oChannel.id, '', oUser.name + ' à quitté le canal ' + oChannel.name);
+				});
+
+				/**
+				 * Serveur : "un utilisateur a envoyé un message de discussion sur un canal"
+				 */
+				network.on('MS_USER_SAYS', async ({user, channel, message}) => {
+					let oUser = await network.req_ms_user_info(user);
+					let oChannel = await network.req_ms_chan_info(channel);
+					this.base.print(oChannel.id, oUser.name, message);
+				});
+			},
+
+
+
+
+
+			//  ####   ######  #    #  #####      #    #    #   ####
+			// #       #       ##   #  #    #     #    ##   #  #    #
+			//  ####   #####   # #  #  #    #     #    # #  #  #
+			//      #  #       #  # #  #    #     #    #  # #  #  ###
+			// #    #  #       #   ##  #    #     #    #   ##  #    #
+			//  ####   ######  #    #  #####      #    #    #   ####
+
+			// METHODES PERMETTANT D'ENVOYER DES MESSAGES RESEAUX AU SERVEUR
+
+
+			/**
 			 * Envoyer le login/pass au server, attendre son retour
 			 * conserver l'id retourner
 			 * en cas d'erreur , notifier
@@ -42,49 +138,35 @@ function createApplicationChat() {
              * @param pass
              * @return {Promise<void>}
              */
-			doLogin: async function(name, pass) {
-                let id = await network.send_login(name, pass);
+			sendLogin: async function(name, pass) {
+                let id = await network.req_login(name, pass);
                 if (id) {
-                    console.log('your id is', id);
                     this.idLocalClient = id;
-                    oApp.show('chat');
+                    this.base.show('chat');
                 } else {
-                    oApp.$refs.login.raiseError();
+					this.base.$refs.login.raiseError();
                 }
             },
 
-            /**
-			 * Renvoie true si l'identifiant est celui du cleint local
-			 * sinon renvoie false
-             * @param id {string}
-             * @return {boolean}
-             */
-			isLocalClient: function(id) {
-				return id === this.idLocalClient;
-			},
-
-            /**
-			 * Réagit à l'arrivée d'un client sur un canal
-             */
-            onUserJoinsChannel: function(user, channel) {
-            	if (this.isLocalClient(user)) {
-            		// il faudrait créer un onglet
-					console.log('add tab', channel);
-//					this.base.chatAddTab()
-				} else {
-                    console.log('user', user, 'joins', channel);
-				}
+			/**
+			 * Envoyer un message de discussion à destination du canal actuelement actif
+			 * @param message
+			 * @returns {Promise<void>}
+			 */
+            sendMessage: async function(message) {
+				network.send_ms_say(this.$store.getters['chat/getActiveTab']().id, message);
 			}
 		},
 
 		mounted: function() {
-			window.NETWORK = network;
-			const base = this.$children[0];
-			const store = base.$store;
-			this.base = base;
+			this.base = this.$children[0];
 
-			base.$on('submit-login', (name, pass) => this.doLogin(name, pass));
-			network
+			// prise en charge des évènement issus des composants
+			this.base.$on('submit-login', (name, pass) => this.sendLogin(name, pass));
+			this.base.$on('send-message', (message) => this.sendMessage(message));
+
+			// initialisation du protocole réseau
+			this.initNetwork();
 		}
 	});
 

@@ -1,6 +1,17 @@
 import * as types from './mutation-types';
 
 const mutations = {
+
+	/**
+     * Remise à zero du chat
+	 * @param state
+	 */
+	[types.CHAT_RESET]: function(state) {
+        state.lastLineId = 0;
+		state.tabs = [];
+		state.activeTab = null;
+	},
+
     /**
      * Ajoute un onglet dans la fenetre de discussion
      * @param state

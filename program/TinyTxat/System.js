@@ -62,15 +62,13 @@ class System {
     }
 
     dropUser(u) {
-        if (!this.userPresent(u)) {
+        if (this.userPresent(u)) {
             // remove from all channels
             this.getUserChannels(u).forEach(function(c) {
                 c.dropUser(u);
             });
             let i = this._users.indexOf(u);
             this._users.splice(i, 1);
-        } else {
-            throw new Error('user ' + u.display() + ' is already registered on the system');
         }
     }
 

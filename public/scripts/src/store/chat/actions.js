@@ -1,6 +1,9 @@
 import * as types from './mutation-types';
 
 const actions = {
+    [types.CHAT_RESET]: function({commit}) {
+		commit(types.CHAT_RESET);
+    },
     [types.CHAT_ADD_TAB]: function({commit}, {id, caption}) {
         commit(types.CHAT_ADD_TAB, {id, caption});
     },

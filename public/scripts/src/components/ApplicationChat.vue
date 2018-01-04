@@ -26,15 +26,15 @@
         ),
         methods: Object.assign(
             {
-                chatMessageToSend: function(sMessage) {
-                	let idTab = this.getActiveTab().id;
-                    this.chatPostLine({
-                        tab: idTab,
-                        client: this.getLocalClient().name,
-                        message: sMessage
-                    });
-                    this.$refs.chat.doScrollDown(idTab);
-                },
+				createAndSelectTab: function(idTab, sCaption) {
+					this.chatAddTab({id: idTab, caption: sCaption});
+					this.chatSelectTab({id: idTab});
+				},
+
+				print: function(idTab, sUser, sMessage) {
+					this.chatPostLine({tab: idTab, client: sUser, message: sMessage});
+					this.$refs.chat.doScrollDown(idTab);
+				},
 
                 show: function(ref) {
                     let aRefs = 'login chat'.split(' ');
@@ -42,18 +42,13 @@
                 },
 
                 init: function() {
-                	
-//                    this.chatAddTab({id: 1, caption: "system"});
-//                    this.chatAddTab({id: 2, caption: "global"});
-//                    this.chatAddTab({id: 3, caption: "mission"});
-//                    this.chatSelectTab({id: 1});
-
-                    this.$refs.chat.$on('send-message', this.chatMessageToSend.bind(this));
+                    this.$refs.chat.$on('send-message', (message) => this.$emit('send-message', message));
                     this.$refs.login.$on('form-submit', (name, pass) => this.$emit('submit-login', name, pass));
                     this.show('login');
                 }
             },
-            mapActions('chat', Object.values(chatActions))
+			mapActions('chat', Object.values(chatActions)),
+
         ),
 
         mounted: function() {

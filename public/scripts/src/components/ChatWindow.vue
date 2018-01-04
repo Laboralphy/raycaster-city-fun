@@ -59,6 +59,10 @@
         ),
         methods: {
 
+        	reset: function() {
+
+            },
+
             /**
              * Si le canal qu'on consulte actuellement recoit un nouveau message
              * on doit l'afficher en scrollant jusqu'en bas
