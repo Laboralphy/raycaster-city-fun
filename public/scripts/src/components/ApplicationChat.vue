@@ -43,13 +43,13 @@
 
                 init: function() {
                 	
-                    this.chatAddTab({id: 1, caption: "system"});
-                    this.chatAddTab({id: 2, caption: "global"});
-                    this.chatAddTab({id: 3, caption: "mission"});
-                    this.chatSelectTab({id: 1});
+//                    this.chatAddTab({id: 1, caption: "system"});
+//                    this.chatAddTab({id: 2, caption: "global"});
+//                    this.chatAddTab({id: 3, caption: "mission"});
+//                    this.chatSelectTab({id: 1});
 
                     this.$refs.chat.$on('send-message', this.chatMessageToSend.bind(this));
-                    this.$refs.login.$on('login', (name, pass) => this.$emit('login', name, pass));
+                    this.$refs.login.$on('form-submit', (name, pass) => this.$emit('submit-login', name, pass));
                     this.show('login');
                 }
             },

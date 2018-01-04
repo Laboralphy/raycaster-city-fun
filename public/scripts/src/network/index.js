@@ -12,11 +12,18 @@ class Network {
 		this.socket.on('connect', () => console.log('connected'));
 		this.socket.on('disconnect', () => console.log('disconnected'));
 
-		//this.socket.on('MS_LIST', ({channels}) => console.log('liste des cannaux', channels))
-
-		//this.socket.on('MS_USER_JOINS', ({user, channel}) => );
+		this.socket.on('MS_USER_JOINS', ({user, channel}) => this.recv_ms_user_joins(user, channel));
 	}
 
+
+    /**
+	 * Reception d'une notiication de join channel
+     * @param user {string} utilisateur ayant rejoin un canal
+     * @param channel {string} canal concerné
+     */
+	recv_ms_user_joins(user, channel) {
+		console.log('user joins', user, channel);
+	}
 
 
 

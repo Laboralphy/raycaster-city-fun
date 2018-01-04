@@ -1,6 +1,7 @@
 const STRINGS = {
 	en: {
 		service: {
+			hello: 'CITY WARS - SERVER',
 			listening: 'listening on port : ',
 			user: {
 				connected: 'user connected',

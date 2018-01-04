@@ -25,20 +25,66 @@ function createApplicationChat() {
 
 		render: h => h(vueApplicationChat),
 
+		data: function() {
+			return {
+				idLocalClient: '', // identifiant du client local
+				base: null
+			}
+		},
+
+		methods: {
+
+            /**
+			 * Envoyer le login/pass au server, attendre son retour
+			 * conserver l'id retourner
+			 * en cas d'erreur , notifier
+             * @param name
+             * @param pass
+             * @return {Promise<void>}
+             */
+			doLogin: async function(name, pass) {
+                let id = await network.send_login(name, pass);
+                if (id) {
+                    console.log('your id is', id);
+                    this.idLocalClient = id;
+                    oApp.show('chat');
+                } else {
+                    oApp.$refs.login.raiseError();
+                }
+            },
+
+            /**
+			 * Renvoie true si l'identifiant est celui du cleint local
+			 * sinon renvoie false
+             * @param id {string}
+             * @return {boolean}
+             */
+			isLocalClient: function(id) {
+				return id === this.idLocalClient;
+			},
+
+            /**
+			 * Réagit à l'arrivée d'un client sur un canal
+             */
+            onUserJoinsChannel: function(user, channel) {
+            	if (this.isLocalClient(user)) {
+            		// il faudrait créer un onglet
+					console.log('add tab', channel);
+//					this.base.chatAddTab()
+				} else {
+                    console.log('user', user, 'joins', channel);
+				}
+			}
+		},
+
 		mounted: function() {
 			window.NETWORK = network;
-			const oApp = this.$children[0];
-			const store = oApp.$store;
+			const base = this.$children[0];
+			const store = base.$store;
+			this.base = base;
 
-			oApp.$on('login', async function(name, pass) {
-				let id = await network.send_login(name, pass);
-				if (id) {
-					console.log('your id is', id);
-					oApp.show('chat');
-				} else {
-					oApp.$refs.login.raiseError();
-				}
-			});
+			base.$on('submit-login', (name, pass) => this.doLogin(name, pass));
+			network
 		}
 	});
 

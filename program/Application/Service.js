@@ -16,7 +16,7 @@ class Service {
 	 */
 	initMessageSystem() {
 		this.txat = new TinyTxat.System();
-		this.txat.on('user-joins', ({to, user, channel}) => this.send_ms_user_joins(to, user, channel));
+		this.txat.on('user-joins', ({to, user, channel}) => to === user ? this.send_ms_you_join(to, channel) : this.send_ms_user_joins(to, user, channel));
 		this.txat.on('user-leaves', ({to, user, channel}) => this.send_ms_user_leaves(to, user, channel));
 		this.txat.on('user-message', ({to, user, channel, message}) => this.send_ms_user_message(to, user, channel, message));
         let c;
@@ -100,27 +100,34 @@ class Service {
 		this._socket(idClient).emit(sEvent, data);
 	}
 
+    /**
+     * avertir un client qu'il rejoin sur un canal
+     * @param client {string} identifiant du client à prévenir
+     * @param channel {string} information du canal concerné {id, name, type}
+     */
+    send_ms_you_join(client, channel) {
+        let oChannel = this.txat.findChannel(channel);
+		this._emit(client, 'MS_YOU_JOIN', {
+			id: oChannel.id(),
+			name: oChannel.name(),
+			type: oChannel.type()
+		});
+    }
 
-	/**
-	 * Envoie la confirmation d'identification à un client
-	 * @param client
-	 * @param id
-	 * @param name
-	 */
-	send_login(client, id, name) {
-		this._emit(client, 'LOGIN', {id, name});
-	}
-
-
-	/**
-	 * avertir un client de l'arrivée d'un utilisateur sur un canal
-	 * @param client {string} identifiant du client à prévenir
-	 * @param user {string} identifiant du client arrivant
-	 * @param channel {string} identifiant du canal concerné
-	 */
-	send_ms_user_joins(client, user, channel) {
-		this._emit(client, 'MS_USER_JOINS', {user, channel});
-	}
+    /**
+     * avertir un client de l'arrivée d'un utilisateur sur un canal
+     * @param client {string} identifiant du client à prévenir
+     * @param user {string} identifiant du client arrivant
+     * @param channel {string} identifiant du canal concerné
+     */
+    send_ms_user_joins(client, user, channel) {
+        let oChannel = this.txat.findChannel(channel);
+		let oClient = this.txat.findUser(client);
+		if (oChannel.userPresent(oClient)) {
+			// le client appartient au canal
+			this._emit(client, 'MS_USER_JOINS', {user, channel});
+        }
+    }
 
 	/**
 	 * Avertir un client du départ d'un autre client d'un canal

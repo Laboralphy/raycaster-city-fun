@@ -49,7 +49,7 @@
         mounted: function() {
             this.$refs.connect.addEventListener('click', (function(event) {
             	this.error = false;
-            	this.$emit('login', this.inputLogin, this.inputPass);
+            	this.$emit('form-submit', this.inputLogin, this.inputPass);
             }).bind(this));
         }
     }

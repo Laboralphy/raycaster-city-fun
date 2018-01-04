@@ -20,7 +20,8 @@ class Application {
 		return new Promise(function(resolve) {
 			let nPort = Config.server.port;
 			http.listen(nPort, function() {
-				logger.log(STRINGS.service.listening, nPort);
+                logger.log(STRINGS.service.hello);
+                logger.log(STRINGS.service.listening, nPort);
 				resolve();
 			});
 		});
