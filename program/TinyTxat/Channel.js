@@ -41,7 +41,6 @@ class Channel {
 
     addUser(u) {
         if (!this.userPresent(u)) {
-            console.log('ADD USER', u.display());
             this._users.push(u);
             this._events.emit('user-added', {channel: this, user: u});
         } else {
