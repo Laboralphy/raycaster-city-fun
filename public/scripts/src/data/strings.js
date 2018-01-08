@@ -3,12 +3,9 @@ const STRINGS_DB = {
         ui: {
             chat: {
                 title: 'Discussion',
-                tabs: {
-                    system: 'Système',
-                    global: 'Global',
-                    mission: 'Mission'
-                },
-                placeholder: 'Message...'
+                placeholder: 'Message...',
+				joined: '$user a rejoin le canal $chan',
+				left: '$user a quitté le canal $chan'
             },
             login: {
                 title: 'Connexion',
@@ -27,6 +24,14 @@ export const STRINGS = STRINGS_DB.fr;
 const ApplicationStrings = {
 	install(Vue, options) {
 		Vue.prototype.STRINGS = STRINGS;
+		String.prototype.with = function(oReplaces) {
+			let s = this;
+			for (let sPattern in oReplaces) {
+				let r = new RegExp('\$' + sPattern, 'gu');
+				s = s.replace(r, oReplaces[sPattern]);
+			}
+			return s;
+		}
 	}
 };
 

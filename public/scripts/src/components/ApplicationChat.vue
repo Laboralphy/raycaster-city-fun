@@ -26,13 +26,8 @@
         ),
         methods: Object.assign(
             {
-				createAndSelectTab: function(idTab, sCaption) {
-					this.chatAddTab({id: idTab, caption: sCaption});
-					this.chatSelectTab({id: idTab});
-				},
-
 				print: function(idTab, sUser, sMessage) {
-					this.chatPostLine({tab: idTab, client: sUser, message: sMessage});
+					this.postLine({tab: idTab, client: sUser, message: sMessage});
 					this.$refs.chat.doScrollDown(idTab);
 				},
 

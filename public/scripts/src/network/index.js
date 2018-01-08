@@ -1,11 +1,13 @@
+import STRINGS from "../data/strings";
 
 class Network {
 	constructor() {
+		this.store = null;
 		this.chanCache = {};
 		this.userCache = {};
 		let sServerURL = window.location.protocol + '//' + window.location.host;
 		this.socket = io(sServerURL);
-		this.registerHandlers();
+		this.registerListeners();
 	}
 
 	setVueApplication(vueApp) {
@@ -16,9 +18,93 @@ class Network {
 		return this.vueApp;
 	}
 
-	registerHandlers() {
-		this.on('connect', () => this.connected());
+	// #          #     ####    #####  ######  #    #  ######  #####    ####
+	// #          #    #          #    #       ##   #  #       #    #  #
+	// #          #     ####      #    #####   # #  #  #####   #    #   ####
+	// #          #         #     #    #       #  # #  #       #####        #
+	// #          #    #    #     #    #       #   ##  #       #   #   #    #
+	// ######     #     ####      #    ######  #    #  ######  #    #   ####
+
+	registerListeners() {
+
+
+
+		// GENERAL PURPOSE
+		// GENERAL PURPOSE
+		// GENERAL PURPOSE
+
+		this.on('connect', () => {
+			this.chanCache = {};
+			this.userCache = {};
+		});
+
+		/**
+		 * Serveur : "Déconnexion du client"
+		 */
+		this.on('disconnect', async () => {
+			await this.store.dispatch('chat/reset');
+		});
+
+
+		// MS : MESSAGE SYSTEM
+		// MS : MESSAGE SYSTEM
+		// MS : MESSAGE SYSTEM
+
+		/**
+		 * Serveur : "vous venez de rejoindre un canal"
+		 */
+		this.on('MS_YOU_JOIN', async ({id}) => {
+			let oChannel = await this.req_ms_chan_info(id);
+			if (oChannel) {
+				await this.store.dispatch('chat/addTab', {id: oChannel.id, caption: oChannel.name});
+				await this.store.dispatch('chat/selectTab', {id: oChannel.id});
+			}
+		});
+
+		/**
+		 * Serveur : "un utilisateur a rejoin l'un des canaux auxquels vous êtes connecté"
+		 */
+		this.on('MS_USER_JOINS', async ({user, channel}) => {
+			let oUser = await this.req_ms_user_info(user);
+			let oChannel = await this.req_ms_chan_info(channel);
+			await this.store.dispatch('chat/postLine', {
+				tab: oChannel.id,
+				client: '',
+				message: STRINGS.ui.chat.joined.with({user: oUser.name, chan: oChannel.name})
+			});
+		});
+
+		/**
+		 * Serveur : "un utilisateur a quitté l'un des canaux auxquels vous êtes connecté"
+		 */
+		this.on('MS_USER_LEAVES', async ({user, channel}) => {
+			let oUser = await this.req_ms_user_info(user);
+			let oChannel = await this.req_ms_chan_info(channel);
+			await this.store.dispatch('chat/postLine', {
+				tab: oChannel.id,
+				client: '',
+				message: STRINGS.ui.chat.left.with({user: oUser.name, chan: oChannel.name})
+			});
+		});
+
+		/**
+		 * Serveur : "un utilisateur a envoyé un message de discussion sur un canal"
+		 */
+		this.on('MS_USER_SAYS', async ({user, channel, message}) => {
+			let oUser = await this.req_ms_user_info(user);
+			let oChannel = await this.req_ms_chan_info(channel);
+			await this.store.dispatch('chat/postLine', {
+				tab: oChannel.id,
+				client: oUser.name,
+				message
+			});
+		});
 	}
+
+	useStore(store) {
+		this.store = store;
+	}
+
 
 	/**
 	 * Passe plat vers socket.on
@@ -27,22 +113,6 @@ class Network {
 	 */
 	on(sEvent, pHandler) {
 		this.socket.on(sEvent, pHandler);
-	}
-
-
-	 // #          #     ####    #####  ######  #    #  ######  #####    ####
-	 // #          #    #          #    #       ##   #  #       #    #  #
-	 // #          #     ####      #    #####   # #  #  #####   #    #   ####
-	 // #          #         #     #    #       #  # #  #       #####        #
-	 // #          #    #    #     #    #       #   ##  #       #   #   #    #
-	 // ######     #     ####      #    ######  #    #  ######  #    #   ####
-
-	/**
-	 * Réagit à la connexion au serveur
-	 */
-	connected() {
-		this.chanCache = {};
-		this.userCache = {};
 	}
 
 

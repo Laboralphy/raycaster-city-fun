@@ -45,6 +45,9 @@ class Application {
         httpServer.get('/scripts', function(req, res) {
             res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js'));
         });
+        httpServer.get('/raycaster', function(req, res) {
+            res.sendFile(path.resolve(sRoot, 'scripts/raycaster/libraycaster.js'));
+        });
 		httpServer.use(express.static(path.resolve(sRoot, 'resources')));
 	}
 }

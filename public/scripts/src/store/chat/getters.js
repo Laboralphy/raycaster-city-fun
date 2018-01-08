@@ -14,7 +14,6 @@ const getters = {
         }
     },
 
-
 	/**
      * Renvoie l'onglet actuellement actif
 	 * @param state

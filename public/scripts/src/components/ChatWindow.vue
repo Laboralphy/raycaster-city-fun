@@ -2,11 +2,6 @@
     <div v-show="visible" class="chat-window window">
         <div class="row">
             <div class="col lg-12">
-                <h2 class="title blue">{{ STRINGS.ui.chat.title }}</h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col lg-12">
                 <chat-channels ref="channels"></chat-channels>
             </div>
         </div>
