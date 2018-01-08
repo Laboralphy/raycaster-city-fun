@@ -8,6 +8,13 @@ class Network {
 		this.registerHandlers();
 	}
 
+	setVueApplication(vueApp) {
+		this.vueApp = vueApp;
+	}
+
+	vue() {
+		return this.vueApp;
+	}
 
 	registerHandlers() {
 		this.on('connect', () => this.connected());
