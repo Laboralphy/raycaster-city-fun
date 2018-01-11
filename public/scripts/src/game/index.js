@@ -7,6 +7,7 @@ class Game extends O876_Raycaster.GameAbstract {
 		});
 		this.on('key.down', event => this.gameEventKey(event));
 		this.on('enter', event => this.gameEventEnter(event));
+		MAIN.pointerlock.on('exit', event => this.gameEventExitPointerLock(event));
 	}
 
 
@@ -23,7 +24,6 @@ class Game extends O876_Raycaster.GameAbstract {
     gameEventKey(oEvent) {
         switch (oEvent.k) {
 			case KEYS.ENTER:
-
 				break;
 
 			case KEYS.ESCAPE:
@@ -31,6 +31,12 @@ class Game extends O876_Raycaster.GameAbstract {
 				break;
         }
     }
+
+    gameEventExitPointerLock(oEvent) {
+		this.showOverlay();
+	}
+
+
 
 
 	/**
@@ -46,7 +52,7 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * Freeze les contrôles du joueur
 	 */
 	showOverlay() {
-		Main.screen.style.opacity = 0.5;
+		MAIN.screen.style.opacity = 0.5;
 		this.getPlayer().getThinker().freeze();
 	}
 
@@ -55,7 +61,7 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * Réactive les contrôles du joueur
 	 */
 	hideOverlay() {
-		Main.screen.style.opacity = 1;
+		MAIN.screen.style.opacity = 1;
 		this.getPlayer().getThinker().thaw();
 	}
 

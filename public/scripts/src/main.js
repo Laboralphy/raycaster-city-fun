@@ -20,10 +20,10 @@ function createApplicationGame() {
 		el: '#user-interface',
 		store,
 		components: {
-			'application': vueApplicationChat
+			'application': App
 		},
 
-		render: h => h(vueApplicationChat),
+		render: h => h(App),
 
 		data: function() {
 			return {
@@ -34,8 +34,10 @@ function createApplicationGame() {
 		methods: {
 
 			startGame: function() {
+				const g = new Game();
 				MAIN.configure(CONFIG);
-				MAIN.run(new Game());
+				MAIN.run(g);
+				MAIN.pointerlock.on('enter', event => g.hideOverlay());
 			},
 
 
@@ -60,10 +62,9 @@ function createApplicationGame() {
 			sendLogin: async function(name, pass) {
 				let id = await network.req_login(name, pass);
 				if (id) {
-					this.base.show('chat');
 					this.startGame();
 				} else {
-					this.base.$refs.login.raiseError();
+					// @TODO coller une erreur de connexion visible pour l'utilisateur
 				}
 			},
 
@@ -78,13 +79,13 @@ function createApplicationGame() {
 		},
 
 		mounted: function() {
-			this.base = this.$children[0];
+			//this.base = this.$children[0];
 
 			// prise en charge des évènement issus des composants
-			this.base.$on('submit-login', (name, pass) => this.sendLogin(name, pass));
-			this.base.$on('send-message', (message) => this.sendMessage(message));
+			//this.base.$on('submit-login', (name, pass) => this.sendLogin(name, pass));
+			//this.base.$on('send-message', (message) => this.sendMessage(message));
 			network.useStore(this.$store);
-			network.on('disconnect', () => this.base.show('login'));
+			this.sendLogin('ralphy', '');
 		}
 	});
 
