@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import store from './store';
-import vueApplicationChat from './components/ApplicationChat.vue';
-import App from './components/App.vue';
+import UI from './components/UserInterface.vue';
 import ApplicationConst from './data/const';
 import STRINGS from './data/strings';
 import Network from './network/index';
@@ -20,14 +19,14 @@ function createApplicationGame() {
 		el: '#user-interface',
 		store,
 		components: {
-			'application': App
+			'application': UI
 		},
 
-		render: h => h(App),
+		render: h => h(UI),
 
 		data: function() {
 			return {
-				base: null
+				ui: null
 			}
 		},
 
@@ -37,7 +36,21 @@ function createApplicationGame() {
 				const g = new Game();
 				MAIN.configure(CONFIG);
 				MAIN.run(g);
-				MAIN.pointerlock.on('enter', event => g.hideOverlay());
+                MAIN.pointerlock.on('enter', event => {
+                    this.ui.hide('ui');
+                    g.hideOverlay();
+                });
+                g.on('blur', event => {
+                    this.ui.show('ui');
+                    this.ui.show('chat');
+				});
+                document.body.setAttribute('class', 'playing');
+			},
+
+			endGame: function() {
+				MAIN.game._halt();
+				MAIN.screen.getContext('2d');
+                document.body.setAttribute('class', '');
 			},
 
 
@@ -62,6 +75,7 @@ function createApplicationGame() {
 			sendLogin: async function(name, pass) {
 				let id = await network.req_login(name, pass);
 				if (id) {
+					this.ui.hide('login');
 					this.startGame();
 				} else {
 					// @TODO coller une erreur de connexion visible pour l'utilisateur
@@ -79,38 +93,25 @@ function createApplicationGame() {
 		},
 
 		mounted: function() {
-			//this.base = this.$children[0];
+			this.ui = this.$children[0];
 
 			// prise en charge des évènement issus des composants
-			//this.base.$on('submit-login', (name, pass) => this.sendLogin(name, pass));
-			//this.base.$on('send-message', (message) => this.sendMessage(message));
+			this.ui.$refs.login.$on('submit', (name, pass) => this.sendLogin(name, pass));
+			this.ui.$refs.chat.$on('message', (message) => this.sendMessage(message));
 			network.useStore(this.$store);
-			this.sendLogin('ralphy', '');
+			network.on('disconnect', async () => {
+                this.endGame();
+				await this.ui.hide('*');
+				await this.ui.show('login');
+			});
+            this.ui.show('login');
+            this.ui.show('ui');
 		}
 	});
 
 	return app;
 }
 
-/**
- * DEMO : Instancie l'application pour une utilisation UI
- * @returns {CombinedVueInstance<V extends Vue, Object, Object, Object, Record<never, any>>}
- */
-function createApplicationUI() {
-	Vue.use(ApplicationConst);
-	Vue.use(STRINGS);
-
-	const app = new Vue({
-		el: '#user-interface',
-		store,
-		components: {
-			App
-		},
-		render: h => h(App)
-	});
-
-	return app;
-}
 
 
 function main () {

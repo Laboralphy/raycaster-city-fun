@@ -40,9 +40,10 @@
 <style scoped>
     button {
         border: solid 2px transparent;
+        background-color: #884422;
     }
     button.selected {
-        border-color: black
+        border-color: #FF8844;
     }
     button.notify {
         background-color: #080;

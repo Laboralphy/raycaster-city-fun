@@ -34,6 +34,7 @@ class Game extends O876_Raycaster.GameAbstract {
 
     gameEventExitPointerLock(oEvent) {
 		this.showOverlay();
+		this.trigger('blur'); // perte de pointerlock
 	}
 
 

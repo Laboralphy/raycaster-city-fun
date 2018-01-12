@@ -1,6 +1,15 @@
 const getters = {
 
     /**
+     * Renvoie true si le composant est visible
+     * @param state
+     * @return {boolean|*}
+     */
+    isVisible: function(state) {
+        return state.visible;
+    },
+
+    /**
      * Renvoie les données concernant un client
      * si l'id est ignoré on renvoie le client local
      * @param id {number} identifiant du client

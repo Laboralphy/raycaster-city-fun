@@ -1,9 +1,14 @@
 body {
     background-color: #555555;
+    font-size: 10px;
+    transition: background-color 1s;
+}
+
+body.playing {
+    background-color: #000000;
 }
 
 .window {
-    font-size: 10px;
     background-color: #AAAAAA;
     border: solid thin black;
     box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);

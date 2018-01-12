@@ -6678,6 +6678,9 @@ O2.createObject('MAIN', {
 		oCanvas.style.width = (wf | 0).toString() + 'px';
 		oCanvas.style.height = (hf | 0).toString() + 'px';
 		oCanvas.__ratio = wf / cw;
+		if (oCanvas.style.position === 'absolute' && oCanvas.style['margin-left'] === 'auto') {
+			oCanvas.style.left = ((w - wf) >> 1 | 0).toString() + 'px';
+		}
 	}
 });
 
@@ -7720,6 +7723,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		this.oImages.finalize();
 		this.oImages = null;
 		this.oThinkerManager = null;
+		this._oContext.clearRect(0, 0, this._oCanvas.width, this._oCanvas.height);
 	},
 
 	/** Le shade process est un processus qui peut prendre du temps
@@ -12039,6 +12043,7 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 		if (this.oMouseDevice) {
 			this.oMouseDevice.unplugHandlers();
 		}
+        this.oRaycaster.finalize();
 	},
 
 	/**

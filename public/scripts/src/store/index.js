@@ -8,6 +8,6 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
     modules
 });
-console.log(modules);
+
 
 export default store;
