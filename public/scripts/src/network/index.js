@@ -10,14 +10,6 @@ class Network {
 		this.registerListeners();
 	}
 
-	setVueApplication(vueApp) {
-		this.vueApp = vueApp;
-	}
-
-	vue() {
-		return this.vueApp;
-	}
-
 	// #          #     ####    #####  ######  #    #  ######  #####    ####
 	// #          #    #          #    #       ##   #  #       #    #  #
 	// #          #     ####      #    #####   # #  #  #####   #    #   ####
@@ -42,7 +34,6 @@ class Network {
 		 * Serveur : "Déconnexion du client"
 		 */
 		this.on('disconnect', async () => {
-			await this.store.dispatch('chat/reset');
 		});
 
 

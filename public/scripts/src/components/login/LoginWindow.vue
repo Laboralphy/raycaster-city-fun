@@ -1,5 +1,5 @@
 <template>
-    <div v-show="visible" class="login-window window">
+    <div v-show="isVisible" class="login-window window">
         <div class="row">
             <div class="col lg-12">
                 <h2 :class="'title ' + (error ? 'red' : 'blue')">{{ STRINGS.ui.login.title }}</h2>
@@ -29,16 +29,23 @@
 </template>
 
 <script>
+    import {mapGetters} from 'vuex';
+
     export default {
         name: "login-window",
         data: function() {
             return {
             	error: false,
-                visible: false,
                 inputLogin: '',
                 inputPass: ''
             };
         },
+
+        computed: Object.assign(
+            mapGetters({
+                isVisible: 'clients/isVisible'
+            })
+        ),
 
         methods: {
             raiseError: function() {
@@ -49,7 +56,7 @@
         mounted: function() {
             this.$refs.connect.addEventListener('click', (function(event) {
             	this.error = false;
-            	this.$emit('form-submit', this.inputLogin, this.inputPass);
+            	this.$emit('submit', this.inputLogin, this.inputPass);
             }).bind(this));
         }
     }

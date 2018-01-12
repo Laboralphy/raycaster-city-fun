@@ -11,7 +11,7 @@ var O2 = {};
 
 /** Creation d'une nouvelle classe
  * @example NouvelleClasse = Function.createClass(function(param1) { this.data = param1; });
- * @param fConstructor prototype du constructeur
+ * @param pPrototype {*} prototype du constructeur
  * @return Function
  */
 Function.prototype.createClass = function(pPrototype) {
@@ -30,9 +30,15 @@ Function.prototype.createClass = function(pPrototype) {
 	}
 };
 
+/**
+ * Permet de superizer une fonction
+ * @param f
+ * @param fParent
+ * @return {any}
+ * @private
+ */
 O2._superizeFunction = function(f, fParent) {
-	var fNew;
-	var s = 'fNew = function() {\n' +
+	var fNew, s = 'fNew = function() {\n' +
 		'var __inherited = (function() {\n' +
 		'	return fParent.apply(this, arguments);\n' +
 		'}).bind(this);\n' +
@@ -53,7 +59,7 @@ O2._superizeFunction = function(f, fParent) {
  * @return Instance de lui-même.
  */
 Function.prototype.extendPrototype = function(aDefinition) {
-	var iProp = '', f, fInherited, f2;
+	var iProp, f, fInherited;
 	if (aDefinition instanceof Function) {
 		aDefinition = aDefinition.prototype;
 	}
@@ -186,7 +192,7 @@ O2.extendClass = function(sName, pParent, pPrototype) {
  */
 O2.mixin = function(pPrototype, pMixin) {
 	var oMixin;
-	if (typeof pPrototype == 'string') {
+	if (typeof pPrototype === 'string') {
 		pPrototype = O2.loadObject(pPrototype);
 	}
 	if (typeof pMixin === 'function') {
@@ -6582,6 +6588,7 @@ O2.createObject('MAIN', {
 	game: null,
 	screen: null,
 	config: null,
+	pointerlock: null,
 
 
 	configure: function(c) {
@@ -6593,6 +6600,7 @@ O2.createObject('MAIN', {
 	 * requires a CONFIG object
 	 */
 	run: function(oGameInstance) {
+		var PL = MAIN.pointerlock = new O876_Raycaster.PointerLock();
 		if (!(MAIN.config)) {
 			throw new Error('Where is my CONFIG object ? (use MAIN.configure)');
 		}
@@ -6609,7 +6617,7 @@ O2.createObject('MAIN', {
 			MAIN.game = new window[sNamespace].Game();
 		}
 		MAIN.game.setConfig(oConfig);
-		if (oConfig.game.fpsControl && O876_Raycaster.PointerLock.init()) {
+		if (oConfig.game.fpsControl && PL.init()) {
 			MAIN.screen.addEventListener('click', function(oEvent) {
 				MAIN.lockPointer();
 			});
@@ -6630,20 +6638,20 @@ O2.createObject('MAIN', {
 		if (!rcc || !rcct) {
 			return false;
 		}
-		if (O876_Raycaster.PointerLock.locked()) {
+		if (MAIN.pointerlock.locked()) {
 			return false;
 		}
 		if (MAIN.config.game.fullScreen) {
 			O876_Raycaster.FullScreen.changeEvent = function(e) {
 				if (O876_Raycaster.FullScreen.isFullScreen()) {
-					O876_Raycaster.PointerLock.requestPointerLock(oElement);
-					O876_Raycaster.PointerLock.setHook(G.oRaycaster.oCamera.oThinker.readMouseMovement, G.oRaycaster.oCamera.oThinker);
+					MAIN.pointerlock.requestPointerLock(oElement);
+					//MAIN.pointerlock.on('mousemove', G.oRaycaster.oCamera.oThinker.readMouseMovement.bind(G.oRaycaster.oCamera.oThinker));
 				}
 			};
 			O876_Raycaster.FullScreen.enter(oElement);
 		} else {
-			O876_Raycaster.PointerLock.requestPointerLock(oElement);
-			O876_Raycaster.PointerLock.setHook(rcct.readMouseMovement, rcct);
+			MAIN.pointerlock.requestPointerLock(oElement);
+			//MAIN.pointerlock.on('mousemove', rcct.readMouseMovement.bind(rcct));
 		}
 		return true;
 	},
@@ -6670,6 +6678,9 @@ O2.createObject('MAIN', {
 		oCanvas.style.width = (wf | 0).toString() + 'px';
 		oCanvas.style.height = (hf | 0).toString() + 'px';
 		oCanvas.__ratio = wf / cw;
+		if (oCanvas.style.position === 'absolute' && oCanvas.style['margin-left'] === 'auto') {
+			oCanvas.style.left = ((w - wf) >> 1 | 0).toString() + 'px';
+		}
 	}
 });
 
@@ -7316,113 +7327,110 @@ O2.createClass('O876_Raycaster.MobileRegister', {
  * Api de gestion du fullscreen et de la capture de souris
  */
 
-O2.createObject('O876_Raycaster.PointerLock', {
-	
-	oElement: null,
-	oHookInstance: null,
-	oHookFunction: null,
-	bInitialized: null,
-	bLocked: false,
-	bEnabled: true,
-	
-	hasPointerLockFeature: function() {
-		return 'pointerLockElement' in document || 'mozPointerLockElement' in document;
+O2.createClass('O876_Raycaster.PointerLock', {
+    oElement: null,
+    bInitialized: null,
+    bLocked: false,
+    bEnabled: true,
+
+	__construct: function() {
+    	// this event handler maybe set or removed, thus let's bind it
+        this.eventMouseMove = this.eventMouseMove.bind(this);
 	},
 
-	enable: function(oElement) {
-		if (!O876_Raycaster.PointerLock.bEnabled) {
-			O876_Raycaster.PointerLock.bEnabled = true;
-			if (oElement) {
-				O876_Raycaster.PointerLock.requestPointerLock(oElement);
-			}
-		}
-	},
+    hasPointerLockFeature: function() {
+        return 'pointerLockElement' in document || 'mozPointerLockElement' in document;
+    },
 
-	disable: function() {
-		if (O876_Raycaster.PointerLock.bEnabled) {
-			O876_Raycaster.PointerLock.bEnabled = false;
-			O876_Raycaster.PointerLock.exitPointerLock();
-		}
-	},
-	
-	init: function() {
-		if (!O876_Raycaster.PointerLock.hasPointerLockFeature()) {
-			return false;
-		}
-		if (O876_Raycaster.PointerLock.bInitialized) {
-			return true;
-		}
-		document.addEventListener('pointerlockchange', O876_Raycaster.PointerLock.eventChange, false);
-		document.addEventListener('mozpointerlockchange', O876_Raycaster.PointerLock.eventChange, false);
-		document.addEventListener('pointerlockerror', O876_Raycaster.PointerLock.eventError, false);
-		document.addEventListener('mozpointerlockerror', O876_Raycaster.PointerLock.eventError, false);
-		O876_Raycaster.PointerLock.bInitialized = true;
-		return true;
-	},
-	
-	/**
-	 * Renvoie TRUE si le pointer à été desactivé
-	 */
-	locked: function() {
-		return O876_Raycaster.PointerLock.bLocked;
-	},
-	
-	/**
-	 * La fonction Hook doit être écrite de la manière suivante :
-	 * myEventFunction: function(xMode, yMove) { ...
-	 */
-	setHook: function(oFunction, oInstance) {
-		O876_Raycaster.PointerLock.oHookInstance = oInstance || window;
-		O876_Raycaster.PointerLock.oHookFunction = oFunction;
-	},
+    enable: function(oElement) {
+        if (!this.bEnabled) {
+            this.bEnabled = true;
+            if (oElement) {
+                this.requestPointerLock(oElement);
+            }
+        }
+    },
 
-	requestPointerLock: function(oElement) {
-		var pl = O876_Raycaster.PointerLock;
-		if (!pl.bEnabled) {
-			return;
-		}
-		if (pl.locked()) {
-			return;
-		}
-		pl.oElement = oElement;
-		oElement.requestPointerLock = oElement.requestPointerLock || oElement.mozRequestPointerLockWithKeys || oElement.mozRequestPointerLock;
-		oElement.requestPointerLock();
-	},
-	
-	exitPointerLock: function() {
-		if (!O876_Raycaster.PointerLock.locked()) {
-			return;
-		}
-		document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
-		document.exitPointerLock();
-	},
+    disable: function() {
+        if (this.bEnabled) {
+            this.bEnabled = false;
+            this.exitPointerLock();
+        }
+    },
 
-	eventChange: function(e) {
-		var oPointerLockElement = document.pointerLockElement || document.mozPointerLockElement;
-		if (oPointerLockElement) {
-			document.addEventListener('mousemove', O876_Raycaster.PointerLock.eventMouseMove, false);
-			O876_Raycaster.PointerLock.bLocked = true;
-		} else {
-			document.removeEventListener('mousemove', O876_Raycaster.PointerLock.eventMouseMove, false);
-			O876_Raycaster.PointerLock.oElement = null;
-			O876_Raycaster.PointerLock.bLocked = false;
-		}
-	},
-	
-	eventError: function(e) {
-		console.error('PointerLock error', e);
-	},
-	
-	eventMouseMove: function(e) {
-		var xMove = e.movementX || e.mozMovementX || 0;
-		var yMove = e.movementY || e.mozMovementY || 0;
-		var p = O876_Raycaster.PointerLock;
-		if (p.oHookFunction) {
-			p.oHookFunction.apply(p.oHookInstance, [xMove, yMove]);
-		}
-	}
+    init: function() {
+        if (!this.hasPointerLockFeature()) {
+            return false;
+        }
+        if (this.bInitialized) {
+            return true;
+        }
+        document.addEventListener('pointerlockchange', this.eventChange.bind(this), false);
+        document.addEventListener('mozpointerlockchange', this.eventChange.bind(this), false);
+        document.addEventListener('pointerlockerror', this.eventError.bind(this), false);
+        document.addEventListener('mozpointerlockerror', this.eventError.bind(this), false);
+        this.bInitialized = true;
+        return true;
+    },
+
+    /**
+     * Renvoie TRUE si le pointer à été desactivé
+     */
+    locked: function() {
+        return this.bLocked;
+    },
+
+
+    requestPointerLock: function(oElement) {
+        var pl = this;
+        if (!pl.bEnabled) {
+            return;
+        }
+        if (pl.locked()) {
+            return;
+        }
+        pl.oElement = oElement;
+        oElement.requestPointerLock = oElement.requestPointerLock || oElement.mozRequestPointerLockWithKeys || oElement.mozRequestPointerLock;
+        oElement.requestPointerLock();
+    },
+
+    exitPointerLock: function() {
+        if (!this.locked()) {
+            return;
+        }
+        document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+        document.exitPointerLock();
+    },
+
+    eventChange: function(e) {
+        var oPointerLockElement = document.pointerLockElement || document.mozPointerLockElement;
+        if (oPointerLockElement) {
+            document.addEventListener('mousemove', this.eventMouseMove, false);
+            this.bLocked = true;
+            this.trigger('enter');
+        } else {
+            document.removeEventListener('mousemove', this.eventMouseMove, false);
+            this.oElement = null;
+            this.bLocked = false;
+            this.trigger('exit');
+        }
+    },
+
+    eventError: function(e) {
+        console.error('PointerLock error', e);
+    },
+
+    eventMouseMove: function(e) {
+        var xMove = e.movementX || e.mozMovementX || 0;
+        var yMove = e.movementY || e.mozMovementY || 0;
+        this.trigger('mousemove', {
+        	x: xMove,
+			y: yMove
+		});
+    }
 });
 
+O2.mixin(O876_Raycaster.PointerLock, O876.Mixin.Events);
 /**
  * Raycasting engine
  * -----------------
@@ -7715,6 +7723,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		this.oImages.finalize();
 		this.oImages = null;
 		this.oThinkerManager = null;
+		this._oContext.clearRect(0, 0, this._oCanvas.width, this._oCanvas.height);
 	},
 
 	/** Le shade process est un processus qui peut prendre du temps
@@ -12034,6 +12043,7 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 		if (this.oMouseDevice) {
 			this.oMouseDevice.unplugHandlers();
 		}
+        this.oRaycaster.finalize();
 	},
 
 	/**
@@ -12577,6 +12587,73 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
  * @class O876_Raycaster.GameAbstract
  * @extends O876_Raycaster.Engine
  *
+ *
+ *
+ *
+ *
+ * EVENTS :
+
+ init
+ - pas de paramètre
+ Appelé au démarrage du jeu
+
+
+ error
+ - message : libellé du message
+ - data : exception ayant déclenché l'erreur
+ Appelé dès qu'une exception non gérée est déclenchée
+
+
+ menuloop
+ - exit : boolean true par défaut, mettre à false pour rester dans le menu.
+
+
+ leveldata
+ - data : objet à remplir contenant le niveau qu'il faut charger
+
+
+ load
+ - phase : numéro de phase
+ - progress : progression de la phase
+ - max : maximuml de la valeur de progression possible
+
+
+ enter
+ - pas de paramètre
+ se lance lorsqu'on entre dans le niveau.
+ tout les objets sont chargés/instanciés à ce niveau.
+
+
+ doomloop
+ - pas de paramètre
+ se lance à chaque update des entités.
+
+
+ frame
+ - pas de paramètre
+ se lance chaque fois qu'une frame est rendue.
+
+
+ framecount
+ - fps : nombre d'image par seconde actuellement calculé
+ - avg : moyenne des images par secondes
+ - time : temps écoulé
+ permet d'obtenir des information sur les performances.
+
+
+ key.down & key.up
+ - k : code de la touche
+ permet de déterminer facilement lorsqu'une touche est appuyée ou relachée.
+
+
+ door
+ - x & y : position de la porte
+ - door : effet permettant de refermer manuellement la porte
+ se déclenche à l'ouverture d'une porte.
+
+
+
+ *
  */
 O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 	_oScreenShot: null,
@@ -13104,6 +13181,201 @@ O2.extendClass('O876_Raycaster.CommandThinker', O876_Raycaster.Thinker, {
 	}
 });
 
+/**
+ * @class O876_Raycaster.FirstPersonThinker
+ */
+O2.extendClass('O876_Raycaster.FirstPersonThinker', O876_Raycaster.Thinker,
+{
+    aCommands : null,
+    oBinds: null,
+    aKeyBindings: null, // binds keycodes to symbolic events
+    aKeyBoundList: null, // keeps a list of bound key
+	nMouseSensitivity: 166,
+	_bFrozen: false,
+
+	__construct : function() {
+		this.defineKeys( {
+			forward : [KEYS.ALPHANUM.Z, KEYS.ALPHANUM.W],
+			backward : KEYS.ALPHANUM.S,
+			left : [KEYS.ALPHANUM.Q, KEYS.ALPHANUM.A],
+			right : KEYS.ALPHANUM.D,
+			use : KEYS.SPACE
+		});
+		this.on('forward.command', (function() {
+			this.oMobile.moveForward();
+			this.checkCollision();
+		}).bind(this));
+		this.on('left.command', (function() {
+			this.oMobile.strafeLeft();
+			this.checkCollision();
+		}).bind(this));
+		this.on('right.command', (function() {
+			this.oMobile.strafeRight();
+			this.checkCollision();
+		}).bind(this));
+		this.on('backward.command', (function() {
+			this.oMobile.moveBackward();
+			this.checkCollision();
+		}).bind(this));
+		MAIN.pointerlock.on('mousemove', this.readMouseMovement.bind(this));
+	},
+
+    bindKey: function(nKey, sEvent) {
+        if (this.aKeyBindings === null) {
+            this.aKeyBindings = [];
+        }
+        if (this.aKeyBoundList === null) {
+            this.aKeyBoundList = [];
+        }
+        if (this.aCommands === null) {
+            this.aCommands = [];
+        }
+        this.aKeyBindings[nKey] = [sEvent, 0];
+        this.aCommands[sEvent] = false;
+        if (this.aKeyBoundList.indexOf(nKey) < 0) {
+            this.aKeyBoundList.push(nKey);
+        }
+    },
+
+    /**
+     * Define keys that will be used to control the mobile on which is applied this Thinker
+     * @param a is an object matching KEY CODES and Event names
+     */
+    defineKeys : function(a) {
+        var i, l;
+        for (var sEvent in a) {
+            if (Array.isArray(a[sEvent])) {
+                l = a[sEvent].length;
+                for (i = 0; i < l; ++i) {
+                    this.bindKey(a[sEvent][i], sEvent);
+                }
+            } else {
+                this.bindKey(a[sEvent], sEvent);
+            }
+        }
+    },
+
+    getCommandStatus : function(sEvent) {
+        return this.aCommands[sEvent];
+    },
+
+    updateKeys : function() {
+        var sKey = '', nKey, sProc, aButton;
+        var aCmds = this.aCommands;
+        var oKbd = this.oGame.getKeyboardDevice();
+        var aKeyData;
+        var sEvent;
+        var kbl = this.aKeyBoundList;
+        var kb = this.aKeyBindings;
+        for (var iKey = 0, l = kbl.length; iKey < l; ++iKey) {
+            nKey = kbl[iKey];
+            aKeyData = kb[nKey];
+            sEvent = aKeyData[0];
+            sProc = '';
+            switch (oKbd.aKeys[nKey]) {
+                case 1: // down
+                    if (aKeyData[1] === 0) {
+                        sProc = sEvent + '.down';
+                        aCmds[sEvent] = true;
+                        aKeyData[1] = 1;
+                    }
+                    break;
+
+                case 2: // Up
+                    if (aKeyData[1] === 1) {
+                        sProc = sEvent + '.up';
+                        aCmds[sEvent] = false;
+                        aKeyData[1] = 0;
+                    }
+                    break;
+                default:
+                    sProc = '';
+                    break;
+            }
+            if (sProc) {
+                this.trigger(sProc);
+            }
+        }
+        var oMouse = this.oGame.getMouseDevice();
+        while (aButton = oMouse.readMouse()) {
+            nKey = aButton[3];
+            sEvent = 'button' + nKey;
+            sProc = '';
+            switch (aButton[0]) {
+                case 1: // button down
+                    sProc = sEvent + '.down';
+                    this.aCommands[sEvent] = true;
+                    break;
+
+                case 0: // button up
+                    sProc = sEvent + '.up';
+                    this.aCommands[sEvent] = false;
+                    break;
+
+                case 3:
+                    sProc = 'wheel.up';
+                    break;
+
+                case -3:
+                    sProc = 'wheel.down';
+                    break;
+
+                default:
+                    sProc = '';
+                    break;
+            }
+            if (sProc) {
+                this.trigger(sProc);
+            }
+        }
+        for (sEvent in this.aCommands) {
+            if (this.aCommands[sEvent]) {
+                sProc = sEvent + '.command';
+                if (sProc) {
+                    this.trigger(sProc);
+                }
+            }
+        }
+    },
+
+
+	readMouseMovement: function(oEvent) {
+		if (!this._bFrozen) {
+			this.oMobile.rotate(oEvent.x / this.nMouseSensitivity);
+		}
+	},
+
+	/**
+	 * Freezes all movement and rotation
+	 */
+	freeze: function() {
+		this._bFrozen = true;
+	},
+
+	/**
+	 * if frozen then back to normal
+	 */
+	thaw: function() {
+		this._bFrozen = false;
+	},
+
+	think: function() {
+		if (!this._bFrozen) {
+			this.updateKeys();
+		}
+	},
+
+	checkCollision: function() {
+		if (this.oMobile.oMobileCollision !== null) {
+			var oTarget = this.oMobile.oMobileCollision;
+			if (oTarget.oSprite.oBlueprint.nType !== RC.OBJECT_TYPE_MISSILE) {
+				this.oMobile.rollbackXY();
+			}
+		}
+	}
+});
+
+O2.mixin(O876_Raycaster.FirstPersonThinker, O876.Mixin.Events);
 /** Interface de controle des mobile par clavier
  * O876 Raycaster project
  * @date 2012-01-01
@@ -13393,141 +13665,6 @@ O2.extendClass('O876_Raycaster.MotionThinker', O876_Raycaster.Thinker,
 
 O2.mixin(O876_Raycaster.MotionThinker, O876.Mixin.Events);
 
-/** Interface de controle des mobile par clavier
- * O876 Raycaster project
- * @date 2012-01-01
- * @author Raphaël Marandet 
- * Se sert d'un device keyboard pour bouger le mobile
- */
-O2.extendClass('O876_Raycaster.MouseKeyboardThinker', O876_Raycaster.Thinker, {
-	aCommands : null,
-	oBinds: null,
-	aKeyBindings: null, // binds keycodes to symbolic events
-	aKeyBoundList: null, // keeps a list of bound key
-	
-	
-	bindKey: function(nKey, sEvent) {
-		if (this.aKeyBindings === null) {
-			this.aKeyBindings = [];
-		}
-		if (this.aKeyBoundList === null) {
-			this.aKeyBoundList = [];
-		}
-		if (this.aCommands === null) {
-			this.aCommands = [];
-		}
-		this.aKeyBindings[nKey] = [sEvent, 0];
-		this.aCommands[sEvent] = false;
-		if (this.aKeyBoundList.indexOf(nKey) < 0) {
-			this.aKeyBoundList.push(nKey);
-		}
-	},
-
-	/**
-	 * Define keys that will be used to control the mobile on which is applied this Thinker
-	 * @param a is an object matching KEY CODES and Event names
-	 */
-	defineKeys : function(a) {
-		var sEvent, i, l;
-		for (var sEvent in a) {
-			if (Array.isArray(a[sEvent])) {
-				l = a[sEvent].length;
-				for (i = 0; i < l; ++i) {
-					this.bindKey(a[sEvent][i], sEvent);
-				}
-			} else {
-				this.bindKey(a[sEvent], sEvent);
-			}
-		}
-	},
-	
-	getCommandStatus : function(sEvent) {
-		return this.aCommands[sEvent];
-	},
-
-	updateKeys : function() {
-		var sKey = '', nKey, sProc, pProc, aButton;
-		var aKeys = this.aKeys;
-		var aCmds = this.aCommands;
-		var oKbd = this.oGame.getKeyboardDevice();
-		var aKeyData;
-		var sEvent;
-		var kbl = this.aKeyBoundList;
-		var kb = this.aKeyBindings;
-		for (var iKey = 0, l = kbl.length; iKey < l; ++iKey) {
-			nKey = kbl[iKey];
-			aKeyData = kb[nKey];
-			sEvent = aKeyData[0];
-			sProc = '';
-			switch (oKbd.aKeys[nKey]) {
-				case 1: // down
-					if (aKeyData[1] === 0) {
-						sProc = sEvent + '.down';
-						aCmds[sEvent] = true;
-						aKeyData[1] = 1;
-					}
-					break;
-		
-				case 2: // Up
-					if (aKeyData[1] == 1) {
-						sProc = sEvent + '.up';
-						aCmds[sEvent] = false;
-						aKeyData[1] = 0;
-					}
-					break;
-				default:
-					sProc = '';
-					break;
-			}
-			if (sProc) {
-				this.trigger(sProc);
-			}
-		}
-		var oMouse = this.oGame.getMouseDevice();
-		while (aButton = oMouse.readMouse()) {
-			nKey = aButton[3];
-			sEvent = 'button' + nKey;
-			sProc = '';
-			switch (aButton[0]) {
-				case 1: // button down
-					sProc = sEvent + '.down';
-					this.aCommands[sEvent] = true;
-					break;
-					
-				case 0: // button up
-					sProc = sEvent + '.up';
-					this.aCommands[sEvent] = false;
-					break;
-
-				case 3:
-					sProc = 'wheel.up';
-					break;
-					
-				case -3:
-					sProc = 'wheel.down';
-					break;
-					
-				default:
-					sProc = '';
-					break;
-			}
-			if (sProc) {
-				this.trigger(sProc);
-			}
-		}
-		for (sEvent in this.aCommands) {
-			if (this.aCommands[sEvent]) {
-				sProc = sEvent + '.command';
-				if (sProc) {
-					this.trigger(sProc);
-				}
-			}
-		}
-	}
-});
-
-O2.mixin(O876_Raycaster.MouseKeyboardThinker, O876.Mixin.Events);
-
 /** Interface de controle des mobile 
  * O876 Raycaster project
  * @date 2013-03-04
@@ -13761,76 +13898,6 @@ O2.extendClass('O876_Raycaster.CameraKeyboardThinker', O876_Raycaster.KeyboardTh
 			case 8:
 				this.oMobile.fRotSpeed = this.fRotationSpeed;
 				break;
-			}
-		}
-	}
-});
-
-/**
- * @class O876_Raycaster.FirstPersonThinker
- */
-O2.extendClass('O876_Raycaster.FirstPersonThinker', O876_Raycaster.MouseKeyboardThinker,
-{
-	nMouseSensitivity: 166,
-	_bFrozen: false,
-
-	__construct : function() {
-		this.defineKeys( {
-			forward : [KEYS.ALPHANUM.Z, KEYS.ALPHANUM.W],
-			backward : KEYS.ALPHANUM.S,
-			left : [KEYS.ALPHANUM.Q, KEYS.ALPHANUM.A],
-			right : KEYS.ALPHANUM.D,
-			use : KEYS.SPACE
-		});
-		this.on('forward.command', (function() {
-			this.oMobile.moveForward();
-			this.checkCollision();
-		}).bind(this));
-		this.on('left.command', (function() {
-			this.oMobile.strafeLeft();
-			this.checkCollision();
-		}).bind(this));
-		this.on('right.command', (function() {
-			this.oMobile.strafeRight();
-			this.checkCollision();
-		}).bind(this));
-		this.on('backward.command', (function() {
-			this.oMobile.moveBackward();
-			this.checkCollision();
-		}).bind(this));
-	},
-
-	readMouseMovement: function(x, y) {
-		if (!this._bFrozen) {
-			this.oMobile.rotate(x / this.nMouseSensitivity);
-		}
-	},
-
-	/**
-	 * Freezes all movement and rotation
-	 */
-	freeze: function() {
-		this._bFrozen = true;
-	},
-
-	/**
-	 * if frozen then back to normal
-	 */
-	thaw: function() {
-		this._bFrozen = false;
-	},
-
-	think: function() {
-		if (!this._bFrozen) {
-			this.updateKeys();
-		}
-	},
-
-	checkCollision: function() {
-		if (this.oMobile.oMobileCollision !== null) {
-			var oTarget = this.oMobile.oMobileCollision;
-			if (oTarget.oSprite.oBlueprint.nType !== RC.OBJECT_TYPE_MISSILE) {
-				this.oMobile.rollbackXY();
 			}
 		}
 	}

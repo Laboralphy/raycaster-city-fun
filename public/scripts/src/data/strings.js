@@ -13,6 +13,10 @@ const STRINGS_DB = {
                 pass: 'Mot de passe',
                 connect: 'Se connecter',
                 error: 'Connexion impossible...'
+            },
+            disconnect: {
+                title: 'Déconnexion',
+                message: 'Vous avez perdu la connexion avec le serveur. Essayez de vous reconnecter ultérieurement...'
             }
         }
     }

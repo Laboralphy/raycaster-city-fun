@@ -5,7 +5,7 @@ export default {
 		doomLoop: 'raf',
 		fullScreen: false,
 		fpsControl: true,
-		controlThinker: '',
+		controlThinker: null,
 		mute: false
 	},
 	raycaster: {

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/jasmine public/scripts/dist/test.js program/test/",
     "start": "node index.js",
-    "webpack": "node_modules/.bin/webpack --watch"
+    "webpack": "node_modules/.bin/webpack --watch",
+    "build": "node_modules/.bin/webpack"
   },
   "author": "",
   "license": "ISC",

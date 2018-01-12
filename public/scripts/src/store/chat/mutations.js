@@ -2,7 +2,25 @@ import * as types from './mutation-types';
 
 const mutations = {
 
-	/**
+
+    /**
+     * Rend la fenetre de login visible
+     * @param state
+     */
+    [types.CHAT_SHOW]: function(state) {
+        state.visible = true;
+    },
+
+    /**
+     * Rend la fenetre de login invisible
+     * @param state
+     */
+    [types.CHAT_HIDE]: function(state) {
+        state.visible = false;
+    },
+
+
+    /**
      * Remise à zero du chat
 	 * @param state
 	 */

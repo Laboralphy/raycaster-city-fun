@@ -1,6 +1,12 @@
 import * as types from './mutation-types';
 
 const actions = {
+    [types.CLIENT_SHOW]: function({commit}) {
+        commit(types.CLIENT_SHOW);
+    },
+    [types.CLIENT_HIDE]: function({commit}) {
+        commit(types.CLIENT_HIDE);
+    },
     [types.CLIENT_CONNECT]: function({commit}, {id, name}) {
         commit(types.CLIENT_CONNECT, {id, name});
     },
