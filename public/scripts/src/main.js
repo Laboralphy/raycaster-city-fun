@@ -42,14 +42,16 @@ function createApplicationGame() {
                 });
                 g.on('blur', event => {
                     this.ui.show('ui');
-                    this.ui.show('chat');
+                    this.ui.show('gameMenu');
+                    this.ui.$refs.gameMenuWrapper.selectTab('#inventaire');
 				});
                 document.body.setAttribute('class', 'playing');
 			},
 
 			endGame: function() {
-				MAIN.game._halt();
-				MAIN.screen.getContext('2d');
+				if (MAIN.game) {
+					MAIN.game._halt();
+				}
                 document.body.setAttribute('class', '');
 			},
 

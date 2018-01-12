@@ -2,7 +2,7 @@
     <div v-show="isVisible">
         <login-window ref="login"></login-window>
         <chat-window ref="chat"></chat-window>
-        <!-- <game-menu-wrapper v-show="shown('game')"></game-menu-wrapper> -->
+        <game-menu-wrapper ref="gameMenuWrapper"></game-menu-wrapper>
     </div>
 </template>
 
@@ -17,7 +17,7 @@
 
     import LoginWindow from './login/LoginWindow.vue';
     import ChatWindow from './chat/ChatWindow.vue';
-    // import GameMenuWrapper from './gameMenu/GameMenuWrapper.vue'
+    import GameMenuWrapper from './gameMenu/GameMenuWrapper.vue'
 
     import {mapGetters} from 'vuex';
 
@@ -26,7 +26,7 @@
         components: {
             LoginWindow,
             ChatWindow,
-            // GameMenuWrapper
+            GameMenuWrapper
         },
         computed: Object.assign(
             mapGetters({
@@ -44,7 +44,11 @@
 
                     case 'chat':
                         return this.$store.dispatch('chat/show');
-                }
+
+                    case 'inventory':
+						return this.$store.dispatch('gameMenu/open');
+
+				}
             },
             hide: function(sWhat) {
                 switch (sWhat) {
@@ -57,9 +61,13 @@
                     case 'chat':
                         return this.$store.dispatch('chat/hide');
 
-                    case '*':
+					case 'inventory':
+						return this.$store.dispatch('gameMenu/close');
+
+					case '*':
                         return this.$store.dispatch('chat/hide')
-                            .then(() => this.$store.dispatch('clients/hide'));
+                            .then(() => this.$store.dispatch('clients/hide'))
+                            .then(() => this.$store.dispatch('gameMenu/close'));
                 }
             }
         }
