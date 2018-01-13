@@ -1,3 +1,5 @@
+const util = require('util');
+
 class Log {
 
 	/**
@@ -30,9 +32,28 @@ class Log {
 		console.log(this.buildDateString(new Date()), ...arguments);
 	}
 
-	err() {
-		console.error(this.buildDateString(new Date()), ...arguments);
+    /**
+	 * Imprime un message d'erreur
+     */
+    err() {
+        console.error(this.buildDateString(new Date()), '/!\\', ...arguments);
+    }
+
+
+    /**
+	 * Même chose que log mais prend en premier argument la chaine formatable
+	 * et les argument suivant seront les arguments de cette chaine
+     */
+	logfmt(sString, ...values) {
+		this.log(util.format(sString, ...values));
 	}
+
+    /**
+     * Même chose que logfmt mais pour les erreur
+     */
+    errfmt(sString, ...values) {
+        this.err(util.format(sString, ...values));
+    }
 }
 
 module.exports = new Log();

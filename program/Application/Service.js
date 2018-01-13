@@ -2,6 +2,8 @@ const Config = require('../Config');
 const ClientManager = require('./ClientManager');
 const TinyTxat = require('../TinyTxat');
 const logger = require('../Logger');
+const level = require('../level');
+
 const util = require('util');
 const STRINGS = require('./consts/strings')[Config.general.lang];
 
@@ -43,9 +45,7 @@ class Service {
     }
 
     run(socket) {
-
-        logger.log(STRINGS.service.user.connected, socket.client.id);
-
+        logger.logfmt(STRINGS.service.event.connected, socket.client.id);
 		let client = this.clientManager.register(socket.client.id);
 		client.socket = socket;
 
@@ -55,7 +55,7 @@ class Service {
 		 */
 		socket.on('disconnect', () => {
 		    let id = socket.client.id;
-            logger.log(STRINGS.service.user.disconnected, id);
+            logger.logfmt(STRINGS.service.event.disconnected, id);
             this.destroyClient(id);
         });
 
@@ -77,7 +77,7 @@ class Service {
 			if (name.length > 2) {
 				client.name = name;
 				client.id = socket.client.id;
-				logger.log(util.format(STRINGS.service.user.assign_name, client.id, client.name));
+				logger.logfmt(STRINGS.service.event.assign_name, client.id, client.name);
 				ack({id: client.id});
 
 				// ajouter le client au canal public
@@ -86,10 +86,22 @@ class Service {
 				let oChannel = this.txat.findChannel(2);
 				oChannel.addUser(oTxatUser);
 			} else {
+                logger.logfmt(STRINGS.service.error.login_failed, client.id, client.name);
 				client.id = null;
 				ack({id: null});
 			}
 		});
+
+
+
+		 //  ####   #    #    ##     #####
+		 // #    #  #    #   #  #      #
+		 // #       ######  #    #     #
+		 // #       #    #  ######     #
+		 // #    #  #    #  #    #     #
+		 //  ####   #    #  #    #     #
+
+
 
 		/**
 		 * ### REQ_CHAN_INFO
@@ -159,12 +171,50 @@ class Service {
 				let oUser = this.txat.findUser(client.id);
 				let oChannel = this.txat.findChannel(channel);
 				if (oChannel.userPresent(oUser)) {
+					logger.logfmt(STRINGS.service.event.user_said,
+						channel,
+						client.name,
+						client.id,
+						message
+					);
 					oChannel.transmitMessage(oUser, message);
-				}
+				} else {
+                    logger.errfmt(STRINGS.service.error.invalid_channel, client.id, channel);
+                }
 			} else {
 				socket.close();
 			}
 		});
+
+
+
+
+		// #       ######  #    #  ######  #
+		// #       #       #    #  #       #
+		// #       #####   #    #  #####   #
+		// #       #       #    #  #       #
+		// #       #        #  #   #       #
+		// ######  ######    ##    ######  ######
+
+
+        /**
+		 * ### REQ_LEV_LOAD
+		 * un utilisateur réclame le chargement d'un niveau.
+		 * @param ref {string} référence du niveau à charger
+         */
+		socket.on('REQ_LEV_LOAD', async ({ref}, ack) => {
+			let data = await level.load(ref);
+			if (data) {
+                logger.logfmt(STRINGS.service.event.level_loaded, socket.client.id, ref);
+                ack(data);
+			} else {
+				logger.errfmt(STRINGS.service.error.level_not_found, socket.client.id, ref);
+				ack(null);
+			}
+		});
+
+
+
 
 
     }

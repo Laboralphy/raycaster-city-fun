@@ -191,6 +191,23 @@ class Network {
 		);
 	}
 
+    /**
+	 * Chargement d'un niveau spécifique
+     * @param ref {string} référence du niveau
+     * @return {Promise<void>}
+     */
+	async req_lev_load(ref) {
+		return new Promise(resolve => {
+			this.socket.emit(
+				'REQ_LEV_LOAD',
+				{ref},
+				(data) => {
+                    resolve(data);
+				}
+			)
+		});
+	}
+
 
 	//  ####   ######  #    #  #####      #    #    #   ####
 	// #       #       ##   #  #    #     #    ##   #  #    #

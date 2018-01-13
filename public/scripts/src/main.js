@@ -14,6 +14,7 @@ function createApplicationGame() {
 	Vue.use(STRINGS);
 
 	let network = new Network();
+	window.NETWORK = network;
 
 	const app = new Vue({
 		el: '#user-interface',
