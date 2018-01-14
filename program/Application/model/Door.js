@@ -3,6 +3,7 @@
  * Permettant de déterminer si le block de cette porte est traversable ou pas
  */
 
+const RC_CONST = require('../consts/raycaster');
 
 class Door {
     constructor() {
@@ -25,6 +26,40 @@ class Door {
         this.nAutocloseTime = 0;
         // si true alors la porte est vérouillée et ne peut pas s'ouvrir
         this.bLocked = false;
+        // type de porte
+        // h1 : porte 1 battant ouverture horizontale
+        // h2 : porte 2 battants ouverture horizontale
+        // v : porte à ouverture verticale
+        this.sDoorType = '';
+    }
+
+    /**
+     * Il existe plusieurs sortes de portes ayant chacunes leurs temps d'ouverture
+     * cette method permet de defini des preset
+     */
+    setDoorType(sType) {
+        this.sDoorType = sType;
+        switch (sType) {
+            case 'h1':
+                this.nOffsetOpen = 600 / RC_CONST.rc_time_factor;
+                this.autoclose(3000);
+                break;
+
+            case 'h2':
+                this.nOffsetOpen = 600 / RC_CONST.rc_time_factor;
+                this.autoclose(3000);
+                break;
+
+            case 'v':
+                this.nOffsetOpen = 800 / RC_CONST.rc_time_factor;
+                this.autoclose(3000);
+                break;
+
+            case 's':
+                this.nOffsetOpen =  64 * 1000 / RC_CONST.rc_time_factor * 40;
+                this.autoclose(Infinity);
+                break;
+        }
     }
 
     /**

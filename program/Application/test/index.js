@@ -87,6 +87,12 @@ describe('model', function() {
                 expect(oDoor.nAutocloseTime).toBe(0);
                 expect(oDoor.isSolid()).toBeTruthy();
                 expect(oDoor.nState).toBe(3);
+
+                for (let i = 0; i < 63; ++i) {
+                    oDoor.process();
+                }
+                expect(oDoor.nState).toBe(0);
+
             });
         });
     });
