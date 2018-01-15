@@ -4,6 +4,13 @@ const RC_CONST = {
     rc_texture_height: 96,
 
 
+    time_door_double: 600,
+    time_door_single_horiz: 800,
+    time_door_single_vert: 800,
+    time_door_secret: 2000,
+    time_door_autoclose: 3000,
+
+
     // laby phys properties
     phys_none : 0x00,
     phys_wall : 0x01,

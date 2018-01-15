@@ -6,6 +6,7 @@
 const RC_CONST = require('../consts/raycaster');
 
 const Door = require('./Door');
+const ActiveList = require('./ActiveList');
 
 class Area {
     constructor() {
@@ -19,6 +20,36 @@ class Area {
         this.physicMap = null;
         // liste des portes, afin de surveiller si on peut les traverser ou pas
         this.doorList = [];
+        // liste des portes actives (celle qui sont en cours d'ouverture/refermeture
+        this.activeDoorList = new ActiveList(); /** @todo ne gérer que les portes qui sont dans cette liste */
+    }
+
+	/**
+     * Commande l'ouverture d'une porte en x, y
+     * Si c'est un passage secret cela commandera aussi l'ouverture du block adjacent
+	 * @param x
+	 * @param y
+	 */
+	openDoor(x, y) {
+        let oDoor = this.physicMap[y][x].door;
+        if (oDoor) {
+            if (oDoor.open()) {
+				if (oDoor.isSecret()) {
+					oDoor.nextSecretDoor = this.doorList.find(d => d.isSecret() && d.isAdjacent(oDoor));
+				}
+            }
+        }
+    }
+
+	/**
+     * Gestion des porte actuellement ouvertes ou entrouvertes
+	 */
+	processDoors() {
+	    let aDoneDoors = this.activeDoorList.items.filter(door => {
+			door.process();
+			return door.done();
+		});
+		this.activeDoorList.unlink(aDoneDoors);
     }
 
     /**
@@ -31,7 +62,7 @@ class Area {
                 door: null
             };
         }));
-        this.physicMap.forEach(row => row.forEach(cell => {
+        this.physicMap.forEach((row, y) => row.forEach((cell, x) => {
             let oDoor = null;
             switch (cell.code) {
                 case RC_CONST.phys_curt_sliding_down:
@@ -59,8 +90,14 @@ class Area {
                     break;
             }
             if (oDoor) {
+                // pour les porte, on complete l'instance
+				oDoor.x = x;
+				oDoor.y = y;
                 cell.door = oDoor;
                 this.doorList.push(oDoor);
+				oDoor.events.on('opening', door => {
+					this.activeDoorList.link(door);
+				});
             }
         }));
     }

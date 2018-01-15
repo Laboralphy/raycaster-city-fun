@@ -5,8 +5,12 @@
 
 const RC_CONST = require('../consts/raycaster');
 
+const Emitter = require('events');
+
 class Door {
     constructor() {
+        super();
+        this.events = new Emitter();
         // offset de la porte 0 = fermé
         this.nOffset = 0;
         // lorsque l'offset atteind cette valeur la porte est traversable
@@ -31,6 +35,9 @@ class Door {
         // h2 : porte 2 battants ouverture horizontale
         // v : porte à ouverture verticale
         this.sDoorType = '';
+        this.x = -1;
+        this.y = -1;
+        this.nextSecretDoor = null;
     }
 
     /**
@@ -41,22 +48,22 @@ class Door {
         this.sDoorType = sType;
         switch (sType) {
             case 'h1':
-                this.nOffsetOpen = 600 / RC_CONST.rc_time_factor;
-                this.autoclose(3000);
+                this.nOffsetOpen = RC_CONST.time_door_single_horiz / RC_CONST.rc_time_factor;
+                this.autoclose(RC_CONST.time_door_autoclose);
                 break;
 
             case 'h2':
-                this.nOffsetOpen = 600 / RC_CONST.rc_time_factor;
-                this.autoclose(3000);
+                this.nOffsetOpen = RC_CONST.time_door_double / RC_CONST.rc_time_factor;
+                this.autoclose(RC_CONST.time_door_autoclose);
                 break;
 
             case 'v':
-                this.nOffsetOpen = 800 / RC_CONST.rc_time_factor;
-                this.autoclose(3000);
+                this.nOffsetOpen = RC_CONST.time_door_single_vert / RC_CONST.rc_time_factor;
+                this.autoclose(RC_CONST.time_door_autoclose);
                 break;
 
             case 's':
-                this.nOffsetOpen =  64 * 1000 / RC_CONST.rc_time_factor * 40;
+                this.nOffsetOpen =  RC_CONST.time_door_secret / RC_CONST.rc_time_factor;
                 this.autoclose(Infinity);
                 break;
         }
@@ -78,13 +85,16 @@ class Door {
      */
     open() {
         if (this.bLocked) {
+			this.events.emit('locked', this);
             return false;
         }
         if (this.nState === 0) {
-            if (this.bAutoclose) {
+			this.done(false);
+			if (this.bAutoclose) {
                 this.nAutocloseTime = this.nAutocloseDelay;
             }
             this.nState = 1;
+			this.events.emit('opening', this);
             return true;
         }
         return false;
@@ -104,14 +114,22 @@ class Door {
                     if (this.bAutoclose) {
                         this.nAutocloseTime = this.nAutocloseDelay;
                     }
+					this.events.emit('opened', this);
                 }
                 break;
 
-            case 2: // porte ouvert, entamer la refermeture si c'est une autoclose
+            case 2: // porte ouverte, entamer la refermeture si c'est une autoclose
                 // dont le delai arrive à terme
-                if (this.bAutoclose && --this.nAutocloseTime <= 0) {
+                if (this.isSecret()) {
+					// les porte secrete ne se referme jamais
+					this.done(true);
+					if (this.nextSecretDoor) {
+						this.nextSecretDoor.open();
+					}
+                } else if (this.bAutoclose && --this.nAutocloseTime <= 0) {
                     this.nAutocloseTime = 0;
                     ++this.nState;
+					this.events.emit('closing', this);
                 }
                 break;
 
@@ -119,6 +137,8 @@ class Door {
                 if (--this.nOffset <= 0) {
                     this.nOffset = 0;
                     this.nState = 0;
+					this.done(true);
+					this.events.emit('closed', this);
                 }
                 break;
         }
@@ -126,6 +146,34 @@ class Door {
 
     isSolid() {
         return this.nOffset < this.nOffsetOpen;
+    }
+
+	/**
+     * Renvoie true si la porte est un passage secret
+     * @return boolean
+	 */
+	isSecret() {
+        return this.sDoorType === 's';
+    }
+
+	/**
+     * Renvoie true si la porte spécifée est adjacente à celle ci
+	 * @param door
+	 */
+	isAdjacent(door) {
+	    //   dx  dy
+		//   -1  -1   2  -
+		//    0  -1   1  +
+		//    1  -1   2  -
+		//   -1   0   1  +
+		//    0   0   0  -
+		//    1   0   1  +
+		//   -1   1   2  -
+		//    0   1   1  +
+		//    1   1   2  -
+		let dx = Math.abs(door.x - this.x);
+		let dy = Math.abs(door.y - this.y);
+        return (dx + dy) === 1;
     }
 }
 
