@@ -121,7 +121,7 @@
     }
 
     .tabs-component-tab.is-active {
-        filter: drop-shadow(0 0 10px rgb(227, 190, 88));
+        filter: drop-shadow(0 0 10px);
     }
 
     .tabs-component-tab.is-disabled * {

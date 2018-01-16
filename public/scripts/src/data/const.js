@@ -1,6 +1,6 @@
 export const CONST = {
     ITEMS: {
-        EMPLACEMENTS: [
+        SLOTS: [
             "tete",
             "torse",
             "jambes",

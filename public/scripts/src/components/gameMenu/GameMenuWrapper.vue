@@ -24,7 +24,7 @@
     import * as types from '../../store/gameMenu/mutation-types';
     import {BorderedCard, Tabs, Tab} from '../ui';
     import Inventory from './Inventory/Inventory.vue';
-    import Personnage from './Personnage.vue';
+    import Personnage from './Personnage/Personnage.vue';
 
     const { mapState, mapMutations } = createNamespacedHelpers('gameMenu');
 
