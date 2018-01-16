@@ -39,11 +39,13 @@ function createApplicationGame() {
                 MAIN.pointerlock.on('enter', event => {
                     this.ui.hide('ui');
                     g.hideOverlay();
+                    document.querySelector('canvas#screen').style.filter = '';
                 });
                 g.on('blur', event => {
                     this.ui.show('ui');
                     this.ui.show('gameMenu');
                     this.ui.$refs.gameMenuWrapper.selectTab('#inventaire');
+                    document.querySelector('canvas#screen').style.filter = 'blur(5px)';
 				});
                 document.body.setAttribute('class', 'playing');
 			},

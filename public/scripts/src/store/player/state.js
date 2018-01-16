@@ -1,5 +1,7 @@
 export default {
-    name: '',
+    name: 'Daedalus',
+    classe: 'Sniper',
+    level: 4,
     stats: {
         STR: 2,
         RES: 3,

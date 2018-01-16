@@ -6,7 +6,7 @@ const actions = {
      * @param state
      */
     getEquipement: function({inventaire}) {
-        const mapping = CONST.ITEMS.EMPLACEMENTS.map((s) => {
+        const mapping = CONST.ITEMS.SLOTS.map((s) => {
             return {
                 emplacement: s,
                 item: inventaire.find((i) => {
