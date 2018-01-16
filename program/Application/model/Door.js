@@ -9,7 +9,6 @@ const Emitter = require('events');
 
 class Door {
     constructor() {
-        super();
         this.events = new Emitter();
         // offset de la porte 0 = fermé
         this.nOffset = 0;
@@ -89,7 +88,6 @@ class Door {
             return false;
         }
         if (this.nState === 0) {
-			this.done(false);
 			if (this.bAutoclose) {
                 this.nAutocloseTime = this.nAutocloseDelay;
             }
@@ -104,6 +102,7 @@ class Door {
      * Effectue le traitement automatisé d'une porte
      */
     process() {
+        let bDone = false;
         switch (this.nState) {
             case 0: // porte fermée : rien à faire
                 break;
@@ -122,7 +121,7 @@ class Door {
                 // dont le delai arrive à terme
                 if (this.isSecret()) {
 					// les porte secrete ne se referme jamais
-					this.done(true);
+					bDone = true;
 					if (this.nextSecretDoor) {
 						this.nextSecretDoor.open();
 					}
@@ -137,11 +136,12 @@ class Door {
                 if (--this.nOffset <= 0) {
                     this.nOffset = 0;
                     this.nState = 0;
-					this.done(true);
+					bDone = true;
 					this.events.emit('closed', this);
                 }
                 break;
         }
+        return bDone;
     }
 
     isSolid() {

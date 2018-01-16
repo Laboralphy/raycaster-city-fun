@@ -45,10 +45,7 @@ class Area {
      * Gestion des porte actuellement ouvertes ou entrouvertes
 	 */
 	processDoors() {
-	    let aDoneDoors = this.activeDoorList.items.filter(door => {
-			door.process();
-			return door.done();
-		});
+	    let aDoneDoors = this.activeDoorList.items.filter(door => door.process());
 		this.activeDoorList.unlink(aDoneDoors);
     }
 
