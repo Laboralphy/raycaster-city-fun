@@ -245,19 +245,7 @@ describe('model', function() {
 	describe('Mobile', function() {
 		const Mobile = require('../model/Mobile');
 		const o876 = require('../../o876');
-		describe('getMovementHash', function() {
-			it ('should return correct value', function() {
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(-10, -2))).toBe(7);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(0, -2))).toBe(8);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(0.5, -2))).toBe(9);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(-10, 0))).toBe(4);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(0, 0))).toBe(5);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(111, 0))).toBe(6);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(-55, 3))).toBe(1);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(0, 3))).toBe(2);
-				expect(Mobile.getMovementHash(new o876.geometry.Vector2D(11, 8))).toBe(3);
-			});
-		});
+		
 	});
 });
 

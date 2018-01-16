@@ -121,4 +121,11 @@ class Area {
                 return pm.door.isSolid();
         }
     }
+
+    isSolidPoint(x, y) {
+    	return this.isSolid(
+    		x / RC_CONST.rc_plane_spacing | 0,
+			y / RC_CONST.rc_plane_spacing | 0
+		);
+	}
 }
