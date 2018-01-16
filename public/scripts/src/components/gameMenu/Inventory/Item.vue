@@ -1,6 +1,6 @@
 <template>
     <bordered-card :color="CONST.ITEMS.RARITY[item.rarity].COLOR"
-                   class="item col">
+                   class="item">
         <img :src="'images/inventory/items/'+ item.id +'.png'"/>
     </bordered-card>
 </template>

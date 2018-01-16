@@ -4,7 +4,7 @@
             <div class="col md-8 sm-6 inventory">
                 <draggable v-model="inventaire"
                            class="dragArea"
-                           :options="{group:'inventaire', pull:'clone'}"
+                           :options="{group:'inventaire'}"
                            @start="showDesc=false">
                     <transition-group name="list-complete">
                         <item

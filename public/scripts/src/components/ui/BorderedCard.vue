@@ -6,17 +6,6 @@
                 :height="rootHeight + 10"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                 :style="'filter: drop-shadow(0px 0px 10px '+ color +');'">
-            <defs>
-                <clipPath :id="'cut-off-border'+ _uid">
-                    <polygon :points="'0 0, 0 '+ (rootHeight - edgeSize) +', '+ (rootWidth - (rootWidth - edgeSize)) +' '+ rootHeight +', '+ rootWidth +' '+ rootHeight +', '+ rootWidth +' '+ (rootHeight - (rootHeight - edgeSize)) +', '+ (rootWidth - edgeSize) +' 0'"></polygon>
-                </clipPath>
-            </defs>
-                <circle v-for="circlesCoord in animatedCoords"
-                        v-bind="circlesCoord"
-                        :clip-path="'url(#cut-off-border'+ _uid +')'"
-                        fill="transparent"
-                        :stroke="color"
-                        stroke-opacity="0.2"></circle>
             <polygon :points="'7 7, 7 '+ (rootHeight - edgeSize - 5) +', '+ (rootWidth- (rootWidth - edgeSize) + 5) +' '+ (rootHeight - 5) +', '+ (rootWidth - 5) +' '+ (rootHeight - 5) +', '+ (rootWidth - 5) +' '+ (rootHeight - (rootHeight - edgeSize) + 5) +', '+ (rootWidth - edgeSize - 5) +' 7'"
                      fill="transparent"
                      :stroke="color"
@@ -32,9 +21,6 @@
 </template>
 
 <script>
-    import {interpolate} from 'd3';
-    import {TweenLite, Linear} from 'gsap';
-
     export default {
         name: "bordered-card",
         props: {
@@ -47,31 +33,11 @@
                 default: 'rgb(227, 190, 88)'
             }
         },
-        watch: {
-            circlesCoords(newCoords) {
-                this.animatedCoords.forEach((circle, index) => {
-                    TweenLite.to(
-                        circle,
-                        this.updateInterval / 1000,
-                        Object.assign({ease:Linear.easeNone},newCoords[index])
-                    )
-                });
-            }
-        },
         methods: {
             mapperTaille() {
                 const root = this.$el;
                 this.rootWidth = root.offsetWidth + 2;
                 this.rootHeight = root.offsetHeight + 2;
-            },
-            randomizeCoords() {
-                this.circlesCoords = newRandomCircles.call(this);
-            },
-            initAnimation() {
-                this.randomizeCoords();
-                setInterval(() => {
-                    this.randomizeCoords()
-                }, this.updateInterval)
             }
         },
         computed: {
@@ -86,10 +52,7 @@
         data: function() {
             return {
                 rootWidth: 0,
-                rootHeight: 0,
-                circlesCoords: newRandomCircles.call(this),
-                animatedCoords: newRandomCircles.call(this),
-                updateInterval: 10000
+                rootHeight: 0
             }
         },
         mounted() {
@@ -97,24 +60,10 @@
             window.addEventListener('resize', () => {
                 this.mapperTaille();
             });
-            this.initAnimation();
         },
         updated() {
             this.mapperTaille();
         }
-    }
-    function newRandomCircles() {
-        const w = this.rootWidth || 0;
-        const h = this.rootHeight || 0;
-        let circles = [];
-        for (let i = 0; i < this.circles; i++) {
-            circles.push({
-                cx: Math.ceil(w + Math.random() * (100 - w)),
-                cy: Math.ceil(h + Math.random() * (100 - h)),
-                r: Math.ceil(h + Math.random() * (100 - h))
-            });
-        }
-        return circles;
     }
 </script>
 
