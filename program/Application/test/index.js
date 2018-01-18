@@ -245,7 +245,109 @@ describe('model', function() {
 	describe('Mobile', function() {
 		const Mobile = require('../model/Mobile');
 		const o876 = require('../../o876');
-		
+		const Vector2D = o876.geometry.Vector2D;
+
+
+		describe('wall collisions', function() {
+            it ('should not collide while going north', function() {
+                let vPos = new Vector2D(57, 53);
+                let vSpeed = new Vector2D(0, -2);
+                let wc = new Vector2D(0, 0);
+                Mobile.computeWallCollisions(
+                    vPod,
+                    vSpeed,
+                    2,
+                    10,
+                    wc
+                );
+                expect(v.x).toBe(0);
+                expect(v.y).toBe(-2);
+            });
+
+			it ('should collide with north wall while going north', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(57, 53),
+                    new Vector2D(0, -2),
+                    2,
+                    10,
+                    0b0001
+                );
+                expect(v.x).toBe(0);
+                expect(v.y).toBe(-1);
+			});
+
+            it ('should not collide while going west', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(57, 53),
+                    new Vector2D(-8, 0),
+                    4,
+                    10,
+                    0b0000
+                );
+                expect(v.x).toBe(-8);
+                expect(v.y).toBe(0);
+            });
+
+            it ('should collide with west wall while going west', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(57, 53),
+                    new Vector2D(-8, 0),
+                    4,
+                    10,
+                    0b1000
+                );
+                expect(v.x).toBe(-3);
+                expect(v.y).toBe(0);
+            });
+
+            it ('should not collide while going east', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(55, 53),
+                    new Vector2D(8, 0),
+                    4,
+                    10,
+                    0b0000
+                );
+                expect(v.x).toBe(8);
+                expect(v.y).toBe(0);
+            });
+
+            it ('should collide with west wall while going east', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(55, 53),
+                    new Vector2D(8, 0),
+                    2,
+                    10,
+                    0b0010
+                );
+                expect(v.x).toBe(2);
+                expect(v.y).toBe(0);
+            });
+
+            it ('should not collide while going south', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(55, 55),
+                    new Vector2D(0, 5),
+                    2,
+                    10,
+                    0b0000
+                );
+                expect(v.x).toBe(0);
+                expect(v.y).toBe(5);
+            });
+
+            it ('should collide with west wall while going south', function() {
+                let v = Mobile.resolveWallCollision(
+                    new Vector2D(55, 55),
+                    new Vector2D(0, 5),
+                    2,
+                    10,
+                    0b0100
+                );
+                expect(v.x).toBe(0);
+                expect(v.y).toBe(2);
+            });
+        });
 	});
 });
 

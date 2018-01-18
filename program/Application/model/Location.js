@@ -10,4 +10,23 @@ module.exports = class Location extends o876.geometry.Vector2D {
 		this.angle = angle;
 		this.area = area;
 	}
+
+    /**
+	 * Défini les coordonnées
+     * @param v {o876.geometry.Vector2D)
+     */
+	setCoordinates(v) {
+		this.x = v.x;
+		this.y = v.y;
+		return this;
+	}
+
+    /**
+	 * Défini un nouvel angle
+     * @param a {number}
+     */
+	setAngle(a) {
+		this.angle = a;
+		return this;
+	}
 };

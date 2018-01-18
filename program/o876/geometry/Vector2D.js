@@ -1,5 +1,9 @@
 /**
  * Created by ralphy on 04/09/17.
+ *
+ * @class Vector2D
+ * @property {number} x
+ * @property {number} y
  */
 
 const Point = require('./Point.js');
