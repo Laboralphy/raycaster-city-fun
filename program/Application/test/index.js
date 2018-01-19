@@ -278,7 +278,7 @@ describe('model', function() {
 				expect(r.wcf.x).toBe(0);
 				expect(r.wcf.y).toBe(0);
             });
-/*
+
 			it ('should collide with north wall while going north', function() {
                 let r = Mobile.computeWallCollisions(
                     new Vector2D(57, 53),
@@ -288,13 +288,15 @@ describe('model', function() {
                     false,
 					collisionNorth
                 );
-                expect(r.delta.x).toBe(0);
-                expect(r.delta.y).toBe(-1);
+                expect(r.pos.x).toBe(57);
+                expect(r.pos.y).toBe(52);
+				expect(r.speed.x).toBe(0);
+				expect(r.speed.y).toBe(-1);
 				expect(r.wcf.x).toBe(0);
 				expect(r.wcf.y).toBe(-1);
 			});
 
-            it ('should not collide while going west', function() {
+			it ('should not collide while going west', function() {
                 let v = Mobile.computeWallCollisions(
                     new Vector2D(57, 53),
                     new Vector2D(-8, 0),
@@ -303,121 +305,145 @@ describe('model', function() {
                     false,
 					collisionEast
                 );
-                expect(v.delta.x).toBe(-8);
-                expect(v.delta.y).toBe(0);
+                expect(v.pos.x).toBe(49);
+                expect(v.pos.y).toBe(53);
+				expect(v.speed.x).toBe(-8);
+				expect(v.speed.y).toBe(0);
 				expect(v.wcf.x).toBe(0);
 				expect(v.wcf.y).toBe(0);
             });
 
-            it ('should collide with west wall while going west', function() {
-                let v = Mobile.computeWallCollisions(
-                    new Vector2D(57.5, 53),
-                    new Vector2D(-1, 0),
-                    4,
-                    10,
-                    false,
+			it ('should collide with west wall while going west', function() {
+				let v = Mobile.computeWallCollisions(
+					new Vector2D(57.5, 53),
+					new Vector2D(-7, 0),
+					4,
+					10,
+					false,
 					collisionWest
-                );
-                expect(v.delta.x).toBe(-3);
-                expect(v.delta.y).toBe(0);
+				);
+
+				expect(v.pos.x).toBe(54);
+				expect(v.pos.y).toBe(53);
+				expect(v.speed.x).toBe(-3.5);
+				expect(v.speed.y).toBe(0);
 				expect(v.wcf.x).toBe(-1);
 				expect(v.wcf.y).toBe(0);
-            });
+			});
 
-            it ('should not collide while going east', function() {
-                let v = Mobile.computeWallCollisions(
-                    new Vector2D(55, 53),
-                    new Vector2D(8, 0),
-                    4,
-                    10,
-                    false,
-					collisionWest
-                );
-                expect(v.delta.x).toBe(8);
-                expect(v.delta.y).toBe(0);
-				expect(v.wcf.x).toBe(0);
-				expect(v.wcf.y).toBe(0);
-            });
-
-            it ('should collide with east wall while going east', function() {
-            	let vPos = new Vector2D(55, 53);
-            	let vSpeed = new Vector2D(8, 0);
-            	let nSize = 2;
-            	let nPlaneSpacing = 10;
-				let wcf = {x: 0, y: 0}; // wall collision flags
-				let delta = new Vector2D(vSpeed);
-				let dx = vSpeed.x;
-				let dy = vSpeed.y;
-				let x = vPos.x;
-				let y = vPos.y;
-				let iIgnoredEye = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx === dy && dx < 0) ? 2 : 0);
-				let xClip, yClip, ix, iy, xci, yci;
-				let bCorrection = false;
-
-				expect(iIgnoredEye).toBe(3);
-
-
-				let i = 0;
-				xci = (i & 1) * Math.sign(2 - i);
-				yci = ((3 - i) & 1) * Math.sign(i - 1);
-				ix = nSize * xci + x;
-				iy = nSize * yci + y;
-
-				expect(xci).toBe(0);
-				expect(yci).toBe(-1);
-				expect(x).toBe(55);
-				expect(y).toBe(53);
-				expect(ix).toBe(55);
-				expect(iy).toBe(51);
-				expect(dx).toBe(8);
-				expect(dy).toBe(0);
-
-				xClip = collisionEast(ix + dx, iy);
-				yClip = collisionEast(ix, iy + dy);
-
-				expect(ix + dx).toBe(63);
-
-				expect(xClip).toBeFalsy();
-				expect(yClip).toBeFalsy();
-
+			it ('should collide with west wall while going west', function() {
 				let v = Mobile.computeWallCollisions(
-                    new Vector2D(55, 53),
-                    new Vector2D(8, 0),
-                    2,
-                    10,
-                    false,
-					collisionEast
-                );
-                expect(v.delta.x).toBe(2);
-                expect(v.delta.y).toBe(0);
-				expect(v.wcf.x).toBe(1);
+					new Vector2D(57.5, 53),
+					new Vector2D(-8, 0),
+					4,
+					10,
+					false,
+					collisionWest
+				);
+
+				expect(v.pos.x).toBe(54);
+				expect(v.pos.y).toBe(53);
+				expect(v.speed.x).toBe(-3.5);
+				expect(v.speed.y).toBe(0);
+				expect(v.wcf.x).toBe(-1);
 				expect(v.wcf.y).toBe(0);
-            });
+			});
+
+			/*
+						it ('should not collide while going east', function() {
+							let v = Mobile.computeWallCollisions(
+								new Vector2D(55, 53),
+								new Vector2D(8, 0),
+								4,
+								10,
+								false,
+								collisionWest
+							);
+							expect(v.delta.x).toBe(8);
+							expect(v.delta.y).toBe(0);
+							expect(v.wcf.x).toBe(0);
+							expect(v.wcf.y).toBe(0);
+						});
+
+						it ('should collide with east wall while going east', function() {
+							let vPos = new Vector2D(55, 53);
+							let vSpeed = new Vector2D(8, 0);
+							let nSize = 2;
+							let nPlaneSpacing = 10;
+							let wcf = {x: 0, y: 0}; // wall collision flags
+							let delta = new Vector2D(vSpeed);
+							let dx = vSpeed.x;
+							let dy = vSpeed.y;
+							let x = vPos.x;
+							let y = vPos.y;
+							let iIgnoredEye = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx === dy && dx < 0) ? 2 : 0);
+							let xClip, yClip, ix, iy, xci, yci;
+							let bCorrection = false;
+
+							expect(iIgnoredEye).toBe(3);
 
 
-            it ('should not collide while going south', function() {
-                let v = Mobile.resolveWallCollision(
-                    new Vector2D(55, 55),
-                    new Vector2D(0, 5),
-                    2,
-                    10,
-                    0b0000
-                );
-                expect(v.x).toBe(0);
-                expect(v.y).toBe(5);
-            });
+							let i = 0;
+							xci = (i & 1) * Math.sign(2 - i);
+							yci = ((3 - i) & 1) * Math.sign(i - 1);
+							ix = nSize * xci + x;
+							iy = nSize * yci + y;
 
-            it ('should collide with west wall while going south', function() {
-                let v = Mobile.resolveWallCollision(
-                    new Vector2D(55, 55),
-                    new Vector2D(0, 5),
-                    2,
-                    10,
-                    0b0100
-                );
-                expect(v.x).toBe(0);
-                expect(v.y).toBe(2);
-            });*/
+							expect(xci).toBe(0);
+							expect(yci).toBe(-1);
+							expect(x).toBe(55);
+							expect(y).toBe(53);
+							expect(ix).toBe(55);
+							expect(iy).toBe(51);
+							expect(dx).toBe(8);
+							expect(dy).toBe(0);
+
+							xClip = collisionEast(ix + dx, iy);
+							yClip = collisionEast(ix, iy + dy);
+
+							expect(ix + dx).toBe(63);
+
+							expect(xClip).toBeFalsy();
+							expect(yClip).toBeFalsy();
+
+							let v = Mobile.computeWallCollisions(
+								new Vector2D(55, 53),
+								new Vector2D(8, 0),
+								2,
+								10,
+								false,
+								collisionEast
+							);
+							expect(v.delta.x).toBe(2);
+							expect(v.delta.y).toBe(0);
+							expect(v.wcf.x).toBe(1);
+							expect(v.wcf.y).toBe(0);
+						});
+
+
+						it ('should not collide while going south', function() {
+							let v = Mobile.resolveWallCollision(
+								new Vector2D(55, 55),
+								new Vector2D(0, 5),
+								2,
+								10,
+								0b0000
+							);
+							expect(v.x).toBe(0);
+							expect(v.y).toBe(5);
+						});
+
+						it ('should collide with west wall while going south', function() {
+							let v = Mobile.resolveWallCollision(
+								new Vector2D(55, 55),
+								new Vector2D(0, 5),
+								2,
+								10,
+								0b0100
+							);
+							expect(v.x).toBe(0);
+							expect(v.y).toBe(2);
+						});*/
         });
 	});
 });

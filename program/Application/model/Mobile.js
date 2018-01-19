@@ -37,6 +37,31 @@ module.exports = class Mobile {
 	 * @param pSolidFunction {function} fonction permettant de déterminer si un point est dans une zone collisionnable
 	 */
 	static computeWallCollisions(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
+		let nDist = vSpeed.distance();
+		if (nDist > nSize) {
+			let vSubSpeed = vSpeed.normalize().mul(nSize);
+			let nModDist = nDist % nSize;
+			let r, pos, speed;
+			if (nModDist) {
+				let vModSpeed = vSpeed.normalize().mul(nModDist);
+				r = Mobile.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
+				pos = r.pos;
+				speed = r.speed;
+			} else {
+				pos = vPos;
+				speed = Vector2D.zero();
+			}
+			for (let iIter = 0; iIter < nDist; iIter += nSize) {
+				r = Mobile.computeWallCollisions(pos, vSubSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
+				pos = r.pos;
+				speed = speed.add(r.speed);
+			}
+			return {
+				pos,
+				speed,
+				wcf: r.wcf
+			};
+		}
 		// par defaut pas de colision détectée
 		let oWallCollision = {x: 0, y: 0};
 		let dx = vSpeed.x;
@@ -53,7 +78,7 @@ module.exports = class Mobile {
 			if (iIgnoredEye === i) {
 				continue;
 			}
-			// xci et yci valent entre -1 et 1 et correspondent aux coeficient de direction
+			// xci et yci valent entre -1 et 1 et correspondent aux coeficients de direction
 			xci = (i & 1) * Math.sign(2 - i);
 			yci = ((3 - i) & 1) * Math.sign(i - 1);
 			ix = nSize * xci + x;
@@ -96,7 +121,7 @@ module.exports = class Mobile {
 		}
 		return {
 			pos: new Vector2D(x, y),
-			speed: new Vector2D(dx, dy),
+			speed: new Vector2D(x - vPos.x, y - vPos.y),
 			wcf: oWallCollision
 		};
 	}
