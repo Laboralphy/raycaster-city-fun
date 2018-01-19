@@ -6108,10 +6108,12 @@ O2.extendClass('O876_Raycaster.GXSecret', O876_Raycaster.GXEffect, {
 	fSpeed : 0, // vitesse d'incrémentation/décrémentation de la
 				// porte
 	nLimit : 0, // Limite d'offset de la porte
+	oEasing: null,
 
 	__construct: function(r) {
 		__inherited(r);
 		this.nLimit = r.nPlaneSpacing;
+		this.oEasing = new O876.Easing();
 	},
 	
 	isOver : function() {
@@ -6120,7 +6122,7 @@ O2.extendClass('O876_Raycaster.GXSecret', O876_Raycaster.GXEffect, {
 
 	seekBlockSecret : function(dx, dy) {
 		if (this.oRaycaster.getMapPhys(this.x + dx,
-				this.y + dy) == this.oRaycaster.PHYS_SECRET_BLOCK) {
+				this.y + dy) === this.oRaycaster.PHYS_SECRET_BLOCK) {
 			this.oRaycaster.setMapPhys(this.x, this.y, 0);
 			Marker.clearXY(this.oRaycaster.oDoors, this.x,
 					this.y);
@@ -6153,36 +6155,38 @@ O2.extendClass('O876_Raycaster.GXSecret', O876_Raycaster.GXEffect, {
 			case 0: // init
 				Marker.markXY(this.oRaycaster.oDoors, this.x,
 						this.y, this);
-				this.fSpeed = this.oRaycaster.TIME_FACTOR * 40 / 1000;
+				this.fSpeed = RC.TIME_DOOR_SECRET / this.oRaycaster.TIME_FACTOR;
 				this.nPhase++; /** no break here */
+				this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('squareAccel');
+				/** @fallthrough */
+
 				// passage au case suivant
 			case 1: // le block se pousse jusqu'a : offset > limite
-				this.fOffset += this.fSpeed;
-				if (this.fOffset >= this.nLimit) {
+				if (this.oEasing.next().over()) {
 					this.fOffset = this.nLimit - 1;
 					// rechercher le block secret suivant
 					this.seekBlockSecret4Corners();
 					this.nPhase++;
 					this.fOffset = 0;
+					this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('squareDeccel');
+				} else {
+					this.fOffset = this.oEasing.val();
 				}
 				break;
 	
 			case 2: // le 2nd block se pousse jusqu'a : offset >
 					// limite
-				this.fOffset += this.fSpeed;
-				if (this.fOffset >= this.nLimit) {
-					this.fOffset = this.nLimit - 1;
-					this.oRaycaster.setMapPhys(this.x,
-							this.y, 0);
-					Marker.clearXY(this.oRaycaster.oDoors, this.x,
-							this.y);
+				if (this.oEasing.next().over()) {
+					this.oRaycaster.setMapPhys(this.x, this.y, 0);
+					Marker.clearXY(this.oRaycaster.oDoors, this.x, this.y);
 					this.nPhase++;
 					this.fOffset = 0;
+				} else {
+					this.fOffset = this.oEasing.val();
 				}
 				break;
 		}
-		this.oRaycaster.setMapOffs(this.x, this.y,
-				this.fOffset | 0);
+		this.oRaycaster.setMapOffs(this.x, this.y, this.fOffset | 0);
 	},
 
 	terminate : function() {
@@ -6858,8 +6862,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 	nSectorRank: -1,						// Rang dans le secteur pour un repérage facile
 	nSize: 16,								// Taile du polygone de collision mobile-mur
 	oSprite: null,							// Référence du sprite
-	xCollisions: [0, 1, 0, -1],	// Tableau des collision
-	yCollisions: [-1, 0, 1, 0],	// ...
 	oThinker: null,
 	oWallCollision: null,					// x: bool : on bumpe un mur qui empeche la progression en X
 	oMobileCollision: null,
@@ -7029,7 +7031,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 		this.y = y;
 		var xs = x / ps | 0;
 		var ys = y / ps | 0;
-		if (xs != this.xSector || ys != this.ySector) {
+		if (xs !== this.xSector || ys !== this.ySector) {
 			rc.oMobileSectors.unregister(this);
 			this.xSector = xs;
 			this.ySector = ys;
@@ -7047,7 +7049,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 		this.ySpeed = 0;
 		var xs = this.x / ps | 0;
 		var ys = this.y / ps | 0;
-		if (xs != this.xSector || ys != this.ySector) {
+		if (xs !== this.xSector || ys !== this.ySector) {
 			this.oRaycaster.oMobileSectors.unregister(this);
 			this.xSector = xs;
 			this.ySector = ys;
@@ -7055,42 +7057,84 @@ O2.createClass('O876_Raycaster.Mobile', {
 		}
 	},
 
+	_vecScale: function(v, fScale) {
+		var v1 = MathTools.normalize(v.x, v.y);
+		return {
+			x: v1.x * fScale,
+			y: v1.y * fScale
+        };
+	},
+
 	/**
-	 * Fait glisser le mobile
-	 * détecte les collision avec le mur
-	 * @param dx {number}
-	 * @param dy {number}
+	 * Détermine la collision entre le mobile et les murs du labyrinthe
+	 * @typedef {Object} xy
+	 * @property {number} x
+	 * @property {number} y
+	 *
+	 * @param vPos {xy} position du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param vSpeed {xy} delta de déplacement du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param nSize {number} demi-taille du mobile
+	 * @param nPlaneSpacing {number} taille de la grille
+	 * (pour savoir ou est ce qu'on s'est collisionné). ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param bCrashWall {boolean} si true alors il n'y a pas de correction de glissement
+	 * @param pSolidFunction {function} fonction permettant de déterminer si un point est dans une zone collisionnable
 	 */
-	slide: function(dx, dy) {
-		var xc = this.xCollisions;
-		var yc = this.yCollisions;
-		var x = this.x;
-		var y = this.y;
-		var ix, iy;
-		var ps = this.oRaycaster.nPlaneSpacing;
-		var nSize = this.nSize;
-		var wc = this.oWallCollision;
-		wc.x = 0;
-		wc.y = 0;
-		var nXYFormula = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx == dy && dx < 0) ? 2 : 0);
+	computeWallCollisions: function(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
+		var nDist = MathTools.distance(vSpeed.x, vSpeed.y);
+		if (nDist > nSize) {
+			var vSubSpeed = this._vecScale(vSpeed, nSize);
+			var nModDist = nDist % nSize;
+			var r, pos, speed;
+			if (nModDist) {
+				var vModSpeed = this._vecScale(vSpeed, nModDist);
+				r = this.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
+				pos = r.pos;
+				speed = r.speed;
+			} else {
+				pos = vPos;
+				speed = {x: 0, y: 0};
+			}
+			for (var iIter = 0; iIter < nDist; iIter += nSize) {
+				r = this.computeWallCollisions(pos, vSubSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
+				pos = r.pos;
+				speed = speed.add(r.speed);
+			}
+			return {
+				pos: pos,
+				speed: speed,
+				wcf: r.wcf
+			};
+		}
+		// par defaut pas de colision détectée
+		var oWallCollision = {x: 0, y: 0};
+		var dx = vSpeed.x;
+		var dy = vSpeed.y;
+		var x = vPos.x;
+		var y = vPos.y;
+		// une formule magique permettant d'igorer l'oeil "à la traine", evitant de se faire coincer dans les portes
+		var iIgnoredEye = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx === dy && dx < 0) ? 2 : 0);
+		var xClip, yClip, ix, iy, xci, yci;
 		var bCorrection = false;
-		var xClip, yClip;
-		var bCrashWall = !this.bSlideWall;
-		this.bWallCollision = false;
+		// pour chaque direction...
 		for (var i = 0; i < 4; ++i) {
-			if (nXYFormula == i) {
+			// si la direction correspond à l'oeil à la traine...
+			if (iIgnoredEye === i) {
 				continue;
 			}
-			ix = nSize * xc[i] + x;
-			iy = nSize * yc[i] + y;
-			xClip = this.oRaycaster.clip(ix + dx, iy, 1);
-			yClip = this.oRaycaster.clip(ix, iy + dy, 1);
+			// xci et yci valent entre -1 et 1 et correspondent aux coeficients de direction
+			xci = (i & 1) * Math.sign(2 - i);
+			yci = ((3 - i) & 1) * Math.sign(i - 1);
+			ix = nSize * xci + x;
+			iy = nSize * yci + y;
+			// déterminer les collsion en x et y
+			xClip = pSolidFunction(ix + dx, iy);
+			yClip = pSolidFunction(ix, iy + dy);
 			if (xClip) {
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
 				}
-				wc.x = xc[i];
+				oWallCollision.x = xci;
 				bCorrection = true;
 			}
 			if (yClip) {
@@ -7098,30 +7142,58 @@ O2.createClass('O876_Raycaster.Mobile', {
 				if (bCrashWall) {
 					dx = 0;
 				}
-				wc.y = yc[i];
+				oWallCollision.y = yci;
 				bCorrection = true;
 			}
 		}
-		this.bWallCollision = bCorrection;
+		x += dx;
+		y += dy;
 		if (bCorrection) {
-			if (wc.x > 0) {
-				x = (x / ps | 0) * ps + ps - 1 - nSize;
-			} else if (wc.x < 0) {
-				x = (x / ps | 0) * ps + nSize;
+			// il y a eu collsion
+			// corriger la coordonée impactée
+			if (oWallCollision.x > 0) {
+				x = (x / nPlaneSpacing | 0) * nPlaneSpacing + nPlaneSpacing - 1 - nSize;
+			} else if (oWallCollision.x < 0) {
+				x = (x / nPlaneSpacing | 0) * nPlaneSpacing + nSize;
 			}
-			if (wc.y > 0) {
-				y = (y / ps | 0) * ps + ps - 1 - nSize;
-			} else if (wc.y < 0) {
-				y = (y / ps | 0) * ps + nSize;
+			if (oWallCollision.y > 0) {
+				y = (y / nPlaneSpacing | 0) * nPlaneSpacing + nPlaneSpacing - 1 - nSize;
+			} else if (oWallCollision.y < 0) {
+				y = (y / nPlaneSpacing | 0) * nPlaneSpacing + nSize;
 			}
-			bCorrection = false;
 		}
-		this.setXY(x + dx, y + dy);
-		this.xSpeed = dx;
-		this.ySpeed = dy;
+		return {
+			pos: {x: x, y: y},
+			speed: {x: x - vPos.x, y: y - vPos.y},
+			wcf: oWallCollision
+		};
 	},
-	
-	
+
+
+    /**
+     * Fait glisser le mobile
+     * détecte les collision avec le mur
+     * @param dx {number}
+     * @param dy {number}
+     */
+    slide: function(dx, dy) {
+    	var vPos = {x: this.x, y: this.y};
+        var vSpeed = {x: dx, y: dy};
+        var rc = this.oRaycaster;
+		var r = this.computeWallCollisions(
+			vPos,
+			vSpeed,
+			this.nSize,
+			this.oRaycaster.nPlaneSpacing,
+			!this.bSlideWall,
+			function(x, y) { return rc.clip(x, y, 1); }
+		);
+	    this.setXY(r.pos.x, r.pos.y);
+        this.xSpeed = r.speed.x;
+        this.ySpeed = r.speed.y;
+        this.oWallCollision = r.wcf;
+    },
+
 
 	/**
 	 * Déplace la caméra d'un certain nombre d'unité vers l'avant
@@ -8471,7 +8543,6 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var xint = 0, yint = 0;
 		
 		var sameOffsetWall = this.sameOffsetWall;
-		var BF = O876_Raycaster.BF;
 		
 		while (done === 0) {
 			if (xt < yt) {
@@ -8543,7 +8614,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 					if (nPhys >= nPHYS_FIRST_DOOR && nPhys <= nPHYS_LAST_DOOR) {
 						// entre PHYS_FIRST_DOOR et PHYS_LAST_DOOR
 						nOfs = nScale >> 1;
-					} else if (nPhys == nPHYS_SECRET_BLOCK || nPhys == nPHYS_TRANSPARENT_BLOCK || nPhys == nPHYS_OFFSET_BLOCK) {
+					} else if (nPhys === nPHYS_SECRET_BLOCK || nPhys === nPHYS_TRANSPARENT_BLOCK || nPhys === nPHYS_OFFSET_BLOCK) {
 						// PHYS_SECRET ou PHYS_TRANSPARENT
 						nOfs = (nText >> 16) & 0xFF; // **Code12** offs
 					} else {
@@ -8556,7 +8627,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 						if (sameOffsetWall(nOfs, xint, yint, xi, yi, dx, dy, nScale)) { // Même mur -> porte
 							nTOfs = (dyt / nScale) * nOfs;
 							xint = x + xScale * (yt + nTOfs);
-							if (((xint / nScale | 0)) != xi) {
+							if (((xint / nScale | 0)) !== xi) {
 								nPhys = nText = 0;
 							}
 							if (nText !== 0	&& Marker_getMarkXY(aExcludes, xi, yi)) {
@@ -8663,7 +8734,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 					Marker.markXY(aExcludes, oData.xWall, oData.yWall);
 				}
 			}
-			nMaxIterations--;
+			--nMaxIterations;
 		} while (oData.oContinueRay.bContinue && nMaxIterations > 0);
 		return aVisibles;
 	},
@@ -9678,8 +9749,6 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 				return this.getMapPhys(xm, ym);
 			case 2:
 				return this.getMapOffs(xm, ym);
-			case 3:
-				return this.getMapXYTag(xm, ym);
 			default:
 				return this.aMap[ym][xm];
 		}
@@ -10393,11 +10462,25 @@ var MathTools = {
 
 	/** Calcul de la distance entre deux point séparés par dx, dy
 	 * @param dx delta x
-	 * @param dx delta y
+	 * @param dy delta y
 	 * @return float
 	 */
 	distance : function(dx, dy) {
 		return Math.sqrt((dx * dx) + (dy * dy));
+	},
+
+	/**
+	 * Normalize le vecteur donnée
+	 * @param dx  {number}
+	 * @param dy  {number}
+	 * @return {number}
+	 */
+	normalize: function(dx, dy) {
+		var dist = MathTools.distance(dx, dy);
+		return {
+			x: dx / dist,
+			y: dy / dist
+		};
 	},
 
     /**
@@ -10929,6 +11012,38 @@ O2.createObject('RC', {
      * This array is internally used by the framework
      */
     FX_ALPHA: [1, 0.75, 0.50, 0.25, 0],
+
+
+	/**
+     * @property TIME_DOOR_DOUBLE
+     * Time (in milliseconds) during a double panel door opening
+	 */
+	TIME_DOOR_DOUBLE: 600,
+
+	/**
+	 * @property TIME_DOOR_DOUBLE
+	 * Time (in milliseconds) during a single panel door opening (horizontally)
+	 */
+	TIME_DOOR_SINGLE_HORIZ: 800,
+
+	/**
+	 * @property TIME_DOOR_DOUBLE
+	 * Time (in milliseconds) during a single panel door opening (vertically)
+	 */
+	TIME_DOOR_SINGLE_VERT: 800,
+
+	/**
+	 * @property TIME_DOOR_DOUBLE
+	 * Time (in milliseconds) during a secret passage opening
+	 */
+	TIME_DOOR_SECRET: 2000,
+
+	/**
+	 * @property TIME_DOOR_AUTOCLOSE
+	 * Time (in milliseconds) during an autoclose door stays open
+	 */
+	TIME_DOOR_AUTOCLOSE: 3000,
+
 
 });
 
@@ -12480,6 +12595,7 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
 	__construct: function(r) {
 		__inherited(r);
 		this.oEasing = new O876.Easing();
+		this.nMaxTime = this.nTime = RC.TIME_DOOR_AUTOCLOSE; // temps restant avant fermeture
 		this.setAutoClose(true);
 	},
 	
@@ -12495,25 +12611,26 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
 				this.nCode = r.getMapPhys(this.x, this.y);
 				switch (this.nCode) {
 					case r.PHYS_DOOR_SLIDING_DOUBLE:
-						this.fSpeed = 600 / r.TIME_FACTOR;
+						this.fSpeed = RC.TIME_DOOR_DOUBLE / r.TIME_FACTOR;
 						this.nLimit = r.nPlaneSpacing >> 1;
 						this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('smoothstep');
 						break;
 			
 					case r.PHYS_DOOR_SLIDING_LEFT:
 					case r.PHYS_DOOR_SLIDING_RIGHT:
-						this.fSpeed = 600 / r.TIME_FACTOR;
+						this.fSpeed = RC.TIME_DOOR_SINGLE_HORIZ / r.TIME_FACTOR;
 						this.nLimit = r.nPlaneSpacing;
 						this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('smoothstep');
 						break;
 			
 					default:
-						this.fSpeed = 800 / r.TIME_FACTOR;
+						this.fSpeed = RC.TIME_DOOR_SINGLE_VERT / r.TIME_FACTOR;
 						this.nLimit = r.yTexture;
 						this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('smoothstep');
 						break;
 				}
 				this.nPhase++;	/** no break on the next line */
+				/** @fallthrough */
 
 			case 1: // la porte s'ouvre jusqu'a : offset > limite
 				if (this.oEasing.next().over()) {
@@ -12553,7 +12670,7 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
 	 */
 	close : function(bForce) {
 		this.nTime = 0;
-		if (bForce && this.nPhase == 2) {
+		if (bForce && this.nPhase === 2) {
 			this.nPhase++;
 		}
 	},

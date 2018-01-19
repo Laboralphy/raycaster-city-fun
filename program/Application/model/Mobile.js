@@ -18,6 +18,10 @@ module.exports = class Mobile {
 		this.wallCollisions = Vector2D.zero();
 	}
 
+    /**
+     * Défini la taille physique du mobile, pour les collisions
+     * @param n {number}
+     */
 	setSize(n) {
 		this.size = n;
 	}
@@ -28,8 +32,8 @@ module.exports = class Mobile {
 	 * @property {number} x
 	 * @property {number} y
 	 *
-	 * @param vPos {xy} position du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
-	 * @param vSpeed {xy} delta de déplacement du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param vPos {Vector2D} position du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param vSpeed {Vector2D} delta de déplacement du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
 	 * @param nSize {number} demi-taille du mobile
 	 * @param nPlaneSpacing {number} taille de la grille
 	 * (pour savoir ou est ce qu'on s'est collisionné). ATTENTION ce vecteur est mis à jour par la fonction !
@@ -126,7 +130,40 @@ module.exports = class Mobile {
 		};
 	}
 
-	/**
+	// sectorization de collision
+
+
+    /**
+     * Teste si le mobile spécifié entre en collision avec un autre mobile.
+     * @param oMobile {Mobile}
+     */
+    computeMobileCollisions(oMobile) {
+        let xTonari = this.xTonari;
+        let yTonari = this.yTonari;
+        let oRegister = this.oRaycaster.oMobileSectors;
+        let oSector;
+        let i;
+        let oOther, iOther, nSectorLength;
+        for (i = 0; i < 9; i++) {
+            oSector = oRegister.get(oMobile.xSector + xTonari[i],
+                oMobile.ySector + yTonari[i]);
+            if (oSector !== null) {
+                nSectorLength = oSector.length;
+                for (iOther = 0; iOther < nSectorLength; ++iOther) {
+                    oOther = oSector[iOther];
+                    if (oOther !== oMobile) {
+                        if (oMobile.hits(oOther)) {
+                            oMobile.oMobileCollision = oOther;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        oMobile.oMobileCollision = null;
+    }
+
+    /**
 	 * Déplace le mobile selon le vector spécifié
 	 * Gestion des collisions
 	 * @param {o876.geometry.Vector2D} vSpeed
