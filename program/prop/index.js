@@ -15,11 +15,7 @@
  * @param value {*}
  * @return {*}
  */
-module.exports = function (oInstance, sProperty, value) {
-    if (value === undefined) {
-        return oInstance[sProperty];
-    } else {
-        oInstance[sProperty] = value;
-        return oInstance;
-    }
-};
+
+const SB = require('../o876/SpellBook');
+
+module.exports = SB.prop;

@@ -4,7 +4,7 @@
   "description": "multiplayer server for playing raycasting games",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine public/scripts/dist/test.js program/test/",
+    "test": "jasmine public/scripts/dist/test.js program/test/ && banner OK",
     "start": "node index.js",
     "webpack": "webpack --watch",
     "build": "webpack"
