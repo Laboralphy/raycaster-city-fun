@@ -30,6 +30,18 @@ module.exports = class Vector2D {
 		}
 	}
 
+    /**
+	 * Mutable !
+	 * Modifie x et y
+     * @param x
+     * @param y
+     */
+	set(x, y) {
+		this.x = x;
+		this.y = y;
+		return this;
+	}
+
 	/**
 	 * Immutable !
 	 * returns a new Vector which is the sum of this instance + the given argument
@@ -88,5 +100,27 @@ module.exports = class Vector2D {
 	 */
 	static zero() {
 		return new Vector2D(0, 0);
+	}
+
+    /**
+	 * Mutable
+	 * Addition mutable des composante du vecteur
+     * @param v {Vector2D}
+     */
+	translate(v) {
+		this.x += v.x;
+		this.y += v.y;
+		return this;
+	}
+
+    /**
+     * Mutable
+     * Multiplication mutable des composante du vecteur
+     * @param f {number}
+     */
+	scale(f) {
+		this.x *= f;
+		this.y *= f;
+		return this;
 	}
 };

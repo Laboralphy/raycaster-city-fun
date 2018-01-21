@@ -5,9 +5,10 @@
  * Each sprites is tested against all other sprite in the surroundiing cells.
  */
 
-const Vector = require('./Vector2D');
+const Vector = require('../geometry/Vector2D');
 const Grid = require('./Grid');
 const Sector = require('./Sector');
+const SB = require('../SpellBook');
 
 module.exports = class Collider {
 	constructor() {
@@ -22,6 +23,14 @@ module.exports = class Collider {
         this._cellWidth = 0;
         this._cellHeight = 0;
 	}
+
+    cellWidth(w) {
+        return SB.prop(this, '_cellWidth', w);
+    }
+
+    cellHeight(h) {
+        return SB.prop(this, '_cellHeight', h);
+    }
 
     width(w) {
         if (w === undefined) {
@@ -40,15 +49,18 @@ module.exports = class Collider {
             return this;
         }
     }
+
 	/**
 	 * Return the sector corresponding to the given coordinates
+     * if the parameters are number, the real sector indices are used (0, 1, 2...)
+	 * if the parameter is a Vector, its components are int-divided by cell size before application
 	 * @param x {number} position x
 	 * @param y {number} position y
 	 * @return {*}
 	 */
 	sector(x, y) {
 		if (y === undefined) {
-			return this._grid.cell(x.x / this._cellWidth, x.y / this._cellHeight);
+			return this._grid.cell(x.x / this._cellWidth | 0, x.y / this._cellHeight | 0);
 		} else {
 			return this._grid.cell(x, y);
 		}
@@ -61,7 +73,7 @@ module.exports = class Collider {
 	 */
 	track(oObject) {
 		let oOldSector = oObject.colliderSector;
-		let v = oObject.flight().position().sub(this._origin);
+		let v = oObject.position().sub(this._origin);
 		let s = oObject.dead() ? null : this.sector(v);
 		if (s && oOldSector && s === oOldSector) {
 			return;
@@ -84,7 +96,7 @@ module.exports = class Collider {
 	 */
 	collides(oObject) {
 		let aObjects = [];
-		let oSector = this.sector(oObject.flight().position().sub(this._origin));
+		let oSector = this.sector(oObject.position().sub(this._origin));
 		if (!oSector) {
 			return aObjects;
 		}

@@ -40,11 +40,11 @@ module.exports = class Sector {
 
     /** Renvoie les objets qui collisione avec l'objet spécifié */
     collides(oObject) {
-        let oShape = oObject.shapeShifted();
+        let oShape = oObject.shape();
         return this._objects
             .filter(function(o) {
                 return o !== oObject &&
-                    oShape.hits(o.shapeShifted())
+                    oShape.hits(o.shape())
             });
     }
 };

@@ -1,4 +1,5 @@
-const Vector = require('../Vector2D');
+const Vector = require('../../geometry/Vector2D');
+const sb = require('../../SpellBook');
 /**
  * @class Fairy.Shape
  *
@@ -7,9 +8,14 @@ const Vector = require('../Vector2D');
  */
 module.exports = class Shape {
     constructor() {
-        this.position = new Vector();
+        this._position = new Vector();
         this.tangibility = 1;
     }
+
+    position(p) {
+        return sb.prop(this, '_position', p);
+    }
+
 
     // Pour savoir si l'objet A percute l'objet B on fait (A.nTangibilityMask &
     // B.nTangibilityMask) si le résultat

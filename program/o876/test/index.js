@@ -1,7 +1,36 @@
 describe('o876', function() {
     const o876 = require('../index.js');
+
+
+
+
+
+
+
+
+
+
+    //  ####   ######   ####   #    #  ######   #####  #####    #   #
+    // #    #  #       #    #  ##  ##  #          #    #    #    # #
+    // #       #####   #    #  # ## #  #####      #    #    #     #
+    // #  ###  #       #    #  #    #  #          #    #####      #
+    // #    #  #       #    #  #    #  #          #    #   #      #
+    //  ####   ######   ####   #    #  ######     #    #    #     #
+
     describe('geometry', function() {
         const Vector2D = o876.geometry.Vector2D;
+
+
+
+
+        //                                                 #####  ######
+        // #    #  ######   ####    #####   ####   #####  #     # #     #
+        // #    #  #       #    #     #    #    #  #    #       # #     #
+        // #    #  #####   #          #    #    #  #    #  #####  #     #
+        // #    #  #       #          #    #    #  #####  #       #     #
+        //  #  #   #       #    #     #    #    #  #   #  #       #     #
+        //   ##    ######   ####      #     ####   #    # ####### ######
+
         describe('Vector', function() {
             describe('initialisation 0', function () {
                 it('creates a zero vector', function () {
@@ -81,12 +110,220 @@ describe('o876', function() {
                 });
             });
         });
+
+
+
+        describe('Collider', function() {
+        //  ####    ####   #       #          #    #####   ######  #####
+        // #    #  #    #  #       #          #    #    #  #       #    #
+        // #       #    #  #       #          #    #    #  #####   #    #
+        // #       #    #  #       #          #    #    #  #       #####
+        // #    #  #    #  #       #          #    #    #  #       #   #
+        //  ####    ####   ######  ######     #    #####   ######  #    #
+            const Collider = o876.collider.Collider;
+            const Mobile = o876.collider.Mobile;
+            const Rect = o876.collider.shapes.Rect;
+            const Vector = o876.geometry.Vector2D;
+
+            it('should create good rects', function() {
+                let r1 = new Rect(new Vector(15, 15), new Vector(-15, -15));
+                let r2 = new Rect(new Vector(15, -15), new Vector(-15, 15));
+                let r3 = new Rect(new Vector(-15, 15), new Vector(15, -15));
+                let r4 = new Rect(new Vector(-15, -15), new Vector(15, 15));
+                expect(r1._p1.x).toBe(-15);
+                expect(r2._p1.x).toBe(-15);
+                expect(r3._p1.x).toBe(-15);
+                expect(r4._p1.x).toBe(-15);
+                expect(r1._p1.y).toBe(-15);
+                expect(r2._p1.y).toBe(-15);
+                expect(r3._p1.y).toBe(-15);
+                expect(r4._p1.y).toBe(-15);
+                expect(r1._p2.x).toBe(15);
+                expect(r2._p2.x).toBe(15);
+                expect(r3._p2.x).toBe(15);
+                expect(r4._p2.x).toBe(15);
+                expect(r1._p2.y).toBe(15);
+                expect(r2._p2.y).toBe(15);
+                expect(r3._p2.y).toBe(15);
+                expect(r4._p2.y).toBe(15);
+            });
+
+            it('should instanciate', function() {
+                let collider = new Collider();
+                expect(collider).toBeDefined();
+            });
+
+            it('should count the exact number of mobiles', function() {
+                let collider = new Collider();
+                collider.cellWidth(64).cellHeight(64);
+                collider.width(10).height(10);
+                let m = [
+                    new Mobile(),
+                    new Mobile()
+                ];
+                m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+                m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+                m[0].position().set(64 * 3 + 20, 64 * 5 + 12);
+                m[1].position().set(64 * 7 + 20, 64 * 2 + 12);
+                collider.track(m[0]);
+                collider.track(m[1]);
+                expect(collider.sector(m[0].position()).count()).toBe(1);
+                expect(collider.sector(3, 5).count()).toBe(1);
+                expect(collider.sector(0, 0).count()).toBe(0);
+                expect(collider.sector(7, 2).count()).toBe(1);
+                m[1].position().set(64 * 3 + 40, 64 * 5 + 32);
+                collider.track(m[0]);
+                collider.track(m[1]);
+                expect(collider.sector(3, 5).count()).toBe(2);
+                expect(collider.sector(7, 2).count()).toBe(0);
+            });
+
+            it('should indicate the collision', function() {
+                let collider = new Collider();
+                collider.cellWidth(64).cellHeight(64);
+                collider.width(10).height(10);
+                let m = [
+                    new Mobile(),
+                    new Mobile()
+                ];
+                m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+                m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+                m[0].position().set(64 * 3 + 20, 64 * 5 + 12);
+                m[1].position().set(64 * 3 + 20, 64 * 2 + 12);
+                collider.track(m[0]);
+                collider.track(m[1]);
+                let aColl;
+
+                aColl = collider.collides(m[0]);
+                expect(aColl.length).toBe(0); // y = 140
+
+                m[1].position().translate(new Vector(0, 167)); // y = 307
+                collider.track(m[0]);
+                collider.track(m[1]);
+                aColl = collider.collides(m[0]);
+                expect(m[1].position().y).toBe(307);
+                expect(aColl.length).toBe(0);
+
+                m[1].position().translate(new Vector(0, 20)); // y = 307
+                collider.track(m[0]);
+                collider.track(m[1]);
+                aColl = collider.collides(m[0]);
+                expect(m[1].position().y).toBe(327);
+                expect(m[0].position().y).toBe(332);
+                expect(m[1].position().x).toBe(212);
+                expect(m[0].position().x).toBe(212);
+                expect(aColl.length).toBe(1);
+            });
+        });
     });
 
 
+
+
+
+
+
     describe('algorithms', function() {
-        const Bresenham = o876.algorithms.Bresenham;
+    //   ##    #        ####    ####   #####      #     #####  #    #  #    #   ####
+    //  #  #   #       #    #  #    #  #    #     #       #    #    #  ##  ##  #
+    // #    #  #       #       #    #  #    #     #       #    ######  # ## #   ####
+    // ######  #       #  ###  #    #  #####      #       #    #    #  #    #       #
+    // #    #  #       #    #  #    #  #   #      #       #    #    #  #    #  #    #
+    // #    #  ######   ####    ####   #    #     #       #    #    #  #    #   ####
+
+
+
+
+
+
+        describe('Astar', function() {
+            //   ##     ####    #####    ##    #####
+            //  #  #   #          #     #  #   #    #
+            // #    #   ####      #    #    #  #    #
+            // ######       #     #    ######  #####
+            // #    #  #    #     #    #    #  #   #
+            // #    #   ####      #    #    #  #    #
+            describe('simple path find', function() {
+                const oAstar = new o876.algorithms.Astar();
+                oAstar.grid([
+                    ('*******').split(''),
+                    ('*   * *').split(''),
+                    ('*     *').split(''),
+                    ('* **  *').split(''),
+                    ('*  ** *').split(''),
+                    ('*  *  *').split(''),
+                    ('*******').split('')
+                ]).walkable(' ').diagonals(false);
+                it('should have initialized grid 7x7 grid', function() {
+                    expect(oAstar._grid.length).toEqual(7);
+                    expect(oAstar._grid[0].length).toEqual(7);
+                });
+                it('should have property width and height set to 7', function() {
+                    expect(oAstar._width).toEqual(7);
+                    expect(oAstar._height).toEqual(7);
+                });
+                it('should find the way', function() {
+                    const aExpected =
+                        [ { x: 5, y: 5 },
+                            { x: 5, y: 4 },
+                            { x: 5, y: 3 },
+                            { x: 4, y: 3 },
+                            { x: 4, y: 2 },
+                            { x: 3, y: 2 },
+                            { x: 2, y: 2 },
+                            { x: 1, y: 2 },
+                            { x: 1, y: 3 },
+                            { x: 1, y: 4 },
+                            { x: 1, y: 5 },
+                            { x: 2, y: 5 } ];
+                    let p = oAstar.find(4, 5, 2, 5);
+                    expect(p).toEqual(aExpected);
+                });
+            });
+
+            describe('impossible path', function() {
+                const oAstar = new o876.algorithms.Astar();
+                oAstar.grid([
+                    ('*******').split(''),
+                    ('*   * *').split(''),
+                    ('*  *  *').split(''),
+                    ('* **  *').split(''),
+                    ('*  ** *').split(''),
+                    ('*  *  *').split(''),
+                    ('*******').split('')
+                ]).walkable(' ').diagonals(false);
+                it('should not find path', function() {
+                    expect(() => oAstar.find(4, 5, 2, 5)).toThrow(new Error('Astar: no path to destination'));
+                });
+            });
+
+            describe('path is possible via diagonals', function() {
+                const oAstar = new o876.algorithms.Astar();
+                oAstar.grid([
+                    ('*******').split(''),
+                    ('*   * *').split(''),
+                    ('*  *  *').split(''),
+                    ('* **  *').split(''),
+                    ('*  ** *').split(''),
+                    ('*  *  *').split(''),
+                    ('*******').split('')
+                ]).walkable(' ').diagonals(true);
+                it('should not find path', function() {
+                    expect(Array.isArray(oAstar.find(4, 5, 2, 5))).toBeTruthy();
+                });
+            });
+        });
+
+
+// #####   #####   ######   ####   ######  #    #  #    #    ##    #    #
+// #    #  #    #  #       #       #       ##   #  #    #   #  #   ##  ##
+// #####   #    #  #####    ####   #####   # #  #  ######  #    #  # ## #
+// #    #  #####   #            #  #       #  # #  #    #  ######  #    #
+// #    #  #   #   #       #    #  #       #   ##  #    #  #    #  #    #
+// #####   #    #  ######   ####   ######  #    #  #    #  #    #  #    #
+
         describe('Bresenham', function() {
+            const Bresenham = o876.algorithms.Bresenham;
             it('should build a line', function() {
                 let aList = [];
                 let bOk = Bresenham.line(10, 10, 15, 12, function (x, y) {
@@ -96,7 +333,67 @@ describe('o876', function() {
                 expect(bOk).toBeTruthy();
             });
         });
+
+
+
+// ######    ##     ####      #    #    #   ####
+// #        #  #   #          #    ##   #  #    #
+// #####   #    #   ####      #    # #  #  #
+// #       ######       #     #    #  # #  #  ###
+// #       #    #  #    #     #    #   ##  #    #
+// ######  #    #   ####      #    #    #   ####
+
+        describe('Easing', function() {
+            describe('setting move', function() {
+                it('should initialize correctly', function() {
+                    const e = new o876.algorithms.Easing();
+                    e.from(4).to(17).during(10);
+                    expect(e.x).toEqual(4);
+                    expect(e.xStart).toEqual(4);
+                    expect(e.xEnd).toEqual(17);
+                    expect(e.nTime).toEqual(10);
+                    expect(e.iTime).toEqual(0);
+                });
+            });
+            describe('setting move', function() {
+                it('should correctly use a simple linear function', function() {
+                    const e = new o876.algorithms.Easing();
+                    e.from(4).to(17).during(10).use(function(v) {
+                        return v * 2;
+                    });
+                    expect(e.x).toEqual(4);
+                    expect(e.xStart).toEqual(4);
+                    expect(e.xEnd).toEqual(17);
+                    expect(e.nTime).toEqual(10);
+                    expect(e.iTime).toEqual(0);
+                    e.next();
+                    expect(e.val() * 10 | 0).toEqual(66);
+                    e.next();
+                    expect(e.val() * 10 | 0).toEqual(92);
+                    e.next();
+                    expect(e.val() * 10 | 0).toEqual(117);
+                    e.next();
+                    expect(e.val() * 10 | 0).toEqual(144);
+                    e.next();
+                    expect(e.val() * 10 | 0).toEqual(170);
+                });
+            });
+        });
     });
+
+
+
+
+
+
+
+//         #####  #######  #####
+//  ####  #     # #    #  #     #
+// #    # #     #     #   #
+// #    #  #####     #    ######
+// #    # #     #   #     #     #
+// #    # #     #   #     #     #
+//  ####   #####    #      #####
 
     describe('Rainbow', function() {
         it ('should parse colors without error', function() {
@@ -190,6 +487,132 @@ describe('o876', function() {
             ]);
             expect(a.length).toEqual(31);
         });
+    });
+
+
+
+//  ####   #####   ######  #       #       #####    ####    ####   #    #
+// #       #    #  #       #       #       #    #  #    #  #    #  #   #
+//  ####   #    #  #####   #       #       #####   #    #  #    #  ####
+//      #  #####   #       #       #       #    #  #    #  #    #  #  #
+// #    #  #       #       #       #       #    #  #    #  #    #  #   #
+//  ####   #       ######  ######  ######  #####    ####    ####   #    #
+
+    describe('SpellBook', function() {
+        describe('#array', function() {
+            it('should return the same array', function() {
+                let a = ['a', 'b', 'c'];
+                let b = o876.SpellBook.array(a);
+                expect(a).toEqual(b);
+                expect(a === b).toBeTruthy();
+            });
+            it('should convert a simple object', function() {
+                let aSource = {3:'t', 2:'o', 1: 'i', 0:'y'};
+                expect(o876.SpellBook.array(aSource))
+                    .toEqual(['y', 'i', 'o', 't']);
+            });
+            it('should convert a simple object with quoted keys', function() {
+                let aSource = {'3':'t', '2':'o', '1':'i', '0':'y'};
+                expect(o876.SpellBook.array(aSource))
+                    .toEqual(['y', 'i', 'o', 't']);
+            });
+            it('should convert an array like object', function() {
+                let aSource = {0:111, 1:222, 2:333, 3:444, 'length': 4};
+                expect(o876.SpellBook.array(aSource)).toEqual([111, 222, 333, 444]);
+            });
+            it('should fail to convert an array like object (bad length)', function() {
+                let aSource = {0:111, 1:222, 2:333, 3:444, 'length': 5};
+                expect(o876.SpellBook.array(aSource)).toBeFalsy();
+            });
+            it('should fail to convert an array like object (missing key)', function() {
+                let aSource = {0:111, 1:222, 2:333, 4:444};
+                expect(o876.SpellBook.array(aSource)).toBeFalsy();
+            });
+            it('should convert argument', function() {
+                let a;
+                (function() {
+                    a = o876.SpellBook.array(arguments);
+                })(4, 5, 6);
+                expect(a).toEqual([4, 5, 6]);
+            });
+        });
+
+        describe('#typeMap', function() {
+            it('should map this type', function() {
+                expect(o876.SpellBook.typeMap([1, 0, {}, [], null, true, false, Infinity, undefined, function() {}])).toEqual('nnoaubbnuf');
+            });
+        });
+
+        describe('#parseSearch', function() {
+            it ('should parse a simple query', function() {
+                expect(o876.SpellBook.parseSearch('?x=1&y=5')).toEqual({
+                    x: '1',
+                    y: '5'
+                });
+                expect(o876.SpellBook.parseSearch('?text=abc+def')).toEqual({
+                    text: 'abc def'
+                });
+            });
+        })
+    });
+
+    describe('Emitter', function() {
+        describe('#on', function() {
+            it('should trigger an event', function () {
+                const E = new o876.Emitter();
+                let sTemoin = 0;
+                E.on('test', function (v) {
+                    sTemoin = v;
+                });
+                expect('test' in E._oEventHandlers).toBeTruthy();
+                expect('on' in E._oEventHandlers.test).toBeTruthy();
+                expect('one' in E._oEventHandlers.test).toBeTruthy();
+                expect(Array.isArray(E._oEventHandlers.test.on)).toBeTruthy();
+                expect(Array.isArray(E._oEventHandlers.test.one)).toBeTruthy();
+                expect(E._oEventHandlers.test.on.length).toEqual(1);
+                expect(E._oEventHandlers.test.one.length).toEqual(0);
+                E.trigger('test', 10);
+                expect(sTemoin).toEqual(10);
+            });
+        });
+        describe('#one', function() {
+            it('should trigger an event only once', function() {
+                const E = new o876.Emitter();
+                let sTemoin = 0;
+                E.one('test', function(v) {
+                    sTemoin += v*2;
+                });
+                E.trigger('test', 44);
+                expect(sTemoin).toEqual(88);
+                E.trigger('test', 44);
+                expect(sTemoin).toEqual(88);
+                E.trigger('test', 44);
+                expect(sTemoin).toEqual(88);
+            });
+        });
+        describe('#off', function() {
+            it('should not trigger anything', function() {
+                const E = new o876.Emitter();
+                let sTemoin = 0;
+                let pHandler = function(v) {
+                    sTemoin += v*2;
+                };
+                let pHandler2 = function(v) {
+                    sTemoin += v*3;
+                };
+                E.on('test', pHandler);
+                E.on('test', pHandler2);
+                E.trigger('test', 4);
+                expect(sTemoin).toEqual(20);
+                E.off('test', pHandler);
+                E.trigger('test', 3);
+                expect(sTemoin).toEqual(29);
+                E.off('test', pHandler2);
+                E.trigger('test', 5);
+                expect(sTemoin).toEqual(29);
+            });
+        });
+
 
     });
 });

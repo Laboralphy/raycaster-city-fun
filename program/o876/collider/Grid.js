@@ -48,7 +48,7 @@ module.exports = class Grid {
 		if (w !== undefined) {
 			this._rebuild(w, this._height);
 		}
-        return sb.prop(this, '_width', x);
+        return sb.prop(this, '_width', w);
     }
 
     /**
@@ -61,7 +61,7 @@ module.exports = class Grid {
         if (h !== undefined) {
             this._rebuild(this._width, h);
         }
-        return sb.prop(this, '_height', x);
+        return sb.prop(this, '_height', h);
     }
 
     /**

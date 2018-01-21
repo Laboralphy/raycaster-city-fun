@@ -55,7 +55,7 @@ module.exports = class Astar {
 			this._grid[y][x] = n;
 		} else {
 			throw new Error(
-				'O876.Astar: writing tile out of Grid: ' + x + ', ' + y);
+				'Astar: writing tile out of Grid: ' + x + ', ' + y);
 		}
 	}
 
@@ -65,7 +65,7 @@ module.exports = class Astar {
 				return this._grid[y][x];
 			}
 		}
-		throw new Error('O876.Astar: read tile out of Grid: ' + x + ', ' + y);
+		throw new Error('Astar: read tile out of Grid: ' + x + ', ' + y);
 	}
 
 	_isCellWalkable(x, y) {
@@ -184,18 +184,18 @@ module.exports = class Astar {
 			oBest = this._bestNood(this.oOpList);
 			if (!oBest) {
 				// could not find path
-                throw new Error('O876.Astar: no path to destination');
+                throw new Error('Astar: no path to destination');
 			}
 			xCurrent = oBest.oPos.x;
 			yCurrent = oBest.oPos.y;
 			this._closeNood(xCurrent, yCurrent);
 			this._addAdjacent(oBest.oPos.x, oBest.oPos.y, xTo, yTo);
 			if (++iIter > MAX) {
-				throw new Error('O876.Astar: too much iterations');
+				throw new Error('Astar: too much iterations');
 			}
 		}
 		if (this.oOpList.empty() && !((xCurrent === xTo) && (yCurrent === yTo))) {
-			throw new Error('O876.Astar: no path to destination');
+			throw new Error('Astar: no path to destination');
 		}
 		this.nIterations = iIter;
 		this._buildPath(xTo, yTo);

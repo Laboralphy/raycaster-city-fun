@@ -3,14 +3,19 @@
  * This class manages a mobile object.
  */
 const sb = require('../SpellBook');
-const Vector2D = require('./Vector2D');
+const Vector2D = require('../geometry/Vector2D');
 
 module.exports = class Mobile {
 	constructor() {
-		this.position = new Vector2D();
+		this._position = new Vector2D();
         this._shape = null;
 		this._dead = false; // les mobile noté "dead" doivent être retiré du jeu
 		this._collider = null;
+	}
+
+	position(p) {
+		this.shape().position(p);
+        return sb.prop(this, '_position', p);
 	}
 
     /**
@@ -31,16 +36,6 @@ module.exports = class Mobile {
     shape(s) {
         return sb.prop(this, '_shape', s);
     }
-
-    /**
-	 * Renvoie la shape enrichie de la position actuelle du mobile
-     * @return {Shape}
-     */
-    shapeShifted() {
-    	let s = this._shape;
-    	s.position = this.position;
-    	return s;
-	}
 
     /**
 	 * Setter/Getter of an instance of Collider
