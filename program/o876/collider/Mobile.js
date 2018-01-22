@@ -14,7 +14,9 @@ module.exports = class Mobile {
 	}
 
 	position(p) {
-		this.shape().position(p);
+        if (p !== undefined && !!this._shape) {
+        	this._shape.position(p);
+		}
         return sb.prop(this, '_position', p);
 	}
 
@@ -34,7 +36,10 @@ module.exports = class Mobile {
      * @return {Shape|Mobile}
      */
     shape(s) {
-        return sb.prop(this, '_shape', s);
+		if (s !== undefined) {
+			s.position(this.position());
+		}
+		return sb.prop(this, '_shape', s);
     }
 
     /**

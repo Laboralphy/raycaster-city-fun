@@ -113,6 +113,59 @@ describe('o876', function() {
 
 
 
+
+        describe('shapes', function() {
+			//  ####   #    #    ##    #####   ######   ####
+			// #       #    #   #  #   #    #  #       #
+			//  ####   ######  #    #  #    #  #####    ####
+			//      #  #    #  ######  #####   #            #
+			// #    #  #    #  #    #  #       #       #    #
+			//  ####   #    #  #    #  #       ######   ####
+			const Vector = o876.geometry.Vector2D;
+            const Rect = o876.collider.shapes.Rect;
+			let s1 = new Rect(
+				new Vector(-10, -10),
+				new Vector(10, 10)
+			);
+			let s2 = new Rect(
+				new Vector(-15, -15),
+				new Vector(31, 12)
+			);
+			it('should collide', function() {
+				s1.position(new Vector(0, 0));
+				s2.position(new Vector(0, 0));
+				expect(s1.hits(s2)).toBeTruthy();
+				expect(s2.hits(s1)).toBeTruthy();
+			});
+			it('should not collide', function() {
+				s1.position(new Vector(100, 100));
+				s2.position(new Vector(0, 0));
+				expect(s1.hits(s2)).toBeFalsy();
+				expect(s2.hits(s1)).toBeFalsy();
+			});
+			it('should not collide - touching corner', function() {
+				s1.position(new Vector(0, 0));
+				s2.position(new Vector(26, 26));
+				expect(s1.hits(s2)).toBeFalsy();
+				expect(s2.hits(s1)).toBeFalsy();
+			});
+			it('should not collide - touching corner', function() {
+				s1.position(new Vector(0, 0));
+				s2.position(new Vector(25, 25));
+				expect(s1.hits(s2)).toBeFalsy();
+				expect(s2.hits(s1)).toBeFalsy();
+			});
+			it('should collide - overlapsing corner by 1', function() {
+				s1.position(new Vector(0, 0));
+				s2.position(new Vector(24, 24));
+				expect(s1.hits(s2)).toBeTruthy();
+				expect(s2.hits(s1)).toBeTruthy();
+			});
+        });
+
+
+
+
         describe('Collider', function() {
         //  ####    ####   #       #          #    #####   ######  #####
         // #    #  #    #  #       #          #    #    #  #       #    #
@@ -178,41 +231,151 @@ describe('o876', function() {
                 expect(collider.sector(7, 2).count()).toBe(0);
             });
 
-            it('should indicate the collision', function() {
-                let collider = new Collider();
-                collider.cellWidth(64).cellHeight(64);
-                collider.width(10).height(10);
-                let m = [
-                    new Mobile(),
-                    new Mobile()
-                ];
-                m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-                m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-                m[0].position().set(64 * 3 + 20, 64 * 5 + 12);
-                m[1].position().set(64 * 3 + 20, 64 * 2 + 12);
-                collider.track(m[0]);
-                collider.track(m[1]);
-                let aColl;
+            it('should have same instance between shap eand mobile', function() {
+                let m = new Mobile();
+                m.shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+            });
 
-                aColl = collider.collides(m[0]);
-                expect(aColl.length).toBe(0); // y = 140
+            it('should not collide - too far', function() {
+				let collider = new Collider();
+				collider.cellWidth(64).cellHeight(64);
+				collider.width(10).height(10);
+				let m = [
+					new Mobile(),
+					new Mobile()
+				];
+				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+				m[0].position().set(200, 300);
+				m[1].position().set(200, 0);
+				collider.track(m[0]);
+				collider.track(m[1]);
+				let aColl = collider.collides(m[0]);
+				expect(aColl.length).toBe(0);
+			});
 
-                m[1].position().translate(new Vector(0, 167)); // y = 307
-                collider.track(m[0]);
-                collider.track(m[1]);
-                aColl = collider.collides(m[0]);
-                expect(m[1].position().y).toBe(307);
-                expect(aColl.length).toBe(0);
+            it('should not collide - distance = far', function() {
+				let collider = new Collider();
+				collider.cellWidth(64).cellHeight(64);
+				collider.width(10).height(10);
+				let m = [
+					new Mobile(),
+					new Mobile()
+				];
+				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+				m[0].position().set(200, 300);
+				m[1].position().set(0, 200);
+				collider.track(m[0]);
+				collider.track(m[1]);
+				let aColl = collider.collides(m[0]);
+				expect(m[1].position().y).toBe(200);
+				expect(m[0].position().y).toBe(300);
+				expect(aColl.length).toBe(0);
+            });
 
-                m[1].position().translate(new Vector(0, 20)); // y = 307
-                collider.track(m[0]);
-                collider.track(m[1]);
-                aColl = collider.collides(m[0]);
-                expect(m[1].position().y).toBe(327);
-                expect(m[0].position().y).toBe(332);
-                expect(m[1].position().x).toBe(212);
-                expect(m[0].position().x).toBe(212);
-                expect(aColl.length).toBe(1);
+
+
+			it('should collide - distance = 10', function() {
+				let collider = new Collider();
+				collider.cellWidth(64).cellHeight(64);
+				collider.width(10).height(10);
+				let m = [
+					new Mobile(),
+					new Mobile()
+				];
+				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+				m[0].position().set(200, 300);
+				m[1].position().set(200, 290);
+				collider.track(m[0]);
+				collider.track(m[1]);
+				let aColl = collider.collides(m[0]);
+				// x
+				expect(m[0].position().x).toBe(200);
+				expect(m[1].position().x).toBe(200);
+				// y
+				expect(m[0].position().y).toBe(300);
+				expect(m[1].position().y).toBe(290);
+				// collision
+				expect(aColl.length).toBe(1);
+			});
+
+
+
+			it('should not collide - distance = 26 (should be below 25 collide)', function() {
+				let collider = new Collider();
+				collider.cellWidth(64).cellHeight(64);
+				collider.width(10).height(10);
+				let m = [
+					new Mobile(),
+					new Mobile()
+				];
+				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+				m[0].position().set(200, 290 + 15 + 11);
+				m[1].position().set(200, 290);
+				collider.track(m[0]);
+				collider.track(m[1]);
+				let aColl = collider.collides(m[0]);
+				// x
+				expect(m[0].position().x).toBe(200);
+				expect(m[1].position().x).toBe(200);
+				// y
+				expect(m[0].position().y).toBe(316);
+				expect(m[1].position().y).toBe(290); // diff 26 >= 15 + 10
+				// collision
+				expect(aColl.length).toBe(0);
+			});
+
+            it('should not collide - distance = 25 (should be below 25 collide)', function() {
+				let collider = new Collider();
+				collider.cellWidth(64).cellHeight(64);
+				collider.width(10).height(10);
+				let m = [
+					new Mobile(),
+					new Mobile()
+				];
+				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+				m[0].position().set(200, 290 + 15 + 10);
+				m[1].position().set(200, 290);
+				collider.track(m[0]);
+				collider.track(m[1]);
+				let aColl = collider.collides(m[0]);
+				// x
+				expect(m[0].position().x).toBe(200);
+				expect(m[1].position().x).toBe(200);
+				// y
+				expect(m[0].position().y).toBe(315);
+				expect(m[1].position().y).toBe(290); // diff 25 >= 15 + 10
+				// collision
+				expect(aColl.length).toBe(0);
+			});
+
+            it('should collide - distance = 24 (should be below 25 collide)', function() {
+				let collider = new Collider();
+				collider.cellWidth(64).cellHeight(64);
+				collider.width(10).height(10);
+				let m = [
+					new Mobile(),
+					new Mobile()
+				];
+				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
+				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
+				m[0].position().set(200, 290 + 14 + 10);
+				m[1].position().set(200, 290);
+				collider.track(m[0]);
+				collider.track(m[1]);
+				aColl = collider.collides(m[0]);
+				// x
+				expect(m[0].position().x).toBe(200);
+				expect(m[1].position().x).toBe(200);
+				// y
+				expect(m[0].position().y).toBe(314);
+				expect(m[1].position().y).toBe(290); // diff 24 !>= 15 + 10
+				// collision
+				expect(aColl.length).toBe(1);
             });
         });
     });
@@ -491,12 +654,12 @@ describe('o876', function() {
 
 
 
-//  ####   #####   ######  #       #       #####    ####    ####   #    #
-// #       #    #  #       #       #       #    #  #    #  #    #  #   #
-//  ####   #    #  #####   #       #       #####   #    #  #    #  ####
-//      #  #####   #       #       #       #    #  #    #  #    #  #  #
-// #    #  #       #       #       #       #    #  #    #  #    #  #   #
-//  ####   #       ######  ######  ######  #####    ####    ####   #    #
+    //  ####   #####   ######  #       #       #####    ####    ####   #    #
+    // #       #    #  #       #       #       #    #  #    #  #    #  #   #
+    //  ####   #    #  #####   #       #       #####   #    #  #    #  ####
+    //      #  #####   #       #       #       #    #  #    #  #    #  #  #
+    // #    #  #       #       #       #       #    #  #    #  #    #  #   #
+    //  ####   #       ######  ######  ######  #####    ####    ####   #    #
 
     describe('SpellBook', function() {
         describe('#array', function() {
@@ -612,7 +775,5 @@ describe('o876', function() {
                 expect(sTemoin).toEqual(29);
             });
         });
-
-
     });
 });
