@@ -123,4 +123,20 @@ module.exports = class Vector2D {
 		this.y *= f;
 		return this;
 	}
+
+    /**
+	 * Converti le vecteur en point dont les coordonnées sont les composantes du vecteur
+	 * @return Point
+     */
+	point() {
+		return new Point(this.x, this.y);
+	}
+
+    /**
+	 * Renvoie l'angle entre le vecteur et l'axe X
+	 * si le vecteur est dans la direction x+ alors l'angle = 0
+     */
+	angle() {
+		Math.atan2(this.y, this.x);
+	}
 };

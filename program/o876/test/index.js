@@ -21,8 +21,6 @@ describe('o876', function() {
         const Vector2D = o876.geometry.Vector2D;
 
 
-
-
         //                                                 #####  ######
         // #    #  ######   ####    #####   ####   #####  #     # #     #
         // #    #  #       #    #     #    #    #  #    #       # #     #
@@ -31,7 +29,7 @@ describe('o876', function() {
         //  #  #   #       #    #     #    #    #  #   #  #       #     #
         //   ##    ######   ####      #     ####   #    # ####### ######
 
-        describe('Vector', function() {
+        describe('Vector', function () {
             describe('initialisation 0', function () {
                 it('creates a zero vector', function () {
                     let v = new Vector2D();
@@ -48,6 +46,15 @@ describe('o876', function() {
                 });
             });
 
+            describe('point', function() {
+                it('creates a point from vector', function() {
+                    let v = new Vector2D(3, 8);
+                    let p = v.point();
+                    expect(p.x).toBe(3);
+                    expect(p.y).toBe(8);
+                })
+            });
+
             describe('cloning', function () {
                 it('properly clones a vector', function () {
                     let v = new Vector2D(-7, 66);
@@ -58,16 +65,16 @@ describe('o876', function() {
                 });
             });
 
-            describe('zero vector', function() {
-                it('should build a 0, 0 vector', function() {
+            describe('zero vector', function () {
+                it('should build a 0, 0 vector', function () {
                     let v = Vector2D.zero();
                     expect(v.x).toEqual(0);
                     expect(v.y).toEqual(0);
                 });
             });
 
-            describe('adding two vectors', function() {
-                it('should add 2 vectors', function() {
+            describe('adding two vectors', function () {
+                it('should add 2 vectors', function () {
                     let v1 = new Vector2D(10, 15);
                     let v2 = new Vector2D(2, -2);
                     let v3 = v1.add(v2);
@@ -81,8 +88,8 @@ describe('o876', function() {
                 });
             });
 
-            describe('scaling a vector', function() {
-                it('should scale a vector', function() {
+            describe('scaling a vector', function () {
+                it('should scale a vector', function () {
                     let v1 = new Vector2D(30, 4);
                     let v2 = v1.mul(6);
                     expect(v1.x).toEqual(30);
@@ -92,19 +99,19 @@ describe('o876', function() {
                 });
             });
 
-            describe('get vector distance', function() {
-                it('should compute vector distance', function() {
+            describe('get vector distance', function () {
+                it('should compute vector distance', function () {
                     let v = new Vector2D(5, 5);
                     expect(v.distance()).toBeCloseTo(5 * Math.sqrt(2), 4);
                 });
-                it('should compute vector distance 2', function() {
+                it('should compute vector distance 2', function () {
                     let v = new Vector2D(-3, 2);
                     expect(v.distance()).toBeCloseTo(Math.sqrt(9 + 4), 4);
                 });
             });
 
-            describe('normalize vector', function() {
-                it('should build a normalized vector', function() {
+            describe('normalize vector', function () {
+                it('should build a normalized vector', function () {
                     let v = new Vector2D(64, 4123);
                     expect(v.normalize().distance()).toBeCloseTo(1, 5);
                 });
@@ -112,274 +119,51 @@ describe('o876', function() {
         });
 
 
-
-
-        describe('shapes', function() {
-			//  ####   #    #    ##    #####   ######   ####
-			// #       #    #   #  #   #    #  #       #
-			//  ####   ######  #    #  #    #  #####    ####
-			//      #  #    #  ######  #####   #            #
-			// #    #  #    #  #    #  #       #       #    #
-			//  ####   #    #  #    #  #       ######   ####
-			const Vector = o876.geometry.Vector2D;
-            const Rect = o876.collider.shapes.Rect;
-			let s1 = new Rect(
-				new Vector(-10, -10),
-				new Vector(10, 10)
-			);
-			let s2 = new Rect(
-				new Vector(-15, -15),
-				new Vector(31, 12)
-			);
-			it('should collide', function() {
-				s1.position(new Vector(0, 0));
-				s2.position(new Vector(0, 0));
-				expect(s1.hits(s2)).toBeTruthy();
-				expect(s2.hits(s1)).toBeTruthy();
-			});
-			it('should not collide', function() {
-				s1.position(new Vector(100, 100));
-				s2.position(new Vector(0, 0));
-				expect(s1.hits(s2)).toBeFalsy();
-				expect(s2.hits(s1)).toBeFalsy();
-			});
-			it('should not collide - touching corner', function() {
-				s1.position(new Vector(0, 0));
-				s2.position(new Vector(26, 26));
-				expect(s1.hits(s2)).toBeFalsy();
-				expect(s2.hits(s1)).toBeFalsy();
-			});
-			it('should not collide - touching corner', function() {
-				s1.position(new Vector(0, 0));
-				s2.position(new Vector(25, 25));
-				expect(s1.hits(s2)).toBeFalsy();
-				expect(s2.hits(s1)).toBeFalsy();
-			});
-			it('should collide - overlapsing corner by 1', function() {
-				s1.position(new Vector(0, 0));
-				s2.position(new Vector(24, 24));
-				expect(s1.hits(s2)).toBeTruthy();
-				expect(s2.hits(s1)).toBeTruthy();
-			});
-        });
-
-
-
-
-        describe('Collider', function() {
-        //  ####    ####   #       #          #    #####   ######  #####
-        // #    #  #    #  #       #          #    #    #  #       #    #
-        // #       #    #  #       #          #    #    #  #####   #    #
-        // #       #    #  #       #          #    #    #  #       #####
-        // #    #  #    #  #       #          #    #    #  #       #   #
-        //  ####    ####   ######  ######     #    #####   ######  #    #
+        describe('Collider', function () {
+            //  ####    ####   #       #          #    #####   ######  #####
+            // #    #  #    #  #       #          #    #    #  #       #    #
+            // #       #    #  #       #          #    #    #  #####   #    #
+            // #       #    #  #       #          #    #    #  #       #####
+            // #    #  #    #  #       #          #    #    #  #       #   #
+            //  ####    ####   ######  ######     #    #####   ######  #    #
             const Collider = o876.collider.Collider;
             const Mobile = o876.collider.Mobile;
-            const Rect = o876.collider.shapes.Rect;
             const Vector = o876.geometry.Vector2D;
 
-            it('should create good rects', function() {
-                let r1 = new Rect(new Vector(15, 15), new Vector(-15, -15));
-                let r2 = new Rect(new Vector(15, -15), new Vector(-15, 15));
-                let r3 = new Rect(new Vector(-15, 15), new Vector(15, -15));
-                let r4 = new Rect(new Vector(-15, -15), new Vector(15, 15));
-                expect(r1._p1.x).toBe(-15);
-                expect(r2._p1.x).toBe(-15);
-                expect(r3._p1.x).toBe(-15);
-                expect(r4._p1.x).toBe(-15);
-                expect(r1._p1.y).toBe(-15);
-                expect(r2._p1.y).toBe(-15);
-                expect(r3._p1.y).toBe(-15);
-                expect(r4._p1.y).toBe(-15);
-                expect(r1._p2.x).toBe(15);
-                expect(r2._p2.x).toBe(15);
-                expect(r3._p2.x).toBe(15);
-                expect(r4._p2.x).toBe(15);
-                expect(r1._p2.y).toBe(15);
-                expect(r2._p2.y).toBe(15);
-                expect(r3._p2.y).toBe(15);
-                expect(r4._p2.y).toBe(15);
+            describe('Mobile', function() {
+                let m1 = new Mobile();
+                let m2 = new Mobile();
+                m1.radius(10);
+                m2.radius(15);
+                m1.position(new Vector(100, 50));
+
+                it('should not collide : distance 50', function() {
+                    m2.position(new Vector(100, 100));
+                    expect(m1.hits(m2)).toBeFalsy();
+                    expect(m2.hits(m1)).toBeFalsy();
+                });
+
+
+                it('should not collide : distance 25', function() {
+                    m2.position().set(100, 50 + 10 + 15);
+                    expect(m1.hits(m2)).toBeFalsy();
+                    expect(m2.hits(m1)).toBeFalsy();
+                });
+
+
+                it('should collide : distance 24.5', function() {
+                    m2.position().set(100, 50 + 10 + 14);
+                    expect(m1.distanceTo(m2)).toBe(24);
+                    expect(m1.position().y).toBe(50);
+                    expect(m2.position().y).toBe(74);
+                    expect(m2.radius() + m1.radius()).toBe(15 + 10);
+                    expect(m1.hits(m2)).toBeTruthy();
+                    expect(m2.hits(m1)).toBeTruthy();
+                });
             });
 
-            it('should instanciate', function() {
-                let collider = new Collider();
-                expect(collider).toBeDefined();
-            });
-
-            it('should count the exact number of mobiles', function() {
-                let collider = new Collider();
-                collider.cellWidth(64).cellHeight(64);
-                collider.width(10).height(10);
-                let m = [
-                    new Mobile(),
-                    new Mobile()
-                ];
-                m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-                m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-                m[0].position().set(64 * 3 + 20, 64 * 5 + 12);
-                m[1].position().set(64 * 7 + 20, 64 * 2 + 12);
-                collider.track(m[0]);
-                collider.track(m[1]);
-                expect(collider.sector(m[0].position()).count()).toBe(1);
-                expect(collider.sector(3, 5).count()).toBe(1);
-                expect(collider.sector(0, 0).count()).toBe(0);
-                expect(collider.sector(7, 2).count()).toBe(1);
-                m[1].position().set(64 * 3 + 40, 64 * 5 + 32);
-                collider.track(m[0]);
-                collider.track(m[1]);
-                expect(collider.sector(3, 5).count()).toBe(2);
-                expect(collider.sector(7, 2).count()).toBe(0);
-            });
-
-            it('should have same instance between shap eand mobile', function() {
-                let m = new Mobile();
-                m.shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-            });
-
-            it('should not collide - too far', function() {
-				let collider = new Collider();
-				collider.cellWidth(64).cellHeight(64);
-				collider.width(10).height(10);
-				let m = [
-					new Mobile(),
-					new Mobile()
-				];
-				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-				m[0].position().set(200, 300);
-				m[1].position().set(200, 0);
-				collider.track(m[0]);
-				collider.track(m[1]);
-				let aColl = collider.collides(m[0]);
-				expect(aColl.length).toBe(0);
-			});
-
-            it('should not collide - distance = far', function() {
-				let collider = new Collider();
-				collider.cellWidth(64).cellHeight(64);
-				collider.width(10).height(10);
-				let m = [
-					new Mobile(),
-					new Mobile()
-				];
-				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-				m[0].position().set(200, 300);
-				m[1].position().set(0, 200);
-				collider.track(m[0]);
-				collider.track(m[1]);
-				let aColl = collider.collides(m[0]);
-				expect(m[1].position().y).toBe(200);
-				expect(m[0].position().y).toBe(300);
-				expect(aColl.length).toBe(0);
-            });
-
-
-
-			it('should collide - distance = 10', function() {
-				let collider = new Collider();
-				collider.cellWidth(64).cellHeight(64);
-				collider.width(10).height(10);
-				let m = [
-					new Mobile(),
-					new Mobile()
-				];
-				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-				m[0].position().set(200, 300);
-				m[1].position().set(200, 290);
-				collider.track(m[0]);
-				collider.track(m[1]);
-				let aColl = collider.collides(m[0]);
-				// x
-				expect(m[0].position().x).toBe(200);
-				expect(m[1].position().x).toBe(200);
-				// y
-				expect(m[0].position().y).toBe(300);
-				expect(m[1].position().y).toBe(290);
-				// collision
-				expect(aColl.length).toBe(1);
-			});
-
-
-
-			it('should not collide - distance = 26 (should be below 25 collide)', function() {
-				let collider = new Collider();
-				collider.cellWidth(64).cellHeight(64);
-				collider.width(10).height(10);
-				let m = [
-					new Mobile(),
-					new Mobile()
-				];
-				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-				m[0].position().set(200, 290 + 15 + 11);
-				m[1].position().set(200, 290);
-				collider.track(m[0]);
-				collider.track(m[1]);
-				let aColl = collider.collides(m[0]);
-				// x
-				expect(m[0].position().x).toBe(200);
-				expect(m[1].position().x).toBe(200);
-				// y
-				expect(m[0].position().y).toBe(316);
-				expect(m[1].position().y).toBe(290); // diff 26 >= 15 + 10
-				// collision
-				expect(aColl.length).toBe(0);
-			});
-
-            it('should not collide - distance = 25 (should be below 25 collide)', function() {
-				let collider = new Collider();
-				collider.cellWidth(64).cellHeight(64);
-				collider.width(10).height(10);
-				let m = [
-					new Mobile(),
-					new Mobile()
-				];
-				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-				m[0].position().set(200, 290 + 15 + 10);
-				m[1].position().set(200, 290);
-				collider.track(m[0]);
-				collider.track(m[1]);
-				let aColl = collider.collides(m[0]);
-				// x
-				expect(m[0].position().x).toBe(200);
-				expect(m[1].position().x).toBe(200);
-				// y
-				expect(m[0].position().y).toBe(315);
-				expect(m[1].position().y).toBe(290); // diff 25 >= 15 + 10
-				// collision
-				expect(aColl.length).toBe(0);
-			});
-
-            it('should collide - distance = 24 (should be below 25 collide)', function() {
-				let collider = new Collider();
-				collider.cellWidth(64).cellHeight(64);
-				collider.width(10).height(10);
-				let m = [
-					new Mobile(),
-					new Mobile()
-				];
-				m[0].shape(new Rect(new Vector(-15, -15), new Vector(15, 15)));
-				m[1].shape(new Rect(new Vector(-10, -10), new Vector(10, 10)));
-				m[0].position().set(200, 290 + 14 + 10);
-				m[1].position().set(200, 290);
-				collider.track(m[0]);
-				collider.track(m[1]);
-				aColl = collider.collides(m[0]);
-				// x
-				expect(m[0].position().x).toBe(200);
-				expect(m[1].position().x).toBe(200);
-				// y
-				expect(m[0].position().y).toBe(314);
-				expect(m[1].position().y).toBe(290); // diff 24 !>= 15 + 10
-				// collision
-				expect(aColl.length).toBe(1);
-            });
         });
     });
-
 
 
 
