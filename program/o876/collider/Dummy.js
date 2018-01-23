@@ -12,7 +12,6 @@ module.exports = class Mobile {
 	constructor() {
 		this._position = new Vector();
 		this._dead = false; // les mobile noté "dead" doivent être retiré du jeu
-		this._collider = null;
 		this._radius = 0;
 	}
 
@@ -43,26 +42,6 @@ module.exports = class Mobile {
     dead(b) {
         return sb.prop(this, '_dead', b);
     }
-
-
-    /**
-	 * Setter/Getter of an instance of Collider
-     * @param c {Collider}
-     * @return {Collider|Mobile}
-     */
-    collider(c) {
-        return sb.prop(this, '_collider', c);
-	}
-
-    /**
-	 * Processes time; animation, flight, and collisions will be processed.
-     * @param nTime {number} the time advances
-     */
-	process(nTime) {
-		if (this._collider) {
-			this._collider.track(this);
-		}
-	}
 
     /**
 	 * Calcule la distance entre le mobile et un autre mobile

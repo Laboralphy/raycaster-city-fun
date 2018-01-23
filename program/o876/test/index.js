@@ -148,12 +148,12 @@ describe('o876', function() {
             // #    #  #    #  #       #          #    #    #  #       #   #
             //  ####    ####   ######  ######     #    #####   ######  #    #
             const Collider = o876.collider.Collider;
-            const Mobile = o876.collider.Mobile;
+            const Dummy = o876.collider.Dummy;
             const Vector = o876.geometry.Vector;
 
             describe('Mobile', function() {
-                let m1 = new Mobile();
-                let m2 = new Mobile();
+                let m1 = new Dummy();
+                let m2 = new Dummy();
                 m1.radius(10);
                 m2.radius(15);
                 m1.position(new Vector(100, 50));

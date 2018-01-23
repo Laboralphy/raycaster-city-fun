@@ -7,22 +7,48 @@
 const o876 = require('../../o876');
 const Vector = o876.geometry.Vector;
 const RC_CONST = require('../consts/raycaster');
+const Location = require('./Location');
+
+const FORCE_NORM = 10;
+
 
 module.exports = class Mobile {
 	constructor() {
 		// position & angle
-		this.location = new o876.geometry.Location();
+		this.location = new Location();
 		// vitesse de déplacement
 		this.speed = new Vector(0, 0);
 		// ensembles des forces appliquées au mobiles
 		this._forces = [];
 		this._collider = null;
-		this._collisionMobile = null;
-		this.size = 16;
+		this._size = 16;
 		this.wallCollisions = Vector.zero();
+		this._dummy = null;
 	}
 
+	/**
+	 * Permet de supprimer le mobile du collisionner
+	 */
+	finalize() {
+		let cm = this._dummy;
+		if (cm) {
+			cm.dead(true);
+			this._dummy = null;
+			this._collider = null;
+		}
+	}
+
+	/**
+	 * setter/getter du collisionneur
+	 * @param c {o876.collider.collider}
+	 * @returns {*}
+	 */
 	collider(c) {
+		if (!this._dummy) {
+			let cm = new o876.collider.Dummy();
+			cm._mobile = this;
+			this._dummy = cm;
+		}
 		return o876.SpellBook.prop(this, '_collider', c);
 	}
 
@@ -57,8 +83,8 @@ module.exports = class Mobile {
      * Défini la taille physique du mobile, pour les collisions
      * @param n {number}
      */
-	setSize(n) {
-		this.size = n;
+	size(n) {
+		return o876.SpellBook.prop(this, '_size', n);
 	}
 
 	/**
@@ -165,20 +191,34 @@ module.exports = class Mobile {
 		};
 	}
 
+	/**
+	 * Mise à jour du Dummy de collision
+	 * @returns {null|*}
+	 */
+	dummy() {
+		let cm = this._dummy;
+		cm.radius(this._size);
+		cm.position(this.location.position());
+		this._collider.track(cm);
+		return cm;
+	}
+
     /**
      * Teste si le mobile spécifié entre en collision avec un autre mobile.
-     * @param oMobile {Mobile}
      */
     computeMobileCollisions() {
-    	let collider = this.collider();
-    	let cm = this._collisionMobile;
-    	if (collider && cm) {
-    		cm.position().set(this.location);
-    		collider.track(cm);
-    		let collider.collides(cm)) {
-
-			}
-		}
+    	let cm = this.dummy();
+		let aMobHits = this.collider().collides(cm);
+		let vPos = this.location.position();
+		// ajouter un vecteur force à tous ces mobiles
+		aMobHits.forEach(m =>
+			this.force(
+				vPos.sub(m.position())
+					.normalize()
+					.scale((cm.radius() + m.radius() - cm.distanceTo(m)) / 2),
+				0
+			)
+		);
     }
 
     /**
@@ -188,17 +228,17 @@ module.exports = class Mobile {
 	 */
 	move(vSpeed) {
 		let oLocation = this.location;
-        let vPos = new Vector(oLocation);
+        let vPos = oLocation.position();
         let area = oLocation.area();
         this.computeWallCollisions(
             vPos,
             vSpeed,
-            this.size,
+            this._size,
             RC_CONST.rc_plane_spacing,
             this.wallCollisions,
             false,
             (x, y) => area.isSolidPoint(x, y)
         );
-        this.location.set(vPos.add(vSpeed));
+        this.location.position(vPos.add(vSpeed));
 	}
 };

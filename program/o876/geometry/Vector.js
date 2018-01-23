@@ -133,4 +133,8 @@ module.exports = class Vector {
 	angle() {
 		return Helper.angle(0, 0, this.x, this.y);
 	}
+
+	toString() {
+		return [this.x, this.y].map(n => n.toString()).join(':');
+	}
 };

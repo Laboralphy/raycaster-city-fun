@@ -1,7 +1,7 @@
-const Mobile = require('./Mobile');
+const Dummy = require('./Dummy');
 const Collider = require('./Collider');
 
 module.exports = {
-    Mobile,
+    Dummy,
     Collider
 };

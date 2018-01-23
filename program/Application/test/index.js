@@ -348,103 +348,90 @@ describe('model', function() {
 				expect(v.wcf.x).toBe(-1);
 				expect(v.wcf.y).toBe(0);
 			});
-
-			/*
-						it ('should not collide while going east', function() {
-							let v = Mobile.computeWallCollisions(
-								new Vector(55, 53),
-								new Vector(8, 0),
-								4,
-								10,
-								false,
-								collisionWest
-							);
-							expect(v.delta.x).toBe(8);
-							expect(v.delta.y).toBe(0);
-							expect(v.wcf.x).toBe(0);
-							expect(v.wcf.y).toBe(0);
-						});
-
-						it ('should collide with east wall while going east', function() {
-							let vPos = new Vector(55, 53);
-							let vSpeed = new Vector(8, 0);
-							let nSize = 2;
-							let nPlaneSpacing = 10;
-							let wcf = {x: 0, y: 0}; // wall collision flags
-							let delta = new Vector(vSpeed);
-							let dx = vSpeed.x;
-							let dy = vSpeed.y;
-							let x = vPos.x;
-							let y = vPos.y;
-							let iIgnoredEye = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx === dy && dx < 0) ? 2 : 0);
-							let xClip, yClip, ix, iy, xci, yci;
-							let bCorrection = false;
-
-							expect(iIgnoredEye).toBe(3);
-
-
-							let i = 0;
-							xci = (i & 1) * Math.sign(2 - i);
-							yci = ((3 - i) & 1) * Math.sign(i - 1);
-							ix = nSize * xci + x;
-							iy = nSize * yci + y;
-
-							expect(xci).toBe(0);
-							expect(yci).toBe(-1);
-							expect(x).toBe(55);
-							expect(y).toBe(53);
-							expect(ix).toBe(55);
-							expect(iy).toBe(51);
-							expect(dx).toBe(8);
-							expect(dy).toBe(0);
-
-							xClip = collisionEast(ix + dx, iy);
-							yClip = collisionEast(ix, iy + dy);
-
-							expect(ix + dx).toBe(63);
-
-							expect(xClip).toBeFalsy();
-							expect(yClip).toBeFalsy();
-
-							let v = Mobile.computeWallCollisions(
-								new Vector(55, 53),
-								new Vector(8, 0),
-								2,
-								10,
-								false,
-								collisionEast
-							);
-							expect(v.delta.x).toBe(2);
-							expect(v.delta.y).toBe(0);
-							expect(v.wcf.x).toBe(1);
-							expect(v.wcf.y).toBe(0);
-						});
-
-
-						it ('should not collide while going south', function() {
-							let v = Mobile.resolveWallCollision(
-								new Vector(55, 55),
-								new Vector(0, 5),
-								2,
-								10,
-								0b0000
-							);
-							expect(v.x).toBe(0);
-							expect(v.y).toBe(5);
-						});
-
-						it ('should collide with west wall while going south', function() {
-							let v = Mobile.resolveWallCollision(
-								new Vector(55, 55),
-								new Vector(0, 5),
-								2,
-								10,
-								0b0100
-							);
-							expect(v.x).toBe(0);
-							expect(v.y).toBe(2);
-						});*/
         });
+
+		describe('mobile collision', function() {
+			const o876 = require('../../o876');
+
+			// innstancier collider
+			const collider = new o876.collider.Collider();
+			collider
+				.cellWidth(100)
+				.cellHeight(100)
+				.width(10)
+				.height(10);
+			// créer des mobiles
+			let m = [
+				new Mobile(),
+				new Mobile(),
+				new Mobile(),
+				new Mobile()
+			];
+
+			m.forEach(mob => mob.collider(collider));
+
+			it('should not collide', function() {
+				m[0].size(10).location.position(new Vector(200, 155));
+				m[1].size(10).location.position(new Vector(250, 155));
+				m[2].size(10).location.position(new Vector(200, 255));
+				m[3].size(10).location.position(new Vector(250, 255));
+				m.forEach(mob => collider.track(mob._dummy));
+
+				expect(m[0].forces().toString()).toBe('0:0');
+				expect(m[1].forces().toString()).toBe('0:0');
+				expect(m[2].forces().toString()).toBe('0:0');
+				expect(m[3].forces().toString()).toBe('0:0');
+			});
+
+			it('should collide and have force (2 mobs)', function() {
+				m[0].size(10).location.position(new Vector(200, 155));
+				m[1].size(10).location.position(new Vector(203, 155));
+				m[2].size(10).location.position(new Vector(200, 255));
+				m[3].size(10).location.position(new Vector(250, 255));
+				let d = m.map(mob => mob.dummy());
+
+
+				expect(d[0].position().x).toBe(200);
+				expect(d[0].position().y).toBe(155);
+				expect(d[1].position().x).toBe(203);
+				expect(d[1].position().y).toBe(155);
+
+
+				expect(m[0]._dummy.distanceTo(m[1]._dummy)).toBe(3);
+				expect(m[0]._dummy.hits(m[1]._dummy)).toBeTruthy();
+
+				m.forEach(mob => collider.track(mob._dummy));
+				m.forEach((mob, i) => mob.computeMobileCollisions(i));
+
+				expect(m[0].forces().toString()).toBe('-8.5:0');
+				expect(m[1].forces().toString()).toBe('8.5:0');
+				expect(m[2].forces().toString()).toBe('0:0');
+				expect(m[3].forces().toString()).toBe('0:0');
+			});
+
+
+			it('should collide and have force (3 mobs)', function() {
+				m[0].size(10).location.position(new Vector(103, 107));
+				m[1].size(10).location.position(new Vector(116, 104));
+				m[2].size(10).location.position(new Vector(110, 113));
+				m[3].size(10).location.position(new Vector(250, 255));
+				let d = m.map(mob => mob.dummy());
+				expect(d[0].distanceTo(d[1])).toBeCloseTo(13.341664064, 4);
+				expect(d[0].distanceTo(d[2])).toBeCloseTo(9.219544457, 4);
+				expect(d[1].distanceTo(d[2])).toBeCloseTo(10.816653826, 4);
+				m.forEach(mob => collider.track(mob._dummy));
+				m.forEach((mob, i) => mob.computeMobileCollisions());
+				let f = m.map(mob => mob.forces());
+				expect(f[0].x).toBeCloseTo(-15.836477980599165, 4);
+				expect(f[0].y).toBeCloseTo(-2.7593186675721006, 4);
+				expect(f[1].x).toBeCloseTo(14.290913919198491, 4);
+				expect(f[1].y).toBeCloseTo(-4.56909801036602, 4);
+				expect(f[2].x).toBeCloseTo(1.5455640614006745, 4);
+				expect(f[2].y).toBeCloseTo(7.328416677938121, 4);
+
+			});
+
+		});
 	});
 });
 
