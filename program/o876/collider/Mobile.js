@@ -3,11 +3,14 @@
  * This class manages a mobile object.
  */
 const sb = require('../SpellBook');
-const Vector2D = require('../geometry/Vector2D');
+const geometry = require('../geometry');
+const Helper = geometry.Helper;
+const Vector = geometry.Vector;
+const Point = geometry.Point;
 
 module.exports = class Mobile {
 	constructor() {
-		this._position = new Vector2D();
+		this._position = new Vector();
 		this._dead = false; // les mobile noté "dead" doivent être retiré du jeu
 		this._collider = null;
 		this._radius = 0;
@@ -67,7 +70,9 @@ module.exports = class Mobile {
      * @returns {*|float|number}
      */
 	distanceTo(oOther) {
-        return this.position().point().distance(oOther.position().point());
+		let p1 = this.position();
+		let p2 = oOther.position();
+        return Helper.distance(p1.x, p1.y, p2.x, p2.y);
 	}
 
     /**
@@ -76,8 +81,9 @@ module.exports = class Mobile {
      * @returns {number}
      */
 	angleTo(oOther) {
-
-		return 0;
+        let p1 = this.position();
+        let p2 = oOther.position();
+        return Helper.angle(p1.x, p1.y, p2.x, p2.y);
 	}
 
     /**

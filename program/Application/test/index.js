@@ -245,7 +245,7 @@ describe('model', function() {
 	describe('Mobile', function() {
 		const Mobile = require('../model/Mobile');
 		const o876 = require('../../o876');
-		const Vector2D = o876.geometry.Vector2D;
+		const Vector = o876.geometry.Vector;
 
 
 		describe('wall collisions', function() {
@@ -264,8 +264,8 @@ describe('model', function() {
 
             it ('should not collide while going north', function() {
                 let r = Mobile.computeWallCollisions(
-					new Vector2D(57, 53),
-					new Vector2D(0, -2),
+					new Vector(57, 53),
+					new Vector(0, -2),
                     2,
                     10,
 					false,
@@ -281,8 +281,8 @@ describe('model', function() {
 
 			it ('should collide with north wall while going north', function() {
                 let r = Mobile.computeWallCollisions(
-                    new Vector2D(57, 53),
-                    new Vector2D(0, -2),
+                    new Vector(57, 53),
+                    new Vector(0, -2),
                     2,
                     10,
                     false,
@@ -298,8 +298,8 @@ describe('model', function() {
 
 			it ('should not collide while going west', function() {
                 let v = Mobile.computeWallCollisions(
-                    new Vector2D(57, 53),
-                    new Vector2D(-8, 0),
+                    new Vector(57, 53),
+                    new Vector(-8, 0),
                     4,
                     10,
                     false,
@@ -315,8 +315,8 @@ describe('model', function() {
 
 			it ('should collide with west wall while going west', function() {
 				let v = Mobile.computeWallCollisions(
-					new Vector2D(57.5, 53),
-					new Vector2D(-7, 0),
+					new Vector(57.5, 53),
+					new Vector(-7, 0),
 					4,
 					10,
 					false,
@@ -333,8 +333,8 @@ describe('model', function() {
 
 			it ('should collide with west wall while going west', function() {
 				let v = Mobile.computeWallCollisions(
-					new Vector2D(57.5, 53),
-					new Vector2D(-8, 0),
+					new Vector(57.5, 53),
+					new Vector(-8, 0),
 					4,
 					10,
 					false,
@@ -352,8 +352,8 @@ describe('model', function() {
 			/*
 						it ('should not collide while going east', function() {
 							let v = Mobile.computeWallCollisions(
-								new Vector2D(55, 53),
-								new Vector2D(8, 0),
+								new Vector(55, 53),
+								new Vector(8, 0),
 								4,
 								10,
 								false,
@@ -366,12 +366,12 @@ describe('model', function() {
 						});
 
 						it ('should collide with east wall while going east', function() {
-							let vPos = new Vector2D(55, 53);
-							let vSpeed = new Vector2D(8, 0);
+							let vPos = new Vector(55, 53);
+							let vSpeed = new Vector(8, 0);
 							let nSize = 2;
 							let nPlaneSpacing = 10;
 							let wcf = {x: 0, y: 0}; // wall collision flags
-							let delta = new Vector2D(vSpeed);
+							let delta = new Vector(vSpeed);
 							let dx = vSpeed.x;
 							let dy = vSpeed.y;
 							let x = vPos.x;
@@ -407,8 +407,8 @@ describe('model', function() {
 							expect(yClip).toBeFalsy();
 
 							let v = Mobile.computeWallCollisions(
-								new Vector2D(55, 53),
-								new Vector2D(8, 0),
+								new Vector(55, 53),
+								new Vector(8, 0),
 								2,
 								10,
 								false,
@@ -423,8 +423,8 @@ describe('model', function() {
 
 						it ('should not collide while going south', function() {
 							let v = Mobile.resolveWallCollision(
-								new Vector2D(55, 55),
-								new Vector2D(0, 5),
+								new Vector(55, 55),
+								new Vector(0, 5),
 								2,
 								10,
 								0b0000
@@ -435,8 +435,8 @@ describe('model', function() {
 
 						it ('should collide with west wall while going south', function() {
 							let v = Mobile.resolveWallCollision(
-								new Vector2D(55, 55),
-								new Vector2D(0, 5),
+								new Vector(55, 55),
+								new Vector(0, 5),
 								2,
 								10,
 								0b0100

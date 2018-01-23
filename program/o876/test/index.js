@@ -18,7 +18,21 @@ describe('o876', function() {
     //  ####   ######   ####   #    #  ######     #    #    #     #
 
     describe('geometry', function() {
-        const Vector2D = o876.geometry.Vector2D;
+        const Vector = o876.geometry.Vector;
+        const Point = o876.geometry.Point;
+
+
+//    #    #  ######  #       #####   ######  #####
+//    #    #  #       #       #    #  #       #    #
+//    ######  #####   #       #    #  #####   #    #
+//    #    #  #       #       #####   #       #####
+//    #    #  #       #       #       #       #   #
+//    #    #  ######  ######  #       ######  #    #
+
+        describe('helper', function() {
+
+        });
+
 
 
         //                                                 #####  ######
@@ -32,7 +46,7 @@ describe('o876', function() {
         describe('Vector', function () {
             describe('initialisation 0', function () {
                 it('creates a zero vector', function () {
-                    let v = new Vector2D();
+                    let v = new Vector();
                     expect(v.x).toEqual(0);
                     expect(v.y).toEqual(0);
                 });
@@ -40,7 +54,7 @@ describe('o876', function() {
 
             describe('initialisation not 0', function () {
                 it('creates an initialized vector with arbitrary values', function () {
-                    let v = new Vector2D(7, 89);
+                    let v = new Vector(7, 89);
                     expect(v.x).toEqual(7);
                     expect(v.y).toEqual(89);
                 });
@@ -48,8 +62,8 @@ describe('o876', function() {
 
             describe('point', function() {
                 it('creates a point from vector', function() {
-                    let v = new Vector2D(3, 8);
-                    let p = v.point();
+                    let v = new Vector(3, 8);
+                    let p = new Point(v);
                     expect(p.x).toBe(3);
                     expect(p.y).toBe(8);
                 })
@@ -57,8 +71,8 @@ describe('o876', function() {
 
             describe('cloning', function () {
                 it('properly clones a vector', function () {
-                    let v = new Vector2D(-7, 66);
-                    let w = new Vector2D(v);
+                    let v = new Vector(-7, 66);
+                    let w = new Vector(v);
                     expect(v.x).toEqual(w.x);
                     expect(v.y).toEqual(w.y);
                     expect(v === w).toBeFalsy();
@@ -67,7 +81,7 @@ describe('o876', function() {
 
             describe('zero vector', function () {
                 it('should build a 0, 0 vector', function () {
-                    let v = Vector2D.zero();
+                    let v = Vector.zero();
                     expect(v.x).toEqual(0);
                     expect(v.y).toEqual(0);
                 });
@@ -75,8 +89,8 @@ describe('o876', function() {
 
             describe('adding two vectors', function () {
                 it('should add 2 vectors', function () {
-                    let v1 = new Vector2D(10, 15);
-                    let v2 = new Vector2D(2, -2);
+                    let v1 = new Vector(10, 15);
+                    let v2 = new Vector(2, -2);
                     let v3 = v1.add(v2);
                     // immutability
                     expect(v1.x).toEqual(10);
@@ -90,7 +104,7 @@ describe('o876', function() {
 
             describe('scaling a vector', function () {
                 it('should scale a vector', function () {
-                    let v1 = new Vector2D(30, 4);
+                    let v1 = new Vector(30, 4);
                     let v2 = v1.mul(6);
                     expect(v1.x).toEqual(30);
                     expect(v1.y).toEqual(4);
@@ -101,19 +115,26 @@ describe('o876', function() {
 
             describe('get vector distance', function () {
                 it('should compute vector distance', function () {
-                    let v = new Vector2D(5, 5);
+                    let v = new Vector(5, 5);
                     expect(v.distance()).toBeCloseTo(5 * Math.sqrt(2), 4);
                 });
                 it('should compute vector distance 2', function () {
-                    let v = new Vector2D(-3, 2);
+                    let v = new Vector(-3, 2);
                     expect(v.distance()).toBeCloseTo(Math.sqrt(9 + 4), 4);
                 });
             });
 
             describe('normalize vector', function () {
                 it('should build a normalized vector', function () {
-                    let v = new Vector2D(64, 4123);
+                    let v = new Vector(64, 4123);
                     expect(v.normalize().distance()).toBeCloseTo(1, 5);
+                });
+            });
+
+            describe('angle', function() {
+                it('should compute 60deg', function() {
+                    let v = new Vector(30, 30);
+                    expect(180 * v.angle() / Math.PI).toBe(45);
                 });
             });
         });
@@ -128,7 +149,7 @@ describe('o876', function() {
             //  ####    ####   ######  ######     #    #####   ######  #    #
             const Collider = o876.collider.Collider;
             const Mobile = o876.collider.Mobile;
-            const Vector = o876.geometry.Vector2D;
+            const Vector = o876.geometry.Vector;
 
             describe('Mobile', function() {
                 let m1 = new Mobile();

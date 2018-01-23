@@ -1,27 +1,26 @@
 /**
  * Created by ralphy on 04/09/17.
  *
- * @class Vector2D
+ * @class Vector
  * @property {number} x
  * @property {number} y
  */
 
-const Point = require('./Point.js');
 const Helper = require('./Helper.js');
 
-module.exports = class Vector2D {
+module.exports = class Vector {
 	/**
 	 * The constructor accepts one two parameters
 	 * If one parameter is given, the constructor will consider it as
-	 * Vector or Point and will build this vector accordingly.
+	 * Vector and will build this vector accordingly.
 	 * If two parameters are given (both numbers), the constructor will initialize the x and y
 	 * components with these numbers.
 	 * if no parameters are given : the vector will be ZERO
-	 * @param (x) {Vector2D|Point|number}
+	 * @param (x) {Vector|number}
 	 * @param (y) {number}
 	 */
 	constructor(x, y) {
-		if ((x instanceof Vector2D) || (x instanceof Point)) {
+		if (x instanceof Vector) {
 			this.x = x.x;
 			this.y = x.y;
 		} else {
@@ -37,6 +36,9 @@ module.exports = class Vector2D {
      * @param y
      */
 	set(x, y) {
+		if (x instanceof Vector) {
+			return this.set(v.x, v.y);
+		}
 		this.x = x;
 		this.y = y;
 		return this;
@@ -45,11 +47,11 @@ module.exports = class Vector2D {
 	/**
 	 * Immutable !
 	 * returns a new Vector which is the sum of this instance + the given argument
-	 * @param v {Vector2D|Point}
-	 * @returns {Vector2D}
+	 * @param v {Vector}
+	 * @returns {Vector}
 	 */
 	add(v) {
-		return new Vector2D(v.x + this.x, v.y + this.y);
+		return new Vector(v.x + this.x, v.y + this.y);
 	}
 
 	/**
@@ -58,21 +60,21 @@ module.exports = class Vector2D {
 	 * @param v
 	 */
 	sub(v) {
-		return new Vector2D(this.x - v.x, this.y - v.y);
+		return new Vector(this.x - v.x, this.y - v.y);
 	}
 
 	/**
 	 * Immutable !
 	 * returns a scalar product
-	 * multiplies the vector components by a given value -(vector, point or number)
-	 * @param f {Vector2D|number}
-	 * @returns {Vector2D|number}
+	 * multiplies the vector components by a given value -(vector or number)
+	 * @param f {Vector|number}
+	 * @returns {Vector|number}
 	 */
 	mul(f) {
-		if ((f instanceof Vector2D) || (f instanceof Point)) {
+		if (f instanceof Vector) {
 			return this.x * f.x + this.y * f.y;
 		} else if (typeof f === 'number') {
-			return new Vector2D(this.x * f, this.y * f);S
+			return new Vector(this.x * f, this.y * f);S
 		} else {
 			throw new Error('vector product accepts only vectors or number as parameter');
 		}
@@ -88,7 +90,7 @@ module.exports = class Vector2D {
 
 	/**
 	 * returns a normalized version of this vector
-	 * @return {Vector2D}
+	 * @return {Vector}
 	 */
 	normalize() {
 		return this.mul(1 / this.distance());
@@ -96,16 +98,16 @@ module.exports = class Vector2D {
 
 	/**
 	 * returns a zero vector
-	 * @returns {Vector2D}
+	 * @returns {Vector}
 	 */
 	static zero() {
-		return new Vector2D(0, 0);
+		return new Vector(0, 0);
 	}
 
     /**
 	 * Mutable
 	 * Addition mutable des composante du vecteur
-     * @param v {Vector2D}
+     * @param v {Vector}
      */
 	translate(v) {
 		this.x += v.x;
@@ -125,18 +127,10 @@ module.exports = class Vector2D {
 	}
 
     /**
-	 * Converti le vecteur en point dont les coordonnées sont les composantes du vecteur
-	 * @return Point
-     */
-	point() {
-		return new Point(this.x, this.y);
-	}
-
-    /**
 	 * Renvoie l'angle entre le vecteur et l'axe X
 	 * si le vecteur est dans la direction x+ alors l'angle = 0
      */
 	angle() {
-		Math.atan2(this.y, this.x);
+		return Helper.angle(0, 0, this.x, this.y);
 	}
 };

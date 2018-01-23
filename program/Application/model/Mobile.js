@@ -5,17 +5,52 @@
  */
 
 const o876 = require('../../o876');
-const Vector2D = o876.geometry.Vector2D;
+const Vector = o876.geometry.Vector;
 const RC_CONST = require('../consts/raycaster');
 
 module.exports = class Mobile {
 	constructor() {
 		// position & angle
 		this.location = new o876.geometry.Location();
-		// vitesse
-		this.speed = new o876.geometry.Vector2D(0, 0);
+		// vitesse de déplacement
+		this.speed = new Vector(0, 0);
+		// ensembles des forces appliquées au mobiles
+		this._forces = [];
+		this._collider = null;
+		this._collisionMobile = null;
 		this.size = 16;
-		this.wallCollisions = Vector2D.zero();
+		this.wallCollisions = Vector.zero();
+	}
+
+	collider(c) {
+		return o876.SpellBook.prop(this, '_collider', c);
+	}
+
+    /**
+	 * ajoute une force
+     * @param v {Vector} vecteur de force
+     * @param f {number} facteur d'atténuation
+     */
+	force(v, f) {
+		this._forces.push([v, f]);
+	}
+
+    /**
+	 * Somme de toutes les forces agissant sur le système
+	 * @return Vector
+     */
+	forces() {
+		return this._forces.reduce((prev, f) => prev.add(f[0]), Vector.zero());
+	}
+
+    /**
+	 * fait appliquer les forces en bougeant le mobile
+	 * toutes les forces diminuent d'intensité selon leur facteur
+	 * les forces devenue trop faible (moins de 1% de leur intensité initiale), disparraissent
+     */
+	applyForces() {
+		this.move(this.forces());
+        this._forces = this._forces.filter(v => v[0].scale(v[1]).normalize() < 0.01);
 	}
 
     /**
@@ -32,8 +67,8 @@ module.exports = class Mobile {
 	 * @property {number} x
 	 * @property {number} y
 	 *
-	 * @param vPos {Vector2D} position du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
-	 * @param vSpeed {Vector2D} delta de déplacement du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param vPos {Vector} position du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param vSpeed {Vector} delta de déplacement du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
 	 * @param nSize {number} demi-taille du mobile
 	 * @param nPlaneSpacing {number} taille de la grille
 	 * (pour savoir ou est ce qu'on s'est collisionné). ATTENTION ce vecteur est mis à jour par la fonction !
@@ -53,7 +88,7 @@ module.exports = class Mobile {
 				speed = r.speed;
 			} else {
 				pos = vPos;
-				speed = Vector2D.zero();
+				speed = Vector.zero();
 			}
 			for (let iIter = 0; iIter < nDist; iIter += nSize) {
 				r = Mobile.computeWallCollisions(pos, vSubSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
@@ -124,54 +159,37 @@ module.exports = class Mobile {
 			}
 		}
 		return {
-			pos: new Vector2D(x, y),
-			speed: new Vector2D(x - vPos.x, y - vPos.y),
+			pos: new Vector(x, y),
+			speed: new Vector(x - vPos.x, y - vPos.y),
 			wcf: oWallCollision
 		};
 	}
-
-	// sectorization de collision
-
 
     /**
      * Teste si le mobile spécifié entre en collision avec un autre mobile.
      * @param oMobile {Mobile}
      */
-    computeMobileCollisions(oMobile) {
-        let xTonari = this.xTonari;
-        let yTonari = this.yTonari;
-        let oRegister = this.oRaycaster.oMobileSectors;
-        let oSector;
-        let i;
-        let oOther, iOther, nSectorLength;
-        for (i = 0; i < 9; i++) {
-            oSector = oRegister.get(oMobile.xSector + xTonari[i],
-                oMobile.ySector + yTonari[i]);
-            if (oSector !== null) {
-                nSectorLength = oSector.length;
-                for (iOther = 0; iOther < nSectorLength; ++iOther) {
-                    oOther = oSector[iOther];
-                    if (oOther !== oMobile) {
-                        if (oMobile.hits(oOther)) {
-                            oMobile.oMobileCollision = oOther;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-        oMobile.oMobileCollision = null;
+    computeMobileCollisions() {
+    	let collider = this.collider();
+    	let cm = this._collisionMobile;
+    	if (collider && cm) {
+    		cm.position().set(this.location);
+    		collider.track(cm);
+    		let collider.collides(cm)) {
+
+			}
+		}
     }
 
     /**
 	 * Déplace le mobile selon le vector spécifié
 	 * Gestion des collisions
-	 * @param {o876.geometry.Vector2D} vSpeed
+	 * @param {o876.geometry.Vector} vSpeed
 	 */
 	move(vSpeed) {
 		let oLocation = this.location;
-        let vPos = new Vector2D(oLocation);
-        let area = oLocation.area;
+        let vPos = new Vector(oLocation);
+        let area = oLocation.area();
         this.computeWallCollisions(
             vPos,
             vSpeed,
@@ -181,6 +199,6 @@ module.exports = class Mobile {
             false,
             (x, y) => area.isSolidPoint(x, y)
         );
-        this.location.setCoordinates(vPos.add(vSpeed));
+        this.location.set(vPos.add(vSpeed));
 	}
 };
