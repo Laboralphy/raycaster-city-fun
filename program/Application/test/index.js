@@ -433,6 +433,71 @@ describe('model', function() {
 
 		});
 	});
+
+	describe('Thinker', function() {
+		const Thinker = require('../model/thinkers/Thinker');
+
+		describe('state succession', function() {
+			it('shoud log correctly', function() {
+				const TestThinker = class extends Thinker {
+                    constructor() {
+                        super();
+                        this.log = [];
+                        this.counter = 0;
+                        this.state('state1');
+                    }
+                    $idle() {
+                    }
+                    $state1_enter() {
+                        this.log.push('entering state1');
+                    }
+                    $state1() {
+                        this.log.push('inside state1 ' + this.counter);
+                        this.counter++;
+                        if (this.counter > 5) {
+                            this.state('state2');
+                        }
+                    }
+                    $state1_exit() {
+                        this.log.push('exiting state1');
+                    }
+                    $state2_enter() {
+                        this.log.push('entering state2');
+                    }
+                    $state2() {
+                        this.log.push('inside state2 ' + this.counter);
+                        this.counter++;
+                        if (this.counter > 9) {
+                            this.state('idle');
+                        }
+                    }
+                    $state2_exit() {
+                        this.log.push('exiting state2');
+                    }
+                };
+                let t = new TestThinker();
+                for (let i = 0; i < 20; ++i) {
+                    t.think();
+                }
+                expect(t.log).toEqual([
+                    'entering state1',
+                    'inside state1 0',
+                    'inside state1 1',
+                    'inside state1 2',
+                    'inside state1 3',
+                    'inside state1 4',
+                    'inside state1 5',
+                    'exiting state1',
+                    'entering state2',
+                    'inside state2 6',
+                    'inside state2 7',
+                    'inside state2 8',
+                    'inside state2 9',
+                    'exiting state2'
+                ]);
+			});
+		});
+	});
 });
 
 
