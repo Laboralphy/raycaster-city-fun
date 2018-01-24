@@ -435,6 +435,16 @@ describe('model', function() {
 	});
 
 	describe('Thinker', function() {
+
+
+  // #####  #    #     #    #    #  #    #  ######  #####
+  //   #    #    #     #    ##   #  #   #   #       #    #
+  //   #    ######     #    # #  #  ####    #####   #    #
+  //   #    #    #     #    #  # #  #  #    #       #####
+  //   #    #    #     #    #   ##  #   #   #       #   #
+  //   #    #    #     #    #    #  #    #  ######  #    #
+
+
 		const Thinker = require('../model/thinkers/Thinker');
 
 		describe('state succession', function() {
