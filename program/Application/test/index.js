@@ -507,6 +507,62 @@ describe('model', function() {
                 ]);
 			});
 		});
+
+        describe('timed state succession', function() {
+        	it('should check timed state', function() {
+                const TestThinker = class extends Thinker {
+                    constructor() {
+                        super();
+                        this.log = [];
+                        this.counter = 0;
+                        this.state('state1');
+                    }
+                    $idle() {
+                    }
+                    $state1_enter() {
+                    	this.duration(5).next('state2');
+                        this.log.push('entering state1');
+                    }
+                    $state1() {
+                        this.log.push('inside state1 ' + this.counter);
+                        this.counter++;
+                    }
+                    $state1_exit() {
+                        this.log.push('exiting state1');
+                    }
+
+                    $state2_enter() {
+                        this.duration(3);
+                        this.log.push('entering state2');
+                    }
+                    $state2() {
+                        this.log.push('inside state2 ' + this.counter);
+                        this.counter++;
+                    }
+                    $state2_exit() {
+                        this.log.push('exiting state2');
+                    }
+                };
+                let t = new TestThinker();
+                for (let i = 0; i < 20; ++i) {
+                    t.think();
+                }
+                expect(t.log).toEqual([
+                    'entering state1',
+                    'inside state1 0',
+                    'inside state1 1',
+                    'inside state1 2',
+                    'inside state1 3',
+                    'inside state1 4',
+                    'exiting state1',
+                    'entering state2',
+                    'inside state2 5',
+                    'inside state2 6',
+                    'inside state2 7',
+                    'exiting state2'
+                ]);
+			});
+        });
 	});
 });
 

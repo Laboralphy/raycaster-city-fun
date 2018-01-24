@@ -57,6 +57,7 @@ module.exports = class Thinker {
 		this.invoke('$' + this._state);
 		if (--this._duration <= 0) {
 			this.state(this.next());
+			this.next('idle');
 		}
 	}
 
