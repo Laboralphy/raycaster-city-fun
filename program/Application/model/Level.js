@@ -10,9 +10,10 @@ module.exports = class Level {
 
 
 	constructor() {
+		this._aliases = {};
 		this._map = {
-			lower: new o876.collider.Grid(),
-			upper: new o876.collider.Grid(),
+			lower: new o876.structures.Grid(),
+			upper: new o876.structures.Grid(),
 		};
 		this._map.lower.on('rebuild', data => data.cell = {
 			phys: 0,
@@ -47,11 +48,11 @@ module.exports = class Level {
 		};
 		this._walls = {
 			src: '',
-			codes: []
+			codes: [null]
 		};
 		this._flats = {
 			src: '',
-			codes: []
+			codes: [null]
 		};
 		this._startpoint = {
 			x: 416,
@@ -76,9 +77,11 @@ module.exports = class Level {
 	 */
 	size(n) {
 		if (n === undefined) {
-			return this._map.width();
+			return this._map.lower.width();
 		} else {
-			return this._map.width(n).height(n);
+            this._map.upper.width(n).height(n);
+            this._map.lower.width(n).height(n);
+			return this;
 		}
 	}
 
@@ -92,8 +95,32 @@ module.exports = class Level {
 	 * @return {this|number}
 	 */
 	map(level, x, y, data, code) {
+		if (Array.isArray(x)) {
+			if (x.length !== this.size()) {
+				throw new Error('')
+			}
+			x.forEach(
+				(row, iy) => (Array.isArray(row) ? row : row.split('')).forEach(
+					(cell, ix) => this.map(level, ix, iy, cell)
+				)
+			);
+			return this;
+		}
 		if (code === undefined) {
-			return this._map[level].cell(x, y)[data];
+			if (data in this._aliases) {
+				let a = this._aliases[data];
+                this._map[level].cell(x, y).wfid = a.wfid;
+                this._map[level].cell(x, y).phys = a.phys;
+                this._map[level].cell(x, y).offs = a.offs;
+                return this;
+            } else {
+				let cell = this._map[level].cell(x, y);
+				if (data in cell) {
+					return cell[data];
+				} else {
+					throw new Error('invalid alias or property : "' + data + '"');
+				}
+            }
 		} else {
 			this._map[level].cell(x, y)[data] = code;
 			return this;
@@ -108,8 +135,8 @@ module.exports = class Level {
 	 * @param code {number}
 	 * @return {this|number}
 	 */
-	text(level, x, y, code) {
-		return this.map(level, x, y, 'text', code);
+	wfid(level, x, y, code) {
+		return this.map(level, x, y, 'wfid', code);
 	}
 
 	/**
@@ -191,19 +218,36 @@ module.exports = class Level {
 	 */
 	visual(sVariable, x) {
 		this._visual[sVariable] = sVariable.toLowerCase().include('color') ? o876.Rainbow.parse(x) : x;
+		return this;
+	}
+
+	textures({walls = null, flats = null, sky = null}) {
+		if (walls) {
+			this._walls.src = walls;
+        }
+        if (flats) {
+			this._flats.src = flats;
+		}
+		if (sky) {
+			this._background = sky;
+		}
+		return this;
 	}
 
 	/**
 	 * Définition d'un block-mur
 	 */
-	wall(xTextures, nFrames, nDelay, nLoop) {
-		if (typeof xTextures === 'string') {
+	wall(xTextures = null, nFrames = 0, nDelay = 0, nLoop = 0) {
+		if (xTextures === null) {
+            return this._walls.codes.push(null);
+		}
+		if (typeof xTextures === 'number') {
 			xTextures = [xTextures, xTextures];
 		}
-		if (nFrames === undefined) {
-			this._walls.push(xTextures)
+		if (nFrames <= 1) {
+			return this._walls.codes.push(xTextures)
 		} else {
-			this._walls.push([xTextures, nFrames, nDelay, nLoop]);
+            return this._walls.codes.push([xTextures, nFrames, nDelay, nLoop]);
 		}
 	}
 
@@ -213,8 +257,96 @@ module.exports = class Level {
 	flat(nFloor, nCeilling) {
 		nFloor = nFloor || -1;
 		nCeilling = nCeilling || -1;
-		this._flats.push([nFloor, nCeilling]);
+		if (nCeilling === -1 && nFloor === -1) {
+            return this._flats.codes.push(null);
+		} else {
+            return this._flats.codes.push([nFloor, nCeilling]);
+		}
 	}
+
+    /**
+	 * Ajoute une définition combinée d'un mur et d'un flat
+     * @param walldef {array<number>} defintion des textures murales
+     * @param flatdef {*} definition des textures horizontales {floor, ceilling}
+     * @param animdef {*} definition de l'animation des textures murale  {frames, delay, loop}
+     */
+	block(walldef = null, flatdef = null, animdef = null) {
+		let wcode = 0, fcode = 0;
+		if (walldef) {
+			if (animdef) {
+				wcode = this.wall(walldef, animdef.frames, animdef.delay, animdef.loop);
+			} else {
+                wcode = this.wall(walldef);
+			}
+		} else {
+			wcode = this.wall();
+		}
+		if (flatdef) {
+			fcode = this.flat(flatdef[0], flatdef[1]);
+		} else {
+			fcode = this.flat();
+		}
+		if (fcode !== wcode) {
+			throw new Error('error during block definition - walls : ' + wcode + ' & flats : ' + fcode);
+		}
+		return wcode - 1;
+	}
+
+    /**
+	 * Associe un identifiant texte avec un code wfid, un code phys et un offset
+     * @param id {string} identifiant
+     * @param wfid {number} identifiant texture wall flat
+     * @param phys {number} code physique
+     * @param offs {number} offset
+     */
+	alias(sDef) {
+		let aDef = sDef.split(' ');
+		let w = {n:-1, e:-1, s:-1, w:-1};
+		let f = {f:-1, c:-1};
+		let a = {f: 0, d: 0, l: 0};
+		let p = 0;
+		const DOORS = {
+			"solid": 0x01,
+			"door-up" : 0x02,
+			"curt-up" : 0x03,
+            "door-down" : 0x04,
+            "curt-down" : 0x05,
+            "door-left" : 0x06,
+            "door-right" : 0x07,
+            "door-double" : 0x08,
+			"secret" : 0x09,
+            "transparent" : 0x0A,
+            "invisible" : 0x0B,
+            "offset" : 0x0C
+		};
+		aDef.forEach(s => {
+			let r;
+            r = s.match(/^w([nswe])(-?[0-9]+)$/);
+            if (r) {
+                w[r[1]] = r[2] | 0;
+                return;
+            }
+            r = s.match(/^f([fc])(-?[0-9]+)$/);
+            if (r) {
+                f[r[1]] = r[2] | 0;
+                return;
+            }
+            r = s.match(/^a([fdl])([0-9]+)$/);
+            if (r) {
+                a[r[1]] = r[2] | 0;
+                return;
+            }
+			if (s in DOORS) {
+            	p = DOORS[s];
+			}
+			throw new Error('could not understand this opcode of block definition : "' + s + '"');
+		});
+
+		this._aliases[id] = {wfid, phys, offs};
+		return this;
+	}
+
+
 
 
 	/**
@@ -223,10 +355,10 @@ module.exports = class Level {
 	 */
 	render() {
 		function cellConvert(c) {
-			return (c.offs << 16) | (c.phys << 12) | c.text;
+			return (c.offs << 16) | (c.phys << 12) | c.wfid;
 		}
 
-		function rowConvert(row) {
+		function rowConvert(row, y) {
 			return row.map(cellConvert);
 		}
 
@@ -235,13 +367,13 @@ module.exports = class Level {
 		}
 
 		return {
-			map: mapConvert(this._map.lower),
-			upper: this
+			map: mapConvert(this._map.lower.cells()),
+			uppermap: this
 				._map
-				.lower
+				.upper.cells()
 				.some(row =>
 					row.some(cell => cellConvert(cell) > 0)
-				) ? mapConvert(this._map.upper) : null,
+				) ? mapConvert(this._map.upper.cells()) : null,
 			visual: this._visual,
 			walls: this._walls,
 			flats: this._flats,

@@ -671,6 +671,41 @@ describe('model', function() {
 
 	describe('Level', function() {
 		const Level = require('../model/Level');
-		let level = new Level();
+
+		it('should build a valid level', function() {
+            let level = new Level();
+
+            let json = level.size(4)
+				.textures({
+					walls: 'wall.png',
+					flats: 'flat.png'
+				})
+				.alias('#', level.block([1, 1]), 1)
+				.alias(' ', level.block(null, [2, 3]), 0)
+				.map('lower', [
+					'####',
+					'#  #',
+					'#  #',
+					'####'
+				])
+				.render();
+            expect(json.uppermap).toBe(null);
+            expect(json.map).toEqual([
+                [0x1001, 0x1001, 0x1001, 0x1001],
+                [0x1001, 0x0002, 0x0002, 0x1001],
+                [0x1001, 0x0002, 0x0002, 0x1001],
+                [0x1001, 0x1001, 0x1001, 0x1001],
+			]);
+            expect(json.walls).toEqual({
+                src: 'wall.png',
+                codes: [null, [1, 1], null]
+            });
+            expect(json.flats).toEqual({
+                src: 'flat.png',
+                codes: [null, null, [2, 3]]
+            });
+		});
+
+
 	});
 });

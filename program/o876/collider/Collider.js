@@ -6,7 +6,7 @@
  */
 
 const Vector = require('../geometry/Vector');
-const Grid = require('./Grid');
+const Grid = require('../structures/Grid');
 const Sector = require('./Sector');
 const SB = require('../SpellBook');
 
