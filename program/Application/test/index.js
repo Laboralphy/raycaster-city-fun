@@ -664,11 +664,13 @@ describe('model', function() {
                 area.processDoors();
                 expect(door.nOffset).toBe(20);
                 expect(door.nState).toBe(2);
-
-
-
             });
-
 		});
+	});
+
+
+	describe('Level', function() {
+		const Level = require('../model/Level');
+		let level = new Level();
 	});
 });
