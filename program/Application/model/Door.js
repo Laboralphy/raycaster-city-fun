@@ -75,7 +75,7 @@ class Door {
      */
     autoclose(nDelay) {
         this.bAutoclose = nDelay !== Infinity;
-        this.nAutocloseDelay = nDelay;
+        this.nAutocloseDelay = nDelay / RC_CONST.rc_time_factor | 0;
     }
 
     /**

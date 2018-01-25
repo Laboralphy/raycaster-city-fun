@@ -564,8 +564,111 @@ describe('model', function() {
 			});
         });
 	});
+
+
+	describe('Area', function() {
+		const Area = require('../model/Area');
+
+		describe('physicMapping', function() {
+			it ('should have solid zone around the map', function() {
+                let area = new Area();
+                area.data({
+                    map: [
+                        [0x1000, 0x1000, 0x1000, 0x1000],
+                        [0x1000, 0x0000, 0x0000, 0x1000],
+                        [0x1000, 0x0000, 0x0000, 0x1000],
+                        [0x1000, 0x1000, 0x1000, 0x1000],
+                    ]
+                });
+                expect(area.isSolid(0, 0)).toBeTruthy();
+                expect(area.isSolid(1, 0)).toBeTruthy();
+                expect(area.isSolid(2, 0)).toBeTruthy();
+                expect(area.isSolid(3, 0)).toBeTruthy();
+
+                expect(area.isSolid(0, 1)).toBeTruthy();
+                expect(area.isSolid(1, 1)).toBeFalsy();
+                expect(area.isSolid(2, 1)).toBeFalsy();
+                expect(area.isSolid(3, 1)).toBeTruthy();
+
+                expect(area.isSolid(0, 2)).toBeTruthy();
+                expect(area.isSolid(1, 2)).toBeFalsy();
+                expect(area.isSolid(2, 2)).toBeFalsy();
+                expect(area.isSolid(3, 2)).toBeTruthy();
+
+                expect(area.isSolid(0, 3)).toBeTruthy();
+                expect(area.isSolid(1, 3)).toBeTruthy();
+                expect(area.isSolid(2, 3)).toBeTruthy();
+                expect(area.isSolid(3, 3)).toBeTruthy();
+			});
+
+            it ('should detect door and instanciate doorlist', function() {
+                let area = new Area();
+                area.data({
+                    map: [
+                        [0x1000, 0x1000, 0x1000, 0x1000],
+                        [0x1000, 0x0000, 0x0000, 0x1000],
+                        [0x1000, 0x0000, 0x0000, 0x1000],
+                        [0x1000, 0x2000, 0x1000, 0x1000],
+                    ]
+                });
+                expect(area.isSolid(0, 0)).toBeTruthy();
+                expect(area.isSolid(1, 0)).toBeTruthy();
+                expect(area.isSolid(2, 0)).toBeTruthy();
+                expect(area.isSolid(3, 0)).toBeTruthy();
+
+                expect(area.isSolid(0, 1)).toBeTruthy();
+                expect(area.isSolid(1, 1)).toBeFalsy();
+                expect(area.isSolid(2, 1)).toBeFalsy();
+                expect(area.isSolid(3, 1)).toBeTruthy();
+
+                expect(area.isSolid(0, 2)).toBeTruthy();
+                expect(area.isSolid(1, 2)).toBeFalsy();
+                expect(area.isSolid(2, 2)).toBeFalsy();
+                expect(area.isSolid(3, 2)).toBeTruthy();
+
+                expect(area.isSolid(0, 3)).toBeTruthy();
+                expect(area.isSolid(1, 3)).toBeTruthy(); // door
+                expect(area.isSolid(2, 3)).toBeTruthy();
+                expect(area.isSolid(3, 3)).toBeTruthy();
+
+                expect(area._doorList.length).toBe(1);
+
+                let door = area._doorList[0];
+                expect(door.nState).toBe(0);
+                area.openDoor(1, 3);
+                expect(door.nState).toBe(1);
+                area.processDoors();
+                expect(door.nOffsetOpen).toBe(20);
+                expect(door.nOffset).toBe(1);
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                expect(door.nOffset).toBe(8);
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                area.processDoors();
+                expect(door.nOffset).toBe(19);
+                expect(door.nState).toBe(1);
+                area.processDoors();
+                expect(door.nOffset).toBe(20);
+                expect(door.nState).toBe(2);
+
+
+
+            });
+
+		});
+	});
 });
-
-
-
-

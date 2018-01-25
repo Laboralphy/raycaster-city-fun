@@ -8,20 +8,20 @@ const RC_CONST = require('../consts/raycaster');
 const Door = require('./Door');
 const ActiveList = require('./ActiveList');
 
-class Area {
+module.exports = class Area {
     constructor() {
         // nom eventuel de la zone
-        this.name = '';
+        this._name = '';
         // graine de génération aléatoire
         this.seed = '';
         // données initiale de la zone telle que générées par le générateur ou le level builder
-        this.data = null;
+        this._data = null;
         // carte des sections solid afin d'accelérer le calcul des collision murale
-        this.physicMap = null;
+        this._physicMap = null;
         // liste des portes, afin de surveiller si on peut les traverser ou pas
-        this.doorList = [];
+        this._doorList = [];
         // liste des portes actives (celle qui sont en cours d'ouverture/refermeture
-        this.activeDoorList = new ActiveList(); /** @todo ne gérer que les portes qui sont dans cette liste */
+        this._activeDoorList = new ActiveList(); /** @todo ne gérer que les portes qui sont dans cette liste */
     }
 
 	/**
@@ -31,11 +31,11 @@ class Area {
 	 * @param y
 	 */
 	openDoor(x, y) {
-        let oDoor = this.physicMap[y][x].door;
+        let oDoor = this._physicMap[y][x].door;
         if (oDoor) {
             if (oDoor.open()) {
 				if (oDoor.isSecret()) {
-					oDoor.nextSecretDoor = this.doorList.find(d => d.isSecret() && d.isAdjacent(oDoor));
+					oDoor.nextSecretDoor = this._doorList.find(d => d.isSecret() && d.isAdjacent(oDoor));
 				}
             }
         }
@@ -45,21 +45,22 @@ class Area {
      * Gestion des porte actuellement ouvertes ou entrouvertes
 	 */
 	processDoors() {
-	    let aDoneDoors = this.activeDoorList.items.filter(door => door.process());
-		this.activeDoorList.unlink(aDoneDoors);
+	    let aDoneDoors = this._activeDoorList.items.filter(door => door.process());
+		this._activeDoorList.unlink(aDoneDoors);
     }
 
     /**
      * Fabrique la carte des zones solides
      */
-    solidify() {
-        this.physicMap = data.map.map(row => row.map(cell => {
+    data(d) {
+        this._data = d;
+        this._physicMap = d.map.map(row => row.map(cell => {
             return {
                 code: (cell & 0x0000F000) >> 12,
                 door: null
             };
         }));
-        this.physicMap.forEach((row, y) => row.forEach((cell, x) => {
+        this._physicMap.forEach((row, y) => row.forEach((cell, x) => {
             let oDoor = null;
             switch (cell.code) {
                 case RC_CONST.phys_curt_sliding_down:
@@ -91,9 +92,9 @@ class Area {
 				oDoor.x = x;
 				oDoor.y = y;
                 cell.door = oDoor;
-                this.doorList.push(oDoor);
+                this._doorList.push(oDoor);
 				oDoor.events.on('opening', door => {
-					this.activeDoorList.link(door);
+					this._activeDoorList.link(door);
 				});
             }
         }));
@@ -105,7 +106,7 @@ class Area {
      * cette methode prend en compte les porte et leur état
      */
     isSolid(x, y) {
-        let pm = this.physicMap[y][x];
+        let pm = this._physicMap[y][x];
         switch (pm.code) {
             case RC_CONST.phys_none:
                 return false;
@@ -128,4 +129,4 @@ class Area {
 			y / RC_CONST.rc_plane_spacing | 0
 		);
 	}
-}
+};
