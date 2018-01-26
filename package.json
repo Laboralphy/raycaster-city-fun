@@ -14,6 +14,7 @@
   "dependencies": {
     "express": "^4.16.2",
     "express-session": "^1.15.6",
+    "pngjs": "^3.3.1",
     "session-file-store": "^1.2.0",
     "socket.io": "^2.0.4",
     "vue": "^2.5.13",

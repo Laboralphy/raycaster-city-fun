@@ -581,4 +581,30 @@ describe('o876', function() {
             });
         });
     });
+
+
+// #####     ##       #    #    #  #####    ####   #    #
+// #    #   #  #      #    ##   #  #    #  #    #  #    #
+// #    #  #    #     #    # #  #  #####   #    #  #    #
+// #####   ######     #    #  # #  #    #  #    #  # ## #
+// #   #   #    #     #    #   ##  #    #  #    #  ##  ##
+// #    #  #    #     #    #    #  #####    ####   #    #
+//
+
+    describe('Rainbow', function() {
+        const Rainbow = require('../Rainbow');
+		describe('parse', function() {
+			it('should parse correctly', function() {
+				expect(Rainbow.parse('red')).toEqual({r: 255, g: 0, b: 0});
+				expect(Rainbow.parse('rgba(128, 192, 101, 0.5)')).toEqual({r: 128, g: 192, b: 101, a: 0.5});
+				expect(Rainbow.parse('#F00')).toEqual({r: 255, g: 0, b: 0});
+			});
+		});
+
+		describe('brightness', function() {
+			it('should filter correctly', function() {
+				expect(Rainbow.brightness(Rainbow.parse('red'), 0.5)).toEqual({r: 127, g: 0, b: 0});
+			});
+		});
+    });
 });
