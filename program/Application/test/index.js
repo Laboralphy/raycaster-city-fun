@@ -673,15 +673,15 @@ describe('model', function() {
 		const Level = require('../model/Level');
 
 		it('should build a valid level', function() {
-            let level = new Level();
+			let level = new Level();
 
-            let json = level.size(4)
+			let json = level.size(4)
 				.textures({
 					walls: 'wall.png',
 					flats: 'flat.png'
 				})
-				.alias('#', level.block([1, 1]), 1)
-				.alias(' ', level.block(null, [2, 3]), 0)
+				.alias('#', {w: [1, 1], p: 'solid'})
+				.alias(' ', {f: [2, 3]})
 				.map('lower', [
 					'####',
 					'#  #',
@@ -689,23 +689,56 @@ describe('model', function() {
 					'####'
 				])
 				.render();
-            expect(json.uppermap).toBe(null);
-            expect(json.map).toEqual([
-                [0x1001, 0x1001, 0x1001, 0x1001],
-                [0x1001, 0x0002, 0x0002, 0x1001],
-                [0x1001, 0x0002, 0x0002, 0x1001],
-                [0x1001, 0x1001, 0x1001, 0x1001],
+			expect(json.uppermap).toBe(null);
+			expect(json.map).toEqual([
+				[0x1001, 0x1001, 0x1001, 0x1001],
+				[0x1001, 0x0002, 0x0002, 0x1001],
+				[0x1001, 0x0002, 0x0002, 0x1001],
+				[0x1001, 0x1001, 0x1001, 0x1001],
 			]);
-            expect(json.walls).toEqual({
-                src: 'wall.png',
-                codes: [null, [1, 1], null]
-            });
-            expect(json.flats).toEqual({
-                src: 'flat.png',
-                codes: [null, null, [2, 3]]
-            });
+			expect(json.walls).toEqual({
+				src: 'wall.png',
+				codes: [null, [1, 1], null]
+			});
+			expect(json.flats).toEqual({
+				src: 'flat.png',
+				codes: [null, null, [2, 3]]
+			});
 		});
 
+		it('should build a valid level 2nd version with big ids', function() {
+			let level = new Level();
 
+			let json = level.size(4)
+				.textures({
+					walls: 'wall.png',
+					flats: 'flat.png'
+				})
+				.alias(0x21, {w: [1, 1], p: 'solid'})
+				.alias(0x10, {f: [2, 3]})
+				.alias(0x33, {w: [1, 1], f: [2, 3], p: 'door-double'})
+				.map('lower', [
+					[0x21, 0x21, 0x21, 0x21],
+					[0x21, 0x10, 0x10, 0x21],
+					[0x21, 0x10, 0x10, 0x21],
+					[0x21, 0x21, 0x33, 0x21]
+				])
+				.render();
+			expect(json.uppermap).toBe(null);
+			expect(json.map).toEqual([
+				[0x1001, 0x1001, 0x1001, 0x1001],
+				[0x1001, 0x0002, 0x0002, 0x1001],
+				[0x1001, 0x0002, 0x0002, 0x1001],
+				[0x1001, 0x1001, 0x8003, 0x1001],
+			]);
+			expect(json.walls).toEqual({
+				src: 'wall.png',
+				codes: [null, [1, 1], null, [1, 1]]
+			});
+			expect(json.flats).toEqual({
+				src: 'flat.png',
+				codes: [null, null, [2, 3], [2, 3]]
+			});
+		});
 	});
 });

@@ -292,19 +292,24 @@ module.exports = class Level {
 		return wcode - 1;
 	}
 
-    /**
-	 * Associe un identifiant texte avec un code wfid, un code phys et un offset
-     * @param id {string} identifiant
-     * @param wfid {number} identifiant texture wall flat
-     * @param phys {number} code physique
-     * @param offs {number} offset
-     */
-	alias(sDef) {
-		let aDef = sDef.split(' ');
-		let w = {n:-1, e:-1, s:-1, w:-1};
-		let f = {f:-1, c:-1};
-		let a = {f: 0, d: 0, l: 0};
-		let p = 0;
+	/**
+	 * Cette fonction permet de combiner tous les paramètres d'un block, et de l'identifier avec un alias de 1 caractère.
+	 * Les alias ainsi défini peuvent permettre de dessiner facilement des niveau dans le contexte d'un level design
+	 * simple.
+	 * Ainsi cet alias fera référence :
+	 * - au code physique,
+	 * - aux textures murales et horizontale
+	 * - au paramètres d'animation de textures
+	 * L'alias peut être ensuite utilisé dans un mappage avec la méthode .map()
+	 * @param sAlias {string} nom de l'alias (1 seul caractère)
+	 * @param w {array} définition des textures murales (1, 2, ou 4 id référence texture)
+	 * @param f {array} définition des textures horizontale (2 id référence texture)
+	 * @param a {array} paramètre d'animation [frames, delay, loop]
+	 * @param o {number} valeur de l'offset
+	 * @param p {number|string} code physique
+	 * @returns {module.Level}
+	 */
+	alias(sAlias, {w = null, f  = null, a = null, o = 0, p = 0}) {
 		const DOORS = {
 			"solid": 0x01,
 			"door-up" : 0x02,
@@ -319,30 +324,9 @@ module.exports = class Level {
             "invisible" : 0x0B,
             "offset" : 0x0C
 		};
-		aDef.forEach(s => {
-			let r;
-            r = s.match(/^w([nswe])(-?[0-9]+)$/);
-            if (r) {
-                w[r[1]] = r[2] | 0;
-                return;
-            }
-            r = s.match(/^f([fc])(-?[0-9]+)$/);
-            if (r) {
-                f[r[1]] = r[2] | 0;
-                return;
-            }
-            r = s.match(/^a([fdl])([0-9]+)$/);
-            if (r) {
-                a[r[1]] = r[2] | 0;
-                return;
-            }
-			if (s in DOORS) {
-            	p = DOORS[s];
-			}
-			throw new Error('could not understand this opcode of block definition : "' + s + '"');
-		});
-
-		this._aliases[id] = {wfid, phys, offs};
+		let phys = (typeof p === 'string') ? (DOORS[p] || 0) : p;
+		let wfid = this.block(w, f, a);
+		this._aliases[sAlias] = {wfid, phys, o};
 		return this;
 	}
 
