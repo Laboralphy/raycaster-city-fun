@@ -234,7 +234,7 @@ module.exports = class Mobile {
             vPos,
             vSpeed,
             this._size,
-            RC_CONST.rc_plane_spacing,
+            RC_CONST.plane_spacing,
             this.wallCollisions,
             false,
             (x, y) => area.isSolidPoint(x, y)

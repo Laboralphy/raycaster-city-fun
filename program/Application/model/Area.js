@@ -61,41 +61,17 @@ module.exports = class Area {
             };
         }));
         this._physicMap.forEach((row, y) => row.forEach((cell, x) => {
-            let oDoor = null;
-            switch (cell.code) {
-                case RC_CONST.phys_curt_sliding_down:
-                case RC_CONST.phys_curt_sliding_up:
-                case RC_CONST.phys_door_sliding_down:
-                case RC_CONST.phys_door_sliding_up:
-                    oDoor = new Door();
-                    oDoor.setDoorType('v');
-                    break;
-
-                case RC_CONST.phys_door_sliding_left:
-                case RC_CONST.phys_door_sliding_right:
-                    oDoor = new Door();
-                    oDoor.setDoorType('h1');
-                    break;
-
-                case RC_CONST.phys_door_sliding_double:
-                    oDoor = new Door();
-                    oDoor.setDoorType('h2');
-                    break;
-
-                case RC_CONST.phys_secret_block:
-                    oDoor = new Door();
-                    oDoor.setDoorType('s');
-                    break;
-            }
-            if (oDoor) {
+            if (cell.code >= RC_CONST.phys_first_door && cell.code <= RC_CONST.phys_last_door) {
+                let oDoor = new Door();
+                oDoor.setDoorType(cell.code);
                 // pour les porte, on complete l'instance
-				oDoor.x = x;
-				oDoor.y = y;
+                oDoor.x = x;
+                oDoor.y = y;
                 cell.door = oDoor;
                 this._doorList.push(oDoor);
-				oDoor.events.on('opening', door => {
-					this._activeDoorList.link(door);
-				});
+                oDoor.events.on('opening', door => {
+                    this._activeDoorList.link(door);
+                });
             }
         }));
     }
@@ -125,8 +101,8 @@ module.exports = class Area {
 
     isSolidPoint(x, y) {
     	return this.isSolid(
-    		x / RC_CONST.rc_plane_spacing | 0,
-			y / RC_CONST.rc_plane_spacing | 0
+    		x / RC_CONST.plane_spacing | 0,
+			y / RC_CONST.plane_spacing | 0
 		);
 	}
 };

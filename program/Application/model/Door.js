@@ -33,7 +33,7 @@ class Door {
         // h1 : porte 1 battant ouverture horizontale
         // h2 : porte 2 battants ouverture horizontale
         // v : porte à ouverture verticale
-        this.sDoorType = '';
+        this.nDoorType = 0;
         this.x = -1;
         this.y = -1;
         this.nextSecretDoor = null;
@@ -43,26 +43,30 @@ class Door {
      * Il existe plusieurs sortes de portes ayant chacunes leurs temps d'ouverture
      * cette method permet de defini des preset
      */
-    setDoorType(sType) {
-        this.sDoorType = sType;
-        switch (sType) {
-            case 'h1':
-                this.nOffsetOpen = RC_CONST.time_door_single_horiz / RC_CONST.rc_time_factor;
+    setDoorType(nType) {
+        this.nDoorType = nType;
+        switch (nType) {
+            case RC_CONST.phys_door_sliding_left:
+            case RC_CONST.phys_door_sliding_right:
+                this.nOffsetOpen = RC_CONST.time_door_single_horiz / RC_CONST.time_factor;
                 this.autoclose(RC_CONST.time_door_autoclose);
                 break;
 
-            case 'h2':
-                this.nOffsetOpen = RC_CONST.time_door_double / RC_CONST.rc_time_factor;
+            case RC_CONST.phys_door_sliding_double:
+                this.nOffsetOpen = RC_CONST.time_door_double / RC_CONST.time_factor;
                 this.autoclose(RC_CONST.time_door_autoclose);
                 break;
 
-            case 'v':
-                this.nOffsetOpen = RC_CONST.time_door_single_vert / RC_CONST.rc_time_factor;
+            case RC_CONST.phys_door_sliding_up:
+            case RC_CONST.phys_door_sliding_down:
+            case RC_CONST.phys_curt_sliding_up:
+            case RC_CONST.phys_curt_sliding_down:
+                this.nOffsetOpen = RC_CONST.time_door_single_vert / RC_CONST.time_factor;
                 this.autoclose(RC_CONST.time_door_autoclose);
                 break;
 
-            case 's':
-                this.nOffsetOpen =  RC_CONST.time_door_secret / RC_CONST.rc_time_factor;
+            case RC_CONST.phys_secret_block:
+                this.nOffsetOpen =  RC_CONST.time_door_secret / RC_CONST.time_factor;
                 this.autoclose(Infinity);
                 break;
         }
@@ -75,7 +79,7 @@ class Door {
      */
     autoclose(nDelay) {
         this.bAutoclose = nDelay !== Infinity;
-        this.nAutocloseDelay = nDelay / RC_CONST.rc_time_factor | 0;
+        this.nAutocloseDelay = nDelay / RC_CONST.time_factor | 0;
     }
 
     /**
@@ -153,7 +157,7 @@ class Door {
      * @return boolean
 	 */
 	isSecret() {
-        return this.sDoorType === 's';
+        return this.nDoorType === RC_CONST.phys_secret_block;
     }
 
 	/**

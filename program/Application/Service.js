@@ -63,10 +63,12 @@ class Service {
 
 		/**
 		 * ### REQ_LOGIN
-		 * Un client souhaite s'identifier après s'etre connecté. Il doit transmettre son nom et son mot de passe.
-		 * Le serveur retransmet immédiatement un identifiant client
-		 * @param name {string}
-		 * @param pass {string}
+		 * Un client souhaite s'identifier après s'etre connecté.
+		 * Il doit transmettre son nom et son mot de passe.
+		 * Le serveur retransmet immédiatement un identifiant client si l'identification réussit
+		 * si l'identification échoue, le serveur renvoie {id: null}
+		 * @param name {string} nom du client
+		 * @param pass {string} mot de passe du client
 		 * @param ack {Function}
 		 */
         socket.on('REQ_LOGIN', ({name, pass}, ack) => {
@@ -107,10 +109,9 @@ class Service {
 		 * ### REQ_CHAN_INFO
 		 * Un client souhaite obtenir des information sur un canal.
 		 * le client fournit l'identifiant, le serveur renvoie par une structure décrivant le canal
-		 * cependant le serveur ne renvoie la structure que si le client est déja connecté au canal
-		 * si le client n'est pas connecté au canal, une structure non renseignée est renvoyée
-		 * @param id
-		 * @param ack
+		 * un coupe circuit intervient pour toute connexion non identifiée
+		 * @param id {string} identifiant du canal
+		 * @param ack {function}
 		 */
         socket.on('REQ_MS_CHAN_INFO', ({id}, ack) => {
         	if (client.id) {
@@ -140,8 +141,8 @@ class Service {
 		 * ### REQ_USER_INFO
 		 * Un client souhaite obtenir des informations sur un utilisateur.
 		 * le client fournit l'identifiant, le serveur renvoie par une structure décrivant l'utilisateur
-		 * si l'identifiant ne correspind à rien, une structure non renseignée est renvoyée
-		 * @param id
+		 * si l'identifiant ne correspind à rien, kick
+		 * @param id {identifiant du user}
 		 * @param ack
 		 */
 		socket.on('REQ_MS_USER_INFO', ({id}, ack) => {
@@ -164,7 +165,8 @@ class Service {
 		/**
 		 * ### MS_SAY
 		 * un utilisateur envoie un message de discussion
-		 *
+		 * @param channel {string} identifiant du canal
+		 * @param message {string} contenu du message
 		 */
 		socket.on('MS_SAY', ({channel, message}) => {
 			if (client.id) {
@@ -199,19 +201,26 @@ class Service {
 
         /**
 		 * ### REQ_LEV_LOAD
-		 * un utilisateur réclame le chargement d'un niveau.
+		 * un client réclame le chargement d'un niveau.
 		 * @param ref {string} référence du niveau à charger
          */
 		socket.on('REQ_LEV_LOAD', async ({ref}, ack) => {
-			let data = await level.load(ref);
-			if (data) {
-                logger.logfmt(STRINGS.service.event.level_loaded, socket.client.id, ref);
-                ack(data);
-			} else {
-				logger.errfmt(STRINGS.service.error.level_not_found, socket.client.id, ref);
-				ack(null);
-			}
+            if (client.id) {
+				let data = await level.load(ref);
+				if (data) {
+					logger.logfmt(STRINGS.service.event.level_loaded, socket.client.id, ref);
+					ack(data);
+				} else {
+					logger.errfmt(STRINGS.service.error.level_not_found, socket.client.id, ref);
+					ack(null);
+				}
+            } else {
+                socket.close();
+            }
 		});
+
+
+
 
 
 

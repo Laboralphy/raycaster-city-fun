@@ -1,4 +1,4 @@
-
+const RC_CONST = require('../consts/raycaster');
 describe('model', function() {
     describe('Door', function() {
         const Door = require('../model/Door');
@@ -213,8 +213,8 @@ describe('model', function() {
             it('should open 2 secret doors', function() {
 				let door1 = new Door();
 				let door2 = new Door();
-				door1.setDoorType('s');
-				door2.setDoorType('s');
+				door1.setDoorType(RC_CONST.phys_secret_block);
+				door2.setDoorType(RC_CONST.phys_secret_block);
 				door1.nextSecretDoor = door2;
 				expect(door1.nState).toBe(0);
 				expect(door2.nState).toBe(0);
