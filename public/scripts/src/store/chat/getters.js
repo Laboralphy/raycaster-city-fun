@@ -1,15 +1,6 @@
 const getters = {
 
     /**
-     * Renvoie true si le composant est visible
-     * @param state
-     * @return {boolean|*}
-     */
-    isVisible: function(state) {
-        return state.visible;
-    },
-
-    /**
      * Renvoie ce qu'il faut afficher dans la fenetre de discussion actuellement sélectionnée
      */
     getContent: function(state) {

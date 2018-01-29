@@ -47,7 +47,7 @@
         },
         computed: Object.assign(
             mapGetters({
-                isVisible: 'chat/isVisible',
+                isVisible: 'ui/isVisibleChat',
 				getChatContent: 'chat/getContent',
 				getActiveTab: 'chat/getActiveTab'
             })

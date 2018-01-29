@@ -6,7 +6,7 @@ const mutations = {
      * Rend la fenetre de login visible
      * @param state
      */
-    [types.UI_SHOW]: function (state) {
+    [types.SHOW]: function (state) {
         state.visible = true;
     },
 
@@ -14,9 +14,31 @@ const mutations = {
      * Rend la fenetre de login invisible
      * @param state
      */
-    [types.UI_HIDE]: function (state) {
+    [types.HIDE]: function (state) {
         state.visible = false;
-    }
+    },
+
+	/**
+     * Affichage d'une section
+	 * @param state
+	 * @param id {string} identifiant de la section à afficher
+	 */
+	[types.SHOW_SECTION]: function(state, {id}) {
+        if (id in state.sections) {
+			state.sections[id].visible = true;
+        }
+	},
+
+	/**
+     * Dissimulation d'une section
+	 * @param state
+	 * @param id {string} identifiant de la section à cacher
+	 */
+	[types.HIDE_SECTION]: function(state, {id}) {
+		if (id in state.sections) {
+			state.sections[id].visible = false;
+		}
+	},
 };
 
 export default mutations;

@@ -32,44 +32,6 @@
             mapGetters({
                 isVisible: 'ui/isVisible'
             })
-        ),
-        methods: {
-            show: function(sWhat) {
-                switch (sWhat) {
-                    case 'ui':
-                        return this.$store.dispatch('ui/show');
-
-                    case 'login':
-                        return this.$store.dispatch('clients/show');
-
-                    case 'chat':
-                        return this.$store.dispatch('chat/show');
-
-                    case 'inventory':
-						return this.$store.dispatch('gameMenu/open');
-
-				}
-            },
-            hide: function(sWhat) {
-                switch (sWhat) {
-                    case 'ui':
-                        return this.$store.dispatch('ui/hide');
-
-                    case 'login':
-                        return this.$store.dispatch('clients/hide');
-
-                    case 'chat':
-                        return this.$store.dispatch('chat/hide');
-
-					case 'inventory':
-						return this.$store.dispatch('gameMenu/close');
-
-					case '*':
-                        return this.$store.dispatch('chat/hide')
-                            .then(() => this.$store.dispatch('clients/hide'))
-                            .then(() => this.$store.dispatch('gameMenu/close'));
-                }
-            }
-        }
+        )
     }
 </script>

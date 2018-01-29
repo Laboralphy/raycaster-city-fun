@@ -1,5 +1,4 @@
 export default {
-    visible: false,
-    clients: [],
-    localClient: null
+    clients: {},
+    localClient: {id: 0, name: 'n/a'}
 }

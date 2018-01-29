@@ -3,7 +3,6 @@ import store from './store';
 import UI from './components/UserInterface.vue';
 import ApplicationConst from './data/const';
 import STRINGS from './data/strings';
-import Network from './network/index';
 import Game from './game/index';
 import CONFIG from './game/config';
 
@@ -12,9 +11,6 @@ import CONFIG from './game/config';
 function createApplicationGame() {
 	Vue.use(ApplicationConst);
 	Vue.use(STRINGS);
-
-	let network = new Network();
-	window.NETWORK = network;
 
 	const app = new Vue({
 		el: '#user-interface',
@@ -77,14 +73,15 @@ function createApplicationGame() {
 			 * @param pass
 			 * @return {Promise<void>}
 			 */
-			sendLogin: async function(name, pass) {
-				let id = await network.req_login(name, pass);
-				if (id) {
-					this.ui.hide('login');
+			sendLogin: async function(login, pass) {
+				await this.$store.dispatch('clients/login', {login, pass});
+				//let id = await network.req_login(login, pass);
+				/*if (id) {
+					this.$store.dispatch('ui/hide', {intf: 'login'});
 					this.startGame();
 				} else {
 					// @TODO coller une erreur de connexion visible pour l'utilisateur
-				}
+				}*/
 			},
 
 			/**
@@ -101,16 +98,17 @@ function createApplicationGame() {
 			this.ui = this.$children[0];
 
 			// prise en charge des évènement issus des composants
-			this.ui.$refs.login.$on('submit', (name, pass) => this.sendLogin(name, pass));
-			this.ui.$refs.chat.$on('message', (message) => this.sendMessage(message));
-			network.useStore(this.$store);
-			network.on('disconnect', async () => {
-                this.endGame();
-				await this.ui.hide('*');
-				await this.ui.show('login');
-			});
-            this.ui.show('login');
-            this.ui.show('ui');
+			//this.ui.$refs.login.$on('submit', (login, pass) => this.sendLogin(login, pass));
+			//this.ui.$refs.chat.$on('message', (message) => this.sendMessage(message));
+			//network.useStore(this.$store);
+			// network.on('disconnect', async () => {
+             //    this.endGame();
+			// 	await this.ui.hide('*');
+			// 	await this.ui.show('login');
+			// });
+			// this.ui.show('login');
+            // this.ui.show('ui');
+			this.$store.dispatch('ui/showSection', {id: 'login'});
 		}
 	});
 
