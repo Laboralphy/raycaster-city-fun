@@ -153,7 +153,7 @@ export default function createWebSocketPlugin (socket) {
 							{id},
 							async (data) => {
 								if (data) {
-									await store.dispatch('client')
+									await store.dispatch('client');
 									userCache[id] = data;
 								}
 								resolve(data);
@@ -229,12 +229,23 @@ export default function createWebSocketPlugin (socket) {
 
 
 		store.subscribe(async mutation => {
+			console.log(mutation);
 			switch (mutation.type) {
-				case 'clients/login':
+				case 'net/reqLogin':
 					// le client souhaite se connecter
 					let id = await req_login(mutation.payload.login, mutation.payload.pass);
-					await store.dispatch('clients/connect', {id, name: mutation.payload.login});
-					await store.dispatch('clients/setLocal', {id});
+					if (id) {
+						await store.dispatch('clients/info', {id, name: mutation.payload.login});
+						await store.dispatch('clients/setLocal', {id});
+						//
+						await store.dispatch('ui/hideSection', {id: 'login'});
+						await store.dispatch('ui/hide');
+					} else {
+						// on a eu un soucis d'identification
+					}
+					break;
+
+				case 'net/msSay':
 					break;
 			}
 		});

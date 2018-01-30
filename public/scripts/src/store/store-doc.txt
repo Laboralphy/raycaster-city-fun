@@ -1,0 +1,52 @@
+ACTIONS
+
+
+ui/show
+montrer l'interface utilisateur, si des section sont également affichée, celles ci se montrent.
+{ pas de paramètre }
+
+
+ui/hide
+cache completement l'interface utilisateur.
+{ pas de paramètre }
+
+
+ui/showSection
+affichage d'une section de l'interface utilisateur
+{
+    id: identifiant de la section de l'UI à afficher
+        actuellement les identifiant possible sont "chat", "login", "inventory"
+}
+
+
+ui/hideSection
+cacher une section de l'interface utilisateur
+{
+    id: identifiant de la section de l'UI à cacher
+}
+
+
+
+
+
+chat/selectTab
+permet de selectionner un onglet
+{
+    id: identifiant de l'onglet
+}
+
+
+
+GETTERS
+
+// ui/isVisible
+
+ui/getSections
+renvoie la listes des sections sous forme de tableau.
+
+ui/isVisibleChat
+renvoie true si la fenêtre chat est visible
+
+ui/isVisibleLogin
+renvoie true si la fenêtre de login est visible
+

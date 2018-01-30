@@ -4,15 +4,11 @@ const getters = {
      * Renvoie ce qu'il faut afficher dans la fenetre de discussion actuellement sélectionnée
      */
     getContent: function(state) {
-        return function() {
-            return state.activeTab ? state.activeTab.lines : ['d'];
-        };
+		return state.activeTab ? state.activeTab.lines : ['d'];
     },
 
     getActiveTab: function(state) {
-        return function() {
-            return state.activeTab;
-        }
+        return state.activeTab;
     },
 
 	/**

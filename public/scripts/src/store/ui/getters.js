@@ -15,6 +15,10 @@ const getters = {
 
 	isVisibleLogin: function(state) {
 		return state.sections.login.visible;
+	},
+
+	getSections: function(state) {
+    	return Object.keys(state.sections);
 	}
 };
 

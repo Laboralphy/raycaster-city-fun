@@ -6,7 +6,7 @@ const mutations = {
      * Remise à zero du chat
 	 * @param state
 	 */
-	[types.CHAT_RESET]: function(state) {
+	[types.RESET]: function(state) {
         state.lastLineId = 0;
 		state.tabs = [];
 		state.activeTab = null;
@@ -20,7 +20,7 @@ const mutations = {
      * de strings.chat.tabs, sinon affiché tel quel.
      *
      */
-    [types.CHAT_ADD_TAB]: function(state, {id, caption}) {
+    [types.ADD_TAB]: function(state, {id, caption}) {
         state.tabs.push({
             id: id,
             lines: [],
@@ -34,7 +34,7 @@ const mutations = {
      * @param state
      * @param id {number} identifiant de l'onglet à selectionner
      */
-    [types.CHAT_SELECT_TAB]: function(state, {id}) {
+    [types.SELECT_TAB]: function(state, {id}) {
         state.activeTab = state.tabs.find(t => t.id === id);
         state.activeTab.notified = false;
     },
@@ -46,7 +46,7 @@ const mutations = {
      * @param client {number} id du client
      * @param message {string} contenu du message
      */
-    [types.CHAT_POST_LINE]: function(state, {tab, client, message}) {
+    [types.POST_LINE]: function(state, {tab, client, message}) {
         let oTab = state.tabs.find(t => t.id === tab);
         if (!oTab) {
             throw new Error('could not find tab #' + tab);

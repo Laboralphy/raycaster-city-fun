@@ -43,7 +43,7 @@
 
         computed: Object.assign(
             mapGetters({
-                isVisible: 'clients/isVisible'
+                isVisible: 'ui/isVisibleLogin'
             })
         ),
 

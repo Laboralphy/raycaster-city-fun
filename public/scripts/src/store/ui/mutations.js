@@ -26,7 +26,9 @@ const mutations = {
 	[types.SHOW_SECTION]: function(state, {id}) {
         if (id in state.sections) {
 			state.sections[id].visible = true;
-        }
+        } else {
+        	throw new Error('this section does not exist : ' + id)
+		}
 	},
 
 	/**

@@ -9,7 +9,7 @@
             <div class="col lg-12">
                 <div class="console">
                     <chat-line
-                            v-for="line in getChatContent()"
+                            v-for="line in getChatContent"
                             :key="line.id"
                             :def-user="line.user"
                             :def-color = "line.color"
@@ -30,7 +30,6 @@
 <script>
     import ChatLine from "./ChatLine.vue";
     import ChatChannels from "./ChatChannels.vue";
-    import * as types from '../../store/chat/mutation-types';
     import {mapGetters} from 'vuex';
 
     export default {
@@ -64,7 +63,7 @@
              * @param idTab
              */
             doScrollDown: function(idTab) {
-                if (idTab === this.getActiveTab().id) {
+                if (idTab === this.getActiveTab.id) {
                     this.pleaseScrollDown = true;
                 }
             },
@@ -80,7 +79,7 @@
 
         mounted: function() {
             this.$refs.channels.$on('select', (function(item) {
-                this.$store.dispatch('chat/' + types.CHAT_SELECT_TAB, {id: item.id});
+                this.$store.dispatch('chat/selectTab', {id: item.id});
                 this.doScrollDown(item.id);
             }).bind(this));
             this.$refs.formInput.addEventListener('submit', event => event.preventDefault());
@@ -88,7 +87,7 @@
             this.$refs.input.addEventListener('keypress', (function(event) {
                 switch (event.key) {
                     case 'Enter':
-                        this.$emit('message', this.inputText);
+						this.$store.dispatch('chat/message', {message: this.inputText});
                         this.inputText = '';
                         break;
 

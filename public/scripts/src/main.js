@@ -34,14 +34,16 @@ function createApplicationGame() {
 				MAIN.configure(CONFIG);
 				MAIN.run(g);
                 MAIN.pointerlock.on('enter', event => {
-                    this.ui.hide('ui');
+                	this.$store.dispatch('ui/hide');
                     g.hideOverlay();
                     document.querySelector('canvas#screen').style.filter = '';
                 });
                 g.on('blur', event => {
-                    this.ui.show('ui');
-                    this.ui.show('gameMenu');
-                    this.ui.$refs.gameMenuWrapper.selectTab('#inventaire');
+                    //this.ui.show('ui');
+                    //this.ui.show('gameMenu');
+                    //this.ui.$refs.gameMenuWrapper.selectTab('#inventaire');
+					this.$store.dispatch('ui/showSection', {id: 'chat'});
+					this.$store.dispatch('ui/show');
                     document.querySelector('canvas#screen').style.filter = 'blur(5px)';
 				});
                 document.body.setAttribute('class', 'playing');
@@ -69,19 +71,18 @@ function createApplicationGame() {
 			 * Envoyer le login/pass au server, attendre son retour
 			 * conserver l'id retourner
 			 * en cas d'erreur , notifier
-			 * @param name
+			 * @param login
 			 * @param pass
 			 * @return {Promise<void>}
 			 */
 			sendLogin: async function(login, pass) {
-				await this.$store.dispatch('clients/login', {login, pass});
-				//let id = await network.req_login(login, pass);
-				/*if (id) {
-					this.$store.dispatch('ui/hide', {intf: 'login'});
+				await this.$store.dispatch('net/reqLogin', {login, pass});
+				if (this.$store.getters['clients/getLocalClient'].id) {
+					// connecté
 					this.startGame();
 				} else {
-					// @TODO coller une erreur de connexion visible pour l'utilisateur
-				}*/
+					console.warn('not connected');
+				}
 			},
 
 			/**
@@ -90,25 +91,21 @@ function createApplicationGame() {
 			 * @returns {Promise<void>}
 			 */
 			sendMessage: async function(message) {
-				network.send_ms_say(this.$store.getters['chat/getActiveTab']().id, message);
+				let channel = this.$store.getters['chat/getActiveTab'].id;
+				this.$store.dispatch('net/msSay', {channel, message});
 			}
 		},
 
-		mounted: function() {
-			this.ui = this.$children[0];
+		mounted: async function() {
+			//this.ui = this.$children[0];
+			let ui = this.$children[0];
 
 			// prise en charge des évènement issus des composants
-			//this.ui.$refs.login.$on('submit', (login, pass) => this.sendLogin(login, pass));
-			//this.ui.$refs.chat.$on('message', (message) => this.sendMessage(message));
-			//network.useStore(this.$store);
-			// network.on('disconnect', async () => {
-             //    this.endGame();
-			// 	await this.ui.hide('*');
-			// 	await this.ui.show('login');
-			// });
-			// this.ui.show('login');
-            // this.ui.show('ui');
-			this.$store.dispatch('ui/showSection', {id: 'login'});
+			ui.$refs.login.$on('submit', (login, pass) => this.sendLogin(login, pass));
+			ui.$refs.chat.$on('message', (message) => this.sendMessage(message));
+
+			await this.$store.dispatch('ui/showSection', {id: 'login'});
+			await this.$store.dispatch('ui/show');
 		}
 	});
 

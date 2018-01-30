@@ -1,17 +1,17 @@
 import * as types from './mutation-types';
 
 const actions = {
-    [types.CHAT_RESET]: function({commit}) {
-		commit(types.CHAT_RESET);
+    [types.RESET]: function({commit}) {
+		commit(types.RESET);
     },
-    [types.CHAT_ADD_TAB]: function({commit}, {id, caption}) {
-        commit(types.CHAT_ADD_TAB, {id, caption});
+    [types.ADD_TAB]: function({commit}, {id, caption}) {
+        commit(types.ADD_TAB, {id, caption});
     },
-    [types.CHAT_SELECT_TAB]: function({commit}, {id}) {
-        commit(types.CHAT_SELECT_TAB, {id});
+    [types.SELECT_TAB]: function({commit}, {id}) {
+        commit(types.SELECT_TAB, {id});
     },
-    [types.CHAT_POST_LINE]: function({commit}, {tab, client, message}) {
-        commit(types.CHAT_POST_LINE, {tab, client, message});
+    [types.POST_LINE]: function({commit}, {tab, client, message}) {
+        commit(types.POST_LINE, {tab, client, message});
     }
 };
 
