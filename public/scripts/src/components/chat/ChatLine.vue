@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-bind:data-uid="{uid}">
         <span v-bind:class="'user-name color-' + color" v-if="user">{{user}} : </span>
         <span v-bind:class="'message color-' + color" v-if="message">
             <i v-if="!user">{{message}}</i>
@@ -11,9 +11,10 @@
 <script>
     export default {
         name: "chat-line",
-        props: ['defUser', 'defColor', 'defMessage'],
+        props: ['defUid', 'defUser', 'defColor', 'defMessage'],
         data: function() {
             return {
+                uid: this.defUid,
                 user: this.defUser,
                 color: this.defColor,
                 message: this.defMessage

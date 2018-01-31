@@ -21,6 +21,16 @@ const getters = {
             return state.tabs.find(t => t.id === id);
         };
     },
+
+    getLastLine: function(state, getters) {
+	    let lines = state.activeTab ? state.activeTab.lines : [];
+	    let n = lines.length - 1;
+	    if (n >= 0) {
+            return lines[n];
+        } else {
+	        return null;
+        }
+    }
 };
 
 export default getters;

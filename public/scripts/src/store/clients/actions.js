@@ -6,7 +6,10 @@ const actions = {
     },
     [types.SET_LOCAL]: function({commit}, {id}) {
         commit(types.SET_LOCAL, {id});
-    }
+    },
+    [types.SUBMIT]: function({commit}, {name}) {
+        commit(types.SUBMIT, {name});
+    },
 };
 
 export default actions;

@@ -73,7 +73,7 @@ export default function createWebSocketPlugin (socket) {
 			let oChannel = await req_ms_chan_info(channel);
 			await store.dispatch('chat/postLine', {
 				tab: oChannel.id,
-				client: '',
+				client: null,
 				message: STRINGS.ui.chat.joined.with({user: oUser.name, chan: oChannel.name})
 			});
 		});
@@ -86,7 +86,7 @@ export default function createWebSocketPlugin (socket) {
 			let oChannel = await req_ms_chan_info(channel);
 			await store.dispatch('chat/postLine', {
 				tab: oChannel.id,
-				client: '',
+				client: null,
 				message: STRINGS.ui.chat.left.with({user: oUser.name, chan: oChannel.name})
 			});
 		});
@@ -99,7 +99,7 @@ export default function createWebSocketPlugin (socket) {
 			let oChannel = await req_ms_chan_info(channel);
 			await store.dispatch('chat/postLine', {
 				tab: oChannel.id,
-				client: oUser.name,
+				client: {id: oUser.id, name: oUser.name},
 				message
 			});
 		});
@@ -260,24 +260,24 @@ export default function createWebSocketPlugin (socket) {
 		store.subscribeAction(async (action) => {
 			console.log(action);
 			switch (action.type) {
-				case 'net/reqLogin':
-					// le client souhaite se connecter
-					let id = await req_login(action.payload.login, action.payload.pass);
-					if (id) {
-						await store.dispatch('clients/info', {id, name: action.payload.login});
-						await store.dispatch('clients/setLocal', {id});
-						//
-						await store.dispatch('ui/hideSection', {id: 'login'});
-						await store.dispatch('ui/hide');
-						startGame();
-					} else {
-						// on a eu un soucis d'identification
-					}
+
+				case 'clients/submit':
+                    // le client souhaite se connecter
+                    let id = await req_login(action.payload.login, action.payload.pass);
+                    if (id) {
+                        await store.dispatch('clients/info', {id, name: action.payload.login});
+                        await store.dispatch('clients/setLocal', {id});
+                        //
+                        await store.dispatch('ui/hideSection', {id: 'login'});
+                        await store.dispatch('ui/hide');
+                        startGame();
+                    } else {
+                        // on a eu un soucis d'identification
+                    }
 					break;
 
-				case 'net/msSay':
-					// le client poste un message
-                    send_ms_say(action.payload.channel, action.payload.message);
+				case 'chat/message':
+                    send_ms_say(action.payload.tab, action.payload.message);
 					break;
 			}
 		});

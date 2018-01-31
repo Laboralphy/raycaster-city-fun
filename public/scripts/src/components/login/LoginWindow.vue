@@ -56,7 +56,7 @@
         mounted: function() {
             this.$refs.connect.addEventListener('click', (function(event) {
             	this.error = false;
-            	this.$emit('submit', this.inputLogin, this.inputPass);
+            	this.$store.dispatch('clients/submit', {login: this.inputLogin, pass: this.inputPass});
             }).bind(this));
         }
     }

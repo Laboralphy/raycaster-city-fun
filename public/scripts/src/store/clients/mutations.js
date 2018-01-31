@@ -19,6 +19,16 @@ const mutations = {
      */
     [types.SET_LOCAL]: function(state, {id}) {
         state.localClient = state.clients[id];
+    },
+
+    /**
+     * Le client fait une tentative d'identifiaction
+     * @param state
+     * @param name
+     */
+    [types.SUBMIT]: function(state, {login, pass}) {
+        state.lastLogin = login;
+        state.lastPass = pass;
     }
 };
 
