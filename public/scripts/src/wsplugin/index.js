@@ -258,7 +258,6 @@ export default function createWebSocketPlugin (socket) {
 
 
 		store.subscribeAction(async (action) => {
-			console.log(action);
 			switch (action.type) {
 
 				case 'clients/submit':

@@ -83,7 +83,6 @@
                             message: this.inputText
 						});
                         this.inputText = '';
-                        this.doScrollDown(tab);
                         break;
 
                     case 'Escape':
