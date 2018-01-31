@@ -5,7 +5,7 @@ const getters = {
 	 */
 	getLocalClient: function(state) {
 		return state.localClient;
-	}
+	},
 };
 
 export default getters;

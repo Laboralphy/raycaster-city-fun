@@ -87,7 +87,7 @@
             this.$refs.input.addEventListener('keypress', (function(event) {
                 switch (event.key) {
                     case 'Enter':
-						this.$store.dispatch('chat/message', {message: this.inputText});
+						this.$emit('message', this.inputText);
                         this.inputText = '';
                         break;
 

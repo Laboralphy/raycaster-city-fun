@@ -1,9 +1,38 @@
-import STRINGS from "../../data/strings";
+import STRINGS from "../data/strings";
+import Game from "../game";
+import CONFIG from "../game/config";
 
 export default function createWebSocketPlugin (socket) {
 	return store => {
 		let chanCache = {};
 		let userCache = {};
+        let G;
+
+		/// GAME
+        function startGame() {
+        	console.log('starting game...');
+        	G = new Game();
+            MAIN.configure(CONFIG);
+            MAIN.run(G);
+            MAIN.pointerlock.on('enter', event => {
+                store.dispatch('ui/hide');
+                G.hideOverlay();
+                document.querySelector('canvas#screen').style.filter = '';
+            });
+            G.on('blur', event => {
+                store.dispatch('ui/showSection', {id: 'chat'});
+                store.dispatch('ui/show');
+                document.querySelector('canvas#screen').style.filter = 'blur(5px)';
+            });
+            document.body.setAttribute('class', 'playing');
+        }
+
+        function endGame() {
+			G._halt();
+            document.body.setAttribute('class', '');
+        }
+
+
 
 		// GENERAL PURPOSE
 		// GENERAL PURPOSE
@@ -126,6 +155,7 @@ export default function createWebSocketPlugin (socket) {
 							{id},
 							(data) => {
 								if (data) {
+									// il n'y a pas de registre de canaux dans le state
 									chanCache[id] = data;
 								}
 								resolve(data);
@@ -145,16 +175,15 @@ export default function createWebSocketPlugin (socket) {
 		async function req_ms_user_info(id) {
 			return new Promise(
 				resolve => {
-					if (id in userCache) {
-						resolve(userCache[id]);
+					if (id in store.state.clients) {
+						resolve(store.state.clients[id]);
 					} else {
 						socket.emit(
 							'REQ_MS_USER_INFO',
 							{id},
 							async (data) => {
 								if (data) {
-									await store.dispatch('client');
-									userCache[id] = data;
+                                    store.commit('clients/info', {id, name: data.name});
 								}
 								resolve(data);
 							}
@@ -228,24 +257,27 @@ export default function createWebSocketPlugin (socket) {
 		//  ####    ####   #####    ####    ####   #    #     #    #####   ######
 
 
-		store.subscribe(async mutation => {
-			console.log(mutation);
-			switch (mutation.type) {
+		store.subscribeAction(async (action) => {
+			console.log(action);
+			switch (action.type) {
 				case 'net/reqLogin':
 					// le client souhaite se connecter
-					let id = await req_login(mutation.payload.login, mutation.payload.pass);
+					let id = await req_login(action.payload.login, action.payload.pass);
 					if (id) {
-						await store.dispatch('clients/info', {id, name: mutation.payload.login});
+						await store.dispatch('clients/info', {id, name: action.payload.login});
 						await store.dispatch('clients/setLocal', {id});
 						//
 						await store.dispatch('ui/hideSection', {id: 'login'});
 						await store.dispatch('ui/hide');
+						startGame();
 					} else {
 						// on a eu un soucis d'identification
 					}
 					break;
 
 				case 'net/msSay':
+					// le client poste un message
+                    send_ms_say(action.payload.channel, action.payload.message);
 					break;
 			}
 		});

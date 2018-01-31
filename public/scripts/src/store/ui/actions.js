@@ -6,7 +6,7 @@ const actions = {
 	},
 
 	[types.HIDE]: async function ({commit}) {
-		commit(types.SHOW);
+		commit(types.HIDE);
 	},
 
 	[types.SHOW_SECTION]: async function ({commit, dispatch}, {id}) {
