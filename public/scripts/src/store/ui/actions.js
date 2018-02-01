@@ -1,12 +1,21 @@
 import * as types from './mutation-types';
 
 const actions = {
-    [types.UI_SHOW]: function ({commit}) {
-        commit(types.UI_SHOW);
-    },
-    [types.UI_HIDE]: function ({commit}) {
-        commit(types.UI_HIDE);
-    }
+	[types.SHOW]: async function ({commit}) {
+		commit(types.SHOW);
+	},
+
+	[types.HIDE]: async function ({commit}) {
+		commit(types.HIDE);
+	},
+
+	[types.SHOW_SECTION]: async function ({commit, dispatch}, {id}) {
+		commit(types.SHOW_SECTION, {id});
+	},
+
+	[types.HIDE_SECTION]: async function ({commit, dispatch}, {id}) {
+		commit(types.HIDE_SECTION, {id});
+	}
 };
 
 export default actions

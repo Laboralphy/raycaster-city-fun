@@ -1,2 +1,5 @@
-export const UI_SHOW = 'show';
-export const UI_HIDE = 'hide';
+export const SHOW = 'show';
+export const HIDE = 'hide';
+export const SHOW_SECTION = 'showSection';
+export const HIDE_SECTION = 'hideSection';
+
