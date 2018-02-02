@@ -4935,7 +4935,7 @@ O2.createClass('O876_Raycaster.Animation',  {
 		// Dépassement de duration (pour une seule fois)
 		if (this.nTime >= this.nDuration) {
 			this.nTime -= this.nDuration;
-			if (this.nLoop == 3) {
+			if (this.nLoop === 3) {
 				this.nIndex = Math.random() * this.nCount | 0;
 			} else {
 				this.nIndex += this.nDirLoop;
@@ -6899,6 +6899,10 @@ O2.createClass('O876_Raycaster.Mobile', {
 		}
 	},
 
+	isMoving: function() {
+		return this.x !== this.xSave || this.y !== this.ySave;
+	},
+
 	/**
 	 * Renvoie le type de blueprint
 	 * Si le mobile n'a pas de sprite (et n'a pas de blueprint)
@@ -7668,19 +7672,13 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	oThinkerManager : null,
 	aVisibleMobiles: null,
 	aDiscardedMobiles: null,
-
-	// weapon Layer
-	oWeaponLayer: null,
-
 	oImages : null,
-
-	// Effects
 	oEffects : null,
-
-	// Data
 	aWorld : null,
 	oConfig : null,
-	
+	oWeaponLayer: null,
+
+	// upper level
 	oUpper: null,
 	/**
 	 * Set Raycaster Configuration
@@ -7756,16 +7754,6 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		}
 		this.oThinkerManager = new O876_Raycaster.ThinkerManager();
 		this.oContinueRay = { bContinue: false };
-		this.oWeaponLayer = {
-			canvas: null,
-			x: -1024,
-			y: 0,
-			width: 0,
-			height: 0,
-			index: 0,
-			alpha: 1,
-			zoom: 1
-		};
 		// économiser la RAM en diminuant le nombre de shading degrees
 		if (this.oConfig.shades) {
 			this.nShadingThreshold = this.oConfig.shades;
@@ -7838,6 +7826,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			return;
 		}
 		this.aDiscardedMobiles = this.updateHorde();
+		if (this.oWeaponLayer) {
+			this.oWeaponLayer.process(this.TIME_FACTOR, this.oCamera);
+		}
 		this.oEffects.process();
 	},
 
@@ -7921,39 +7912,8 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		return g;
 	},
 
-	
-	/** Rendu graphique de l'arme
-	 * canvas : référence du canvas source
-	 * index : numero de la frame affiché
-	 * width : largeur en pixel d'une frame
-	 * height : hauteur d'une frame
-	 * x : position du sprite à l'écran
-	 * y : *        *         *
-	 * zoom : zoom appliqué au sprite 
-	 */
-	drawWeapon: function() {
-		var w = this.oWeaponLayer;
-		if (w.index >= 0 && w.canvas) {
-			var fAlpha = 1;
-			if (w.alpha != 1) {
-				fAlpha = this._oRenderContext.globalAlpha;
-				this._oRenderContext.globalAlpha = w.alpha;
-			}
-			this._oRenderContext.drawImage(
-				w.canvas,    // canvas des tiles d'arme 
-				w.index * w.width,   
-				0, 
-				w.width, 
-				w.height, 
-				w.x, 
-				w.y, 
-				w.width * w.zoom | 0, 
-				w.height * w.zoom | 0
-			);
-			if (w.alpha != 1) {
-				this._oRenderContext.globalAlpha = fAlpha;
-			}
-		}
+	weapon: function(w) {
+		this.oWeaponLayer = w;
 	},
 
 	buildLevel : function() {
@@ -8361,7 +8321,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	backgroundRedim: function() {
 		var oBackground = this.oBackground;
 		var dh = this.yScrSize << 1;
-		if (oBackground && oBackground.height != dh) {
+		if (oBackground && oBackground.height !== dh) {
 			var sw = oBackground.width;
 			var sh = oBackground.height;
 			var dw = sw * dh / sh | 0;
@@ -8882,7 +8842,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var yCam = this.oCamera.y;
 		var xCam8 = xCam / this.nPlaneSpacing | 0;
 		var yCam8 = yCam / this.nPlaneSpacing | 0;
-		var i = 0;
+		var i;
 		this.aZBuffer = [];
 		this.aScanSectors = Marker.create();
 		if (this.oBackground) { // Calculer l'offset camera en cas de background
@@ -9009,6 +8969,10 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		zbl = zb.length;
 		for (i = 0; i < zbl; ++i) {
 			this.drawImage(zb[i]);
+		}
+		// weapon
+		if (this.oWeaponLayer) {
+			this.oWeaponLayer.render(this._oRenderContext);
 		}
 		if (this.oConfig.drawMap) {
 			this.drawMap();
@@ -9593,6 +9557,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			case this.PHYS_CURT_SLIDING_DOWN: // rideau coulissant vers le bas
 				aData[2] += nOffset; // no break here 
 				// suite au case 4...
+				/** @fallthrough */
 
 			case this.PHYS_DOOR_SLIDING_DOWN: // Porte coulissant vers le bas
 				if (nOffset > 0) {
@@ -10785,6 +10750,72 @@ O2.createClass('O876_Raycaster.Transistate', {
 	}
 });
 
+O2.createClass('O876_Raycaster.WeaponLayer', {
+	// x, y
+	x: 0,
+	y: 0,
+	canvas: null,
+	context: null,
+	running: false,
+	xBase: 0,
+	yBase: 0,
+	tile: null,
+	time: 0,
+	firetime: 0,
+	animation: 0,
+
+	RADIUS: 20,
+
+	base: function(x, y) {
+		this.xBase = x;
+		this.yBase = y;
+	},
+
+	fire: function() {
+		this.firetime = this.time + 700;
+	},
+
+	playAnimation: function(n) {
+		if (this.tile.aAnimations[n]) {
+			this.animation = new O876_Raycaster.Animation();
+            this.animation.assign(this.tile.aAnimations[n]);
+		}
+	},
+
+	process: function(nTime, oMobile) {
+        var x = 0, y = 0;
+		this.time += nTime;
+        var t = this.time;
+		this.running = oMobile.isMoving();
+		if (this.running && this.firetime < t) {
+            x = this.RADIUS * Math.sin(t / 170) | 0;
+            y = Math.abs(this.RADIUS * Math.cos(t / 170)) | 0;
+		}
+		if (this.animation) {
+			this.animation.animate(nTime);
+		}
+        this.x = x + this.xBase;
+        this.y = y + this.yBase;
+	},
+
+	render: function(ctx) {
+		var t = this.tile;
+		var x = 0;
+		if (this.animation) {
+			x = this.animation.nFrame * this.tile.nWidth;
+		}
+		ctx.drawImage(t.oImage,
+			x,
+			0,
+			t.nWidth,
+			t.nHeight,
+			this.x,
+			this.y,
+        	t.nWidth,
+            t.nHeight,
+		);
+	}
+});
 /**
  * Classe de personnalisation des 4 face d'un block Cette classe permet de
  * personaliser l'apparence ou les fonctionnalité d'une face d'un mur
