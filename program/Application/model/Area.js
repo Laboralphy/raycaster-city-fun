@@ -16,6 +16,8 @@ module.exports = class Area {
         this.seed = '';
         // données initiale de la zone telle que générées par le générateur ou le level builder
         this._data = null;
+        // niveau
+        this._level = null;
         // carte des sections solid afin d'accelérer le calcul des collision murale
         this._physicMap = null;
         // liste des portes, afin de surveiller si on peut les traverser ou pas
@@ -49,6 +51,15 @@ module.exports = class Area {
 	processDoors() {
 	    let aDoneDoors = this._activeDoorList.items.filter(door => door.process());
 		this._activeDoorList.unlink(aDoneDoors);
+    }
+
+    level(l) {
+	    if (l === undefined) {
+	        return this._level;
+        } else {
+	        this._level = l;
+	        this.data(l.render());
+        }
     }
 
     /**

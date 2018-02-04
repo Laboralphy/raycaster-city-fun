@@ -741,4 +741,78 @@ describe('model', function() {
 			});
 		});
 	});
+
+
+
+	describe('CentralProcessor', function() {
+		const CentralProcessor = require('../model/CentralProcessor');
+		const Area = require('../model/Area');
+        const Level = require('../model/Level');
+        const Location = require('../model/Location');
+		describe('getting area', function() {
+            let area = new Area();
+            let level = new Level();
+            level.size(4)
+                .textures({
+                    walls: 'wall.png',
+                    flats: 'flat.png'
+                })
+                .startpoint(96, 96, 0)
+                .alias(0x21, {w: [1, 1], p: 'solid'})
+                .alias(0x10, {f: [2, 3]})
+                .alias(0x33, {w: [1, 1], f: [2, 3], p: 'door-double'})
+                .map('lower', [
+                    [0x21, 0x21, 0x21, 0x21],
+                    [0x21, 0x10, 0x10, 0x21],
+                    [0x21, 0x10, 0x10, 0x21],
+                    [0x21, 0x21, 0x33, 0x21]
+                ]);
+            area.level(level);
+            let cp = new CentralProcessor();
+            cp.linkArea('test', area);
+
+            it('should contain an area', function () {
+                expect(cp.getArea('test')).toBeDefined();
+            });
+        });
+		describe('mobile creation', function() {
+            it('should create a mobile', function() {
+                let area = new Area();
+                let level = new Level();
+                level.size(4)
+                    .textures({
+                        walls: 'wall.png',
+                        flats: 'flat.png'
+                    })
+                    .startpoint(96, 96, 0)
+                    .alias(0x21, {w: [1, 1], p: 'solid'})
+                    .alias(0x10, {f: [2, 3]})
+                    .alias(0x33, {w: [1, 1], f: [2, 3], p: 'door-double'})
+                    .map('lower', [
+                        [0x21, 0x21, 0x21, 0x21],
+                        [0x21, 0x10, 0x10, 0x21],
+                        [0x21, 0x10, 0x10, 0x21],
+                        [0x21, 0x21, 0x33, 0x21]
+                    ]);
+                area.level(level);
+                let cp = new CentralProcessor();
+                cp.linkArea('test', area);
+
+                let loc = new Location();
+                loc.position().x = 100;
+                loc.position().y = 120;
+                loc.heading(1);
+                loc.area(area);
+                expect(loc.position().x).toBe(100);
+                expect(loc.position().y).toBe(120);
+                expect(loc.heading()).toBe(1);
+                cp.createMobile('1', 'thing', loc);
+                expect(cp._mobiles[1]).toBeDefined();
+                expect(cp._mobiles['1'].id).toBe('1');
+                expect(cp._mobiles['1'].location.position().x).toBe(100);
+                expect(cp._mobiles['1'].location.position().y).toBe(120);
+                expect(cp._mobiles['1'].location.heading()).toBe(1);
+            })
+		});
+	});
 });

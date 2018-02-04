@@ -71,6 +71,22 @@ module.exports = class Level {
 	}
 
 
+    /**
+	 * Défini le point de départ du niveau
+     * @param pos {Vector}
+     * @param heading {number}
+     */
+	startpoint(pos, heading) {
+		if (pos === undefined) {
+			return this._startpoint;
+		} else {
+            this._startpoint.x = pos.x;
+            this._startpoint.y = pos.y;
+            this._startpoint.angle = heading;
+            return this;
+		}
+	}
+
 	/**
 	 * Getter/setter de la taille de la carte
 	 * @param n

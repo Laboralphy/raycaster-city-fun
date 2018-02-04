@@ -11,10 +11,11 @@ module.exports = class Location {
 		this._position = new o876.geometry.Vector(x, y);
 	}
 
-	assign({x, y, angle, area}) {
-        this._heading = angle;
-        this._area = area;
-        this._position = new o876.geometry.Vector(x, y);
+	assign(other) {
+		this
+			.position(new o876.geometry.Vector(other.position()))
+			.heading(other.heading())
+			.area(other.area());
 	}
 
 	position(p) {

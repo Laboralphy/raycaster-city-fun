@@ -1,19 +1,32 @@
 const Player = require('./Player');
-const Level = require('./Level');
-const Area = require('../Area');
+const Mobile = require('./Mobile');
+const Area = require('./Area');
 const uniqid = require('uniqid');
+const Emitter = require('events');
 
 
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
  */
 class CentralProcessor {
-    constrcutor() {
+    constructor() {
         this._areas = {};
         this._players = {};
         this._mobiles = {};
         this._blueprints = {};
+        this.emitter = new Emitter();
     }
+
+//  ####   ######   #####   #####  ######  #####    ####
+// #    #  #          #       #    #       #    #  #
+// #       #####      #       #    #####   #    #   ####
+// #  ###  #          #       #    #       #####        #
+// #    #  #          #       #    #       #   #   #    #
+//  ####   ######     #       #    ######  #    #   ####
+
+
+    // Les getters permettent d'interoger l'état du jeu
+
 
     /**
      * Renvoie une instance d'Area
@@ -24,10 +37,7 @@ class CentralProcessor {
         if (id in this._areas) {
             return this._areas[id];
         } else {
-            let area = new Area();
-            // chargement des données
-            area.data(await Level.load(id));
-            this._areas[id] = area;
+            throw new Error('there is no such area : ' + id);
         }
     }
 
@@ -54,6 +64,22 @@ class CentralProcessor {
 			.filter(px => px.location.area === id);
     }
 
+
+
+
+
+
+
+
+
+//  #####  #####     ##    #    #   ####   #    #     #     #####  #####    ####
+//    #    #    #   #  #   ##   #  #       ##  ##     #       #    #    #  #
+//    #    #    #  #    #  # #  #   ####   # ## #     #       #    #    #   ####
+//    #    #####   ######  #  # #       #  #    #     #       #    #####        #
+//    #    #   #   #    #  #   ##  #    #  #    #     #       #    #   #   #    #
+//    #    #    #  #    #  #    #   ####   #    #     #       #    #    #   ####
+
+    // les transmitters permettre de transmettres des packet a desticnation des clients
 	/**
      * Transmission d'un packet à un joueur
 	 * @param player {Player} joueur a qui envoyer le packet
@@ -64,7 +90,7 @@ class CentralProcessor {
 	    if (Array.isArray(player)) {
 	        player.forEach(p => this.transmit(p, event, packet));
         } else {
-			let id = player.id;
+            this.emitter.emit(player.id, event, packet);
         }
     }
 
@@ -74,9 +100,23 @@ class CentralProcessor {
 	 * @param event {string} nom de l'évnèmenet
 	 * @param packet {*} contenu du packet
 	 */
-	transmitArea(area, event, packet) {
+	transmitToArea(area, event, packet) {
         this.transmit(this.getAreaPlayers(area), event, packet);
     }
+
+
+
+
+// #    #  ######  #       #####   ######  #####    ####
+// #    #  #       #       #    #  #       #    #  #
+// ######  #####   #       #    #  #####   #    #   ####
+// #    #  #       #       #####   #       #####        #
+// #    #  #       #       #       #       #   #   #    #
+// #    #  ######  ######  #       ######  #    #   ####
+
+    // Les helpers aide à faires différent truc
+    // les builder aident à fabriquer les paquet de données à partir d'entité
+
 
     /**
      * Fabrique un packet de creation de mobile
@@ -84,7 +124,7 @@ class CentralProcessor {
      * @return {{id, x, y, a: number, sx: number, sy: number, bp: module.Level.blueprint|string}}
      */
     static buildMobileCreationPacket(m) {
-        let mloc = m.location();
+        let mloc = m.location;
         let mpos = mloc.position();
         let mspd = m.speed;
         return {
@@ -117,6 +157,20 @@ class CentralProcessor {
         };
     }
 
+
+
+
+
+
+// #    #  #    #   #####    ##     #####  ######  #####    ####
+// ##  ##  #    #     #     #  #      #    #       #    #  #
+// # ## #  #    #     #    #    #     #    #####   #    #   ####
+// #    #  #    #     #    ######     #    #       #####        #
+// #    #  #    #     #    #    #     #    #       #   #   #    #
+// #    #   ####      #    #    #     #    ######  #    #   ####
+
+    // Les mutateurs permettent de modifier l'etat du jeu
+
     /**
      * Création d'une instance Player et d'une instance Mobile correspondant
      * @param id
@@ -128,7 +182,7 @@ class CentralProcessor {
         // obtenir et remplir la location
         // en cas d'absence de location, en créer une a partir de la position de départ du niveau
         let area = this.getArea(p.location.area());
-        p.location.assign(area._startpoint); // @todo récupéré la position mise en persistance.
+        p.location.assign(area._startpoint); // @todo récupérer la position mise en persistance.
 		this.createMobile(id, p.type, p.location);
     }
 
@@ -145,9 +199,30 @@ class CentralProcessor {
         m.location.assign(location);
         m.blueprint = ref;
         this._mobiles[id] = m;
-        this.transmitArea(location.area, 'G_CREATE_MOBILE', CentralProcessor.buildMobileCreationPacket(m));
+        this.transmitToArea(location.area, 'G_CREATE_MOBILE', CentralProcessor.buildMobileCreationPacket(m));
         return m;
     }
+
+    /**
+     * Ajoute un level à la liste des zones
+     * @param id {string} identifiant de la zone
+     * @param area {Area} instance de la zone
+     */
+    linkArea(id, area) {
+	    this._areas[id] = area;
+    }
+
+
+
+// #    #   ####   ######           ####     ##     ####   ######   ####
+// #    #  #       #               #    #   #  #   #       #       #
+// #    #   ####   #####           #       #    #   ####   #####    ####
+// #    #       #  #               #       ######       #  #            #
+// #    #  #    #  #               #    #  #    #  #    #  #       #    #
+//  ####    ####   ######           ####   #    #   ####   ######   ####
+
+    // fonction appelée par les services pour indiquer des cas d'utilisation
+    // généralement des action du client
 
     /**
      * ### use case Client Identified
@@ -183,7 +258,6 @@ class CentralProcessor {
      */
     clientHasLoadedLevel(id) {
         let p = this._players[id];
-        let oPlayerMobile = this._mobiles[id];
         let area = this._areas[p.location.area];
 
         // transmettre la position de tous les mobiles
@@ -197,3 +271,5 @@ class CentralProcessor {
         // transmettre aux clients la position du nouveau
     }
 }
+
+module.exports = CentralProcessor;
