@@ -14,6 +14,8 @@ const FORCE_NORM = 10;
 
 module.exports = class Mobile {
 	constructor() {
+        // identifiant
+		this.id = '';
 		// position & angle
 		this.location = new Location();
 		// vitesse de déplacement
@@ -24,6 +26,8 @@ module.exports = class Mobile {
 		this._size = 16;
 		this.wallCollisions = Vector.zero();
 		this._dummy = null;
+		// aspect
+		this.blueprint = '';
 	}
 
 	/**

@@ -22,6 +22,8 @@ module.exports = class Area {
         this._doorList = [];
         // liste des portes actives (celle qui sont en cours d'ouverture/refermeture
         this._activeDoorList = new ActiveList(); /** @todo ne gérer que les portes qui sont dans cette liste */
+        // position de départ
+        this._startpoint = null;
     }
 
 	/**
@@ -53,27 +55,33 @@ module.exports = class Area {
      * Fabrique la carte des zones solides
      */
     data(d) {
-        this._data = d;
-        this._physicMap = d.map.map(row => row.map(cell => {
-            return {
-                code: (cell & 0x0000F000) >> 12,
-                door: null
-            };
-        }));
-        this._physicMap.forEach((row, y) => row.forEach((cell, x) => {
-            if (cell.code >= RC_CONST.phys_first_door && cell.code <= RC_CONST.phys_last_door) {
-                let oDoor = new Door();
-                oDoor.setDoorType(cell.code);
-                // pour les porte, on complete l'instance
-                oDoor.x = x;
-                oDoor.y = y;
-                cell.door = oDoor;
-                this._doorList.push(oDoor);
-                oDoor.events.on('opening', door => {
-                    this._activeDoorList.link(door);
-                });
-            }
-        }));
+        if (d === undefined) {
+            return this._data;
+        } else {
+            this._data = d;
+            this._physicMap = d.map.map(row => row.map(cell => {
+                return {
+                    code: (cell & 0x0000F000) >> 12,
+                    door: null
+                };
+            }));
+            this._physicMap.forEach((row, y) => row.forEach((cell, x) => {
+                if (cell.code >= RC_CONST.phys_first_door && cell.code <= RC_CONST.phys_last_door) {
+                    let oDoor = new Door();
+                    oDoor.setDoorType(cell.code);
+                    // pour les porte, on complete l'instance
+                    oDoor.x = x;
+                    oDoor.y = y;
+                    cell.door = oDoor;
+                    this._doorList.push(oDoor);
+                    oDoor.events.on('opening', door => {
+                        this._activeDoorList.link(door);
+                    });
+                }
+            }));
+            this._startpoint = d.startpoint;
+            return this;
+        }
     }
 
     /**

@@ -11,6 +11,12 @@ module.exports = class Location {
 		this._position = new o876.geometry.Vector(x, y);
 	}
 
+	assign({x, y, angle, area}) {
+        this._heading = angle;
+        this._area = area;
+        this._position = new o876.geometry.Vector(x, y);
+	}
+
 	position(p) {
 		return o876.SpellBook.prop(this, '_position', p);
 	}

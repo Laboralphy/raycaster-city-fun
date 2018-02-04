@@ -7,6 +7,10 @@ const Location = require('./Location');
 
 class Player {
     constructor() {
+        // identifiant
+        this.id = '';
+        // aspect / type
+        this.type = 'none';
         // position & angle dans cette zone
         this.location = new Location();
         // instance de l'inventaire
