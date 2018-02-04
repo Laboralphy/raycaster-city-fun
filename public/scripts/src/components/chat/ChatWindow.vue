@@ -9,9 +9,10 @@
             <div class="col lg-12">
                 <div class="console">
                     <chat-line
-                            v-for="line in getChatContent()"
+                            v-for="line in getChatContent"
                             :key="line.id"
-                            :def-user="line.user"
+                            :def-uid="line.user ? line.user.id : ''"
+                            :def-user="line.user ? line.user.name : ''"
                             :def-color = "line.color"
                             :def-message="line.message"
                     ></chat-line>
@@ -30,7 +31,6 @@
 <script>
     import ChatLine from "./ChatLine.vue";
     import ChatChannels from "./ChatChannels.vue";
-    import * as types from '../../store/chat/mutation-types';
     import {mapGetters} from 'vuex';
 
     export default {
@@ -47,9 +47,11 @@
         },
         computed: Object.assign(
             mapGetters({
-                isVisible: 'chat/isVisible',
+                isVisible: 'ui/isVisibleChat',
 				getChatContent: 'chat/getContent',
-				getActiveTab: 'chat/getActiveTab'
+				getActiveTab: 'chat/getActiveTab',
+                getLastLine: 'chat/getLastLine',
+                getLocalClient: 'clients/getLocalClient'
             })
         ),
         methods: {
@@ -57,38 +59,29 @@
         	reset: function() {
 
             },
-
-            /**
-             * Si le canal qu'on consulte actuellement recoit un nouveau message
-             * on doit l'afficher en scrollant jusqu'en bas
-             * @param idTab
-             */
-            doScrollDown: function(idTab) {
-                if (idTab === this.getActiveTab().id) {
-                    this.pleaseScrollDown = true;
-                }
-            },
-
         },
 
+        // quand une ligne apparait dans la fenetre de chat active
+        // et que cette ligne à été postée par le client local
         updated: function() {
-            if (this.pleaseScrollDown) {
-                this.pleaseScrollDown = false;
-                this.$refs.lastItem.scrollIntoView();
-            }
+            this.$refs.lastItem.scrollIntoView();
         },
 
         mounted: function() {
-            this.$refs.channels.$on('select', (function(item) {
-                this.$store.dispatch('chat/' + types.CHAT_SELECT_TAB, {id: item.id});
-                this.doScrollDown(item.id);
+            this.$refs.channels.$on('select', (async function(item) {
+                await this.$store.dispatch('chat/selectTab', {id: item.id});
+                this.$refs.lastItem.scrollIntoView();
             }).bind(this));
             this.$refs.formInput.addEventListener('submit', event => event.preventDefault());
             // temporaire
-            this.$refs.input.addEventListener('keypress', (function(event) {
+            this.$refs.input.addEventListener('keypress', (async function(event) {
                 switch (event.key) {
                     case 'Enter':
-                        this.$emit('message', this.inputText);
+                        let tab = this.getActiveTab.id;
+						await this.$store.dispatch('chat/message', {
+						    tab,
+                            message: this.inputText
+						});
                         this.inputText = '';
                         break;
 

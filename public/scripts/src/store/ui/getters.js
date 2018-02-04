@@ -7,7 +7,19 @@ const getters = {
      */
     isVisible: function (state) {
         return state.visible;
-    }
+    },
+
+	isVisibleChat: function(state) {
+		return state.sections.chat.visible;
+	},
+
+	isVisibleLogin: function(state) {
+		return state.sections.login.visible;
+	},
+
+	getSections: function(state) {
+    	return Object.keys(state.sections);
+	}
 };
 
 export default getters;
