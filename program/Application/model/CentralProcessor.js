@@ -1,6 +1,7 @@
 const Player = require('./Player');
 const Level = require('./Level');
 const Area = require('../Area');
+const uniqid = require('uniqid');
 
 
 /**
@@ -11,6 +12,7 @@ class CentralProcessor {
         this._areas = {};
         this._players = {};
         this._mobiles = {};
+        this._blueprints = {};
     }
 
     /**
@@ -29,8 +31,51 @@ class CentralProcessor {
         }
     }
 
-    transmit(player, event, packet) {
-        let id = player.id;
+	/**
+     * Renvoie la liste des mobiles qui sont dans la zone spécifiée
+     * @param area {Area} zone dans laquelle s'effectue la recherche
+     * @return {Array.<Mobile>}
+	 */
+	getAreaMobiles(area) {
+	    let id = area.id;
+		return Object
+			.values(this._mobiles)
+			.filter(px => px.location.area === id);
+    }
+
+	/**
+     * Renvoie la liste des joueurs qui sont dan sla zone
+	 * @param area
+	 */
+	getAreaPlayers(area) {
+		let id = area.id;
+		return Object
+			.values(this._players)
+			.filter(px => px.location.area === id);
+    }
+
+	/**
+     * Transmission d'un packet à un joueur
+	 * @param player {Player} joueur a qui envoyer le packet
+	 * @param event {string} nom de l'évnèmenet
+	 * @param packet {*} contenu du packet
+	 */
+	transmit(player, event, packet) {
+	    if (Array.isArray(player)) {
+	        player.forEach(p => this.transmit(p, event, packet));
+        } else {
+			let id = player.id;
+        }
+    }
+
+	/**
+     * Transmission d'un packet à tous les joueur d'une zone
+	 * @param area {Area} zone
+	 * @param event {string} nom de l'évnèmenet
+	 * @param packet {*} contenu du packet
+	 */
+	transmitArea(area, event, packet) {
+        this.transmit(this.getAreaPlayers(area), event, packet);
     }
 
     /**
@@ -84,6 +129,24 @@ class CentralProcessor {
         // en cas d'absence de location, en créer une a partir de la position de départ du niveau
         let area = this.getArea(p.location.area());
         p.location.assign(area._startpoint); // @todo récupéré la position mise en persistance.
+		this.createMobile(id, p.type, p.location);
+    }
+
+	/**
+     * Création d'un mobile, cela peut etre un PNJ ou un missile
+     * @param id {string} identifiant
+     * @param ref {string} référence du blueprint
+     * @param location {Location}
+     * @return {Mobile}
+	 */
+	createMobile(id, ref, location) {
+        let m = new Mobile();
+        m.id = id;
+        m.location.assign(location);
+        m.blueprint = ref;
+        this._mobiles[id] = m;
+        this.transmitArea(location.area, 'G_CREATE_MOBILE', CentralProcessor.buildMobileCreationPacket(m));
+        return m;
     }
 
     /**
@@ -132,9 +195,5 @@ class CentralProcessor {
         this.transmit(id, 'G_CREATE_MOBILES', aPackets);
 
         // transmettre aux clients la position du nouveau
-        let aTonari = Object
-            .values(this._players)
-            .filter(px => px.location.area === area.id);
-        this.transmit(aTonari, 'G_CREATE_MOBILE', CentralProcessor.buildMobileCreationPacket(oPlayerMobile));
     }
 }

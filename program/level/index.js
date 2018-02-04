@@ -9,7 +9,7 @@ const logger = require('../Logger');
  */
 async function load(sLevel) {
     return new Promise(async resolve => {
-        let sFileName = path.resolve(__dirname, sLevel + '.json');
+        let sFileName = path.resolve('data/levels', sLevel + '.json');
         let res = await asyncfs.readFile(sFileName, {flag: 'r'});
         if (res) {
             resolve(JSON.parse(res));

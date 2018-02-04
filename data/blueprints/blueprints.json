@@ -1,0 +1,41 @@
+{
+	"m_warlock_b": {
+		"type": 1,
+		"tile": "m_warlock_b",
+		"width": 16,
+		"height": 96,
+		"thinker": "",
+		"fx": 0,
+		"data": null
+	},
+
+	"m_imp1": {
+		"type": 1,
+		"tile": "m_warlock_b",
+		"width": 16,
+		"height": 96,
+		"thinker": "",
+		"fx": 0,
+		"data": null
+	},
+
+	"p_magbolt": {
+		"type": 4,
+		"tile": "p_magbolt",
+		"width": 8,
+		"height": 96,
+		"thinker": "",
+		"fx": 2,
+		"data": null
+	},
+
+	"p_magbolt_c2": {
+		"type": 4,
+		"tile": "p_magbolt",
+		"width": 8,
+		"height": 96,
+		"thinker": "",
+		"fx": 2,
+		"data": null
+	}
+}
