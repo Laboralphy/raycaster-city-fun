@@ -1,6 +1,35 @@
 import * as types from './mutation-types';
 
 const mutations = {
+
+
+    /**
+     * Rend la fenetre de login visible
+     * @param state
+     */
+    [types.CHAT_SHOW]: function(state) {
+        state.visible = true;
+    },
+
+    /**
+     * Rend la fenetre de login invisible
+     * @param state
+     */
+    [types.CHAT_HIDE]: function(state) {
+        state.visible = false;
+    },
+
+
+    /**
+     * Remise à zero du chat
+	 * @param state
+	 */
+	[types.CHAT_RESET]: function(state) {
+        state.lastLineId = 0;
+		state.tabs = [];
+		state.activeTab = null;
+	},
+
     /**
      * Ajoute un onglet dans la fenetre de discussion
      * @param state

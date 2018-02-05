@@ -4,17 +4,16 @@
   "description": "multiplayer server for playing raycasting games",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/jasmine public/scripts/dist/test.js program/test/",
+    "test": "jasmine public/scripts/dist/test.js program/test/",
     "start": "node index.js",
-    "webpack": "node_modules/.bin/webpack --watch"
+    "webpack": "webpack --watch",
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "d3": "^4.12.2",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
-    "gsap": "^1.20.3",
     "session-file-store": "^1.2.0",
     "socket.io": "^2.0.4",
     "vue": "^2.5.13",

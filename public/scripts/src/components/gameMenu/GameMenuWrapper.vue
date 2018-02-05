@@ -75,7 +75,8 @@
             ])
         ),
         mounted() {
-            window.addEventListener('keypress', (e) => {
+            /*
+        	window.addEventListener('keypress', (e) => {
                 switch (e.key) {
                     case '²':
                     case 'œ':
@@ -91,7 +92,8 @@
                         this.selectTab('#personnage');
                         break;
                 }
-            });
+            });*/
+
             const elTab = this.$refs['game-menu-tabs'];
             elTab.$on('changed', function() {
                 window.dispatchEvent(new Event('resize'));

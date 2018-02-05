@@ -1,10 +1,5 @@
 <template>
-    <div v-show="visible" class="chat-window window">
-        <div class="row">
-            <div class="col lg-12">
-                <h2 class="title blue">{{ STRINGS.ui.chat.title }}</h2>
-            </div>
-        </div>
+    <div v-show="isVisible" class="chat-window">
         <div class="row">
             <div class="col lg-12">
                 <chat-channels ref="channels"></chat-channels>
@@ -35,7 +30,7 @@
 <script>
     import ChatLine from "./ChatLine.vue";
     import ChatChannels from "./ChatChannels.vue";
-    import * as types from '../store/chat/mutation-types';
+    import * as types from '../../store/chat/mutation-types';
     import {mapGetters} from 'vuex';
 
     export default {
@@ -46,19 +41,22 @@
         },
         data: function() {
             return {
-                visible: false,
                 inputText: '',
                 pleaseScrollDown: true,
             };
         },
         computed: Object.assign(
-        	{},
             mapGetters({
+                isVisible: 'chat/isVisible',
 				getChatContent: 'chat/getContent',
 				getActiveTab: 'chat/getActiveTab'
             })
         ),
         methods: {
+
+        	reset: function() {
+
+            },
 
             /**
              * Si le canal qu'on consulte actuellement recoit un nouveau message
@@ -90,7 +88,7 @@
             this.$refs.input.addEventListener('keypress', (function(event) {
                 switch (event.key) {
                     case 'Enter':
-                        this.$emit('send-message', this.inputText);
+                        this.$emit('message', this.inputText);
                         this.inputText = '';
                         break;
 
@@ -110,13 +108,13 @@
     }
 
     .console {
-        background-color: rgba(0, 0, 0, 0.666);
+        background-color: rgba(128, 64, 0, 0.333);
     }
 
     input {
-        background-color: rgba(0, 0, 0, 0.2);
-        color: white;
-        border: solid thin black;
+        background-color: rgba(128, 64, 0, 0.2);
+        color: rgb(255, 128, 64);
+        border: solid thin rgb(128, 64, 0);
     }
 
     .console {

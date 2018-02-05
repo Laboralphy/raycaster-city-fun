@@ -5,9 +5,10 @@ const io = require('socket.io')(http);
 const path = require('path');
 
 
-const config = require('../Config');
+const Config = require('../Config');
 const logger = require('../Logger');
 const Service = require('./Service');
+const STRINGS = require('./consts/strings')[Config.general.lang];
 
 class Application {
 
@@ -17,9 +18,10 @@ class Application {
 	 */
 	async listen() {
 		return new Promise(function(resolve) {
-			let nPort = config.server.port;
+			let nPort = Config.server.port;
 			http.listen(nPort, function() {
-				logger.log('listening on port ', nPort);
+                logger.log(STRINGS.service.hello);
+                logger.log(STRINGS.service.listening, nPort);
 				resolve();
 			});
 		});
@@ -27,9 +29,7 @@ class Application {
 
 	runService() {
         let service = new Service();
-        io.on('connection', function(socket) {
-            service.run(socket);
-        });
+        io.on('connection', socket => service.run(socket));
 	}
 
 	/**
@@ -44,6 +44,9 @@ class Application {
 		// app.js
         httpServer.get('/scripts', function(req, res) {
             res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js'));
+        });
+        httpServer.get('/raycaster', function(req, res) {
+            res.sendFile(path.resolve(sRoot, 'scripts/raycaster/libraycaster.js'));
         });
 		httpServer.use(express.static(path.resolve(sRoot, 'resources')));
 	}

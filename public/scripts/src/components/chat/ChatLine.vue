@@ -30,7 +30,7 @@
         text-shadow: 1px 1px 0 #000;
     }
     .color-0 {
-        color: #cccccc;
+        color: #ff8844;
     }
     .color-1 {
         color: #5cff4e;

@@ -1,11 +1,11 @@
 <template>
     <nav>
         <ul>
-            <li v-for="item in getTabList">
+            <li v-for="item in tabList">
                 <button
-                    v-bind:key="item.id" v-bind:class="(item.id === getActiveTab.id ? 'selected' : '') + ' ' + (item.notified ? 'notify' : '')"
+                    v-bind:key="item.id" v-bind:class="(activeTab === item.id ? 'selected' : '') + ' ' + (item.notified ? 'notify' : '')"
                     v-on:click="clickHandler(item)"
-                    type="button">{{ STRINGS.ui.chat.tabs[item.caption] }}
+                    type="button">{{ item.caption }}
                 </button>
             </li>
         </ul>
@@ -17,14 +17,17 @@
     export default {
         name: "links",
         computed: {
-            getTabList: function() {
+            tabList: function() {
                 return this.$store.state.chat.tabs;
             },
 
-            getActiveTab: function() {
-                return this.$store.state.chat.activeTab;
-            },
-
+            activeTab: function() {
+                if (this.$store.state.chat.activeTab) {
+                    return this.$store.state.chat.activeTab.id;
+                } else {
+                    return null;
+                }
+            }
         },
         methods: {
             clickHandler: function(item) {
@@ -37,9 +40,10 @@
 <style scoped>
     button {
         border: solid 2px transparent;
+        background-color: #884422;
     }
     button.selected {
-        border-color: black
+        border-color: #FF8844;
     }
     button.notify {
         background-color: #080;

@@ -1,6 +1,24 @@
 import * as types from './mutation-types';
 
 const mutations = {
+
+    /**
+     * Rend la fenetre de login visible
+     * @param state
+     */
+    [types.CLIENT_SHOW]: function(state) {
+        state.visible = true;
+    },
+
+    /**
+     * Rend la fenetre de login invisible
+     * @param state
+     */
+    [types.CLIENT_HIDE]: function(state) {
+        state.visible = false;
+    },
+
+
     /**
      * Ajoute un nouveau client
      * @param state {*} etat

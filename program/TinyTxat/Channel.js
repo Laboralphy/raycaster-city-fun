@@ -6,7 +6,7 @@ class Channel {
         this._users = [];
         this._id = null;
         this._sName = '';
-        this._sType = ''
+        this._sType = '';
         this._events = new Events();
     }
 
@@ -51,8 +51,8 @@ class Channel {
     dropUser(u) {
         if (this.userPresent(u)) {
             let i = this._users.indexOf(u);
-            this._users.splice(i, 1);
             this._events.emit('user-dropped', {channel: this, user: u});
+			this._users.splice(i, 1);
         } else {
             throw new Error('cannot remove user ' + u.display() + ' from channel ' + this.display() + ' : user not registered in the channel');
         }

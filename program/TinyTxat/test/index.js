@@ -157,4 +157,18 @@ describe('Channel', function() {
 			]);
 		});
 	});
+
+	describe('find channel', function() {
+		it ('should find channel', function() {
+			let c = new Channel();
+			c.name('lobby').id(12);
+			let s = new System();
+			s.addChannel(c);
+			expect(s._channels.length).toBe(1);
+			expect(s._channels[0]).toBe(c);
+			expect(s._channels.find(x => x.id() === 12)).toBe(c);
+			expect(s.findChannel(12)).toBeDefined();
+			expect(s.findChannel(13)).toBeUndefined();
+		})
+	});
 });
