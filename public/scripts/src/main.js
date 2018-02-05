@@ -52,7 +52,7 @@ function createApplicationUI() {
 
 
 function main () {
-    window.Application = createApplicationChat();
+    window.Application = createApplicationUI();
 }
 
 window.addEventListener('load', main);

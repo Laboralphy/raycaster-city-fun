@@ -1,7 +1,7 @@
 <template>
     <bordered-card color="rgb(113, 227, 204)" class="game-menu-tab">
         <div class="row">
-            <div class="col md-8 sm-6 inventory">
+            <div class="col lg-9 md-8 sm-6 inventory">
                 <draggable v-model="inventaire"
                            class="dragArea"
                            :options="{group:'inventaire', pull:'clone'}"
@@ -20,7 +20,7 @@
                     </transition-group>
                 </draggable>
             </div>
-            <div class="col md-4 sm-6 skull">
+            <div class="col lg-3 md-4 sm-6 skull">
                 <bordered-card
                         v-for="item in equipement"
                         :key="item.emplacement"
@@ -99,7 +99,6 @@
                     this.itemInfoStyle = {
                         top: e.clientY +'px'
                     };
-                    console.log(e);
                     if (e.clientX >= window.innerWidth * 0.55) {
                         this.itemInfoStyle.left = (e.clientX - this.$refs['itemInfo'].offsetWidth)+'px';
                     } else {
