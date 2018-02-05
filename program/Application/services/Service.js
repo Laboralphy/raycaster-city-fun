@@ -1,11 +1,11 @@
-const Config = require('../Config');
-const ClientManager = require('./ClientManager');
-const TinyTxat = require('../TinyTxat');
-const logger = require('../Logger');
-const level = require('../level');
+const Config = require('../../Config/index');
+const ClientManager = require('../ClientManager/index');
+const TinyTxat = require('../../TinyTxat/index');
+const logger = require('../../Logger/index');
+const level = require('../../level/index');
 
 const util = require('util');
-const STRINGS = require('./consts/strings')[Config.general.lang];
+const STRINGS = require('../consts/strings')[Config.general.lang];
 
 class Service {
     constructor() {

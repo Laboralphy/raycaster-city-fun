@@ -7,7 +7,7 @@ const path = require('path');
 
 const Config = require('../Config');
 const logger = require('../Logger');
-const Service = require('./Service');
+const Service = require('./services/Service');
 const STRINGS = require('./consts/strings')[Config.general.lang];
 
 class Application {
