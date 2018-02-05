@@ -1,5 +1,8 @@
 const ServiceAbstract = require('./Abstract');
 const TinyTxat = require('../../TinyTxat/index');
+const logger = require('../../Logger');
+const Config = require('../Config');
+const STRINGS = require('../consts/strings')[Config.general.lang];
 
 class ServiceTxat extends ServiceAbstract {
 
@@ -21,6 +24,13 @@ class ServiceTxat extends ServiceAbstract {
         c = new TinyTxat.Channel();
         c.id(2).name('public').type('public');
         this.txat.addChannel(c);
+        this.events.on('service-login', ({client}) => {
+			// ajouter le client au canal public
+			let oTxatUser = new TinyTxat.User(client);
+			this.txat.addUser(oTxatUser);
+			let oChannel = this.txat.findChannel(2);
+			oChannel.addUser(oTxatUser);
+        });
     }
 
     disconnectClient(client) {
@@ -31,6 +41,7 @@ class ServiceTxat extends ServiceAbstract {
      * ajout d'un client
      */
     connectClient(client) {
+        super.connectClient(client);
         let socket = client.socket;
         /**
          * ### REQ_CHAN_INFO
@@ -126,7 +137,7 @@ class ServiceTxat extends ServiceAbstract {
      */
     send_ms_you_join(client, channel) {
         let oChannel = this.txat.findChannel(channel);
-        this._socket.emit(client, 'MS_YOU_JOIN', {
+        this._emit(client, 'MS_YOU_JOIN', {
             id: oChannel.id(),
             name: oChannel.name(),
             type: oChannel.type()
@@ -144,7 +155,7 @@ class ServiceTxat extends ServiceAbstract {
         let oClient = this.txat.findUser(client);
         if (oChannel.userPresent(oClient)) {
             // le client appartient au canal
-            this._socket.emit(client, 'MS_USER_JOINS', {user, channel});
+            this._emit(client, 'MS_USER_JOINS', {user, channel});
         }
     }
 
@@ -155,7 +166,7 @@ class ServiceTxat extends ServiceAbstract {
      * @param channel {string} identifiant du canal concerné
      */
     send_ms_user_leaves(client, user, channel) {
-        this._socket.emit(client, 'MS_USER_LEAVES', {user, channel});
+        this._emit(client, 'MS_USER_LEAVES', {user, channel});
     }
 
     /**
@@ -166,9 +177,8 @@ class ServiceTxat extends ServiceAbstract {
      * @param message {string} contenu du message
      */
     send_ms_user_says(client, user, channel, message) {
-        this._socket.emit(client, 'MS_USER_SAYS', {user, channel, message});
+        this._emit(client, 'MS_USER_SAYS', {user, channel, message});
     }
 }
-
 
 module.exports = ServiceTxat;

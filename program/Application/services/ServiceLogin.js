@@ -1,12 +1,15 @@
 const ServiceAbstract = require('./Abstract');
-const TinyTxat = require('../../TinyTxat/index');
+const logger = require('../../Logger');
+const Config = require('../Config/index');
+const STRINGS = require('../consts/strings')[Config.general.lang];
 
-class ServiceTxat extends ServiceAbstract {
+class ServiceLogin extends ServiceAbstract {
     constructor() {
         super();
     }
 
     connectClient(client) {
+        super.connectClient(client);
         let socket = client.socket;
 
         /**
@@ -28,18 +31,8 @@ class ServiceTxat extends ServiceAbstract {
                 client.name = name;
                 client.id = socket.client.id;
                 logger.logfmt(STRINGS.service.event.assign_name, client.id, client.name);
-                this._share({
-                    type: 'LOGIN',
-                    client
-                });
+                this._share('service-login', {client});
                 ack({id: client.id});
-
-
-                // ajouter le client au canal public
-                let oTxatUser = new TinyTxat.User(client);
-                this.txat.addUser(oTxatUser);
-                let oChannel = this.txat.findChannel(2);
-                oChannel.addUser(oTxatUser);
             } else {
                 logger.logfmt(STRINGS.service.error.login_failed, client.id, client.name);
                 client.id = null;
@@ -49,4 +42,4 @@ class ServiceTxat extends ServiceAbstract {
     }
 }
 
-module.exports = ServiceTxat;
+module.exports = ServiceLogin;

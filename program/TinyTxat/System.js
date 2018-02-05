@@ -23,6 +23,7 @@ class System {
     }
 
     _eventUserJoins(event) {
+    	console.log('JOIN')
         // transmettre l'évènement à tous les utilisateurs du canal
         event.channel._users.forEach(u =>
 			this._events.emit('user-joins', {

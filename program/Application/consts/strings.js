@@ -11,6 +11,7 @@ const STRINGS = {
 				level_loaded: 'level loaded successfully (user "%s" level "%s")',
 				user_said: '[%s] %s (%s): %s'
 			},
+			plugin_loaded: 'plugin "%s" has been loaded',
 			error: {
 				invalid_channel: 'user send message to a wrong channel (user "%s" channel "%s")',
 				login_failed: 'user access denied (user "%s" nickname "%s")',

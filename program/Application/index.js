@@ -5,9 +5,9 @@ const io = require('socket.io')(http);
 const path = require('path');
 
 
-const Config = require('../Config');
+const Config = require('./Config');
 const logger = require('../Logger');
-const Service = require('./services/Service');
+const Service = require('./services');
 const STRINGS = require('./consts/strings')[Config.general.lang];
 
 class Application {

@@ -13,25 +13,37 @@ class Abstract {
     }
 
     disconnectClient(client) {}
+    
+    connectClient(client) {}
 
     /**
      * Renvoie la socket d'un client
      * @param idClient {string} id du client
+     * @return {*}
      * @private
      */
     _socket(idClient) {
         return this.clientManager().client(idClient).socket;
     }
 
+	/**
+     * Emission d'un packet à destination d'un client
+	 * @param idClient {string} identifiant destinataire
+	 * @param sEvent {string} évènement
+	 * @param data {*}
+	 * @private
+	 */
     _emit(idClient, sEvent, data) {
         this._socket(idClient).emit(sEvent, data);
     }
 
     /**
      * Transmet une information à tous les plugins
+     * @param _event {string} nature de l'évènement
+     * @param data {*} information supplémentaire
      */
     _share(_event, data) {
-        this.events.emit('message', Object.assign({}, { _event }, data));
+        this.events.emit('plugin-message', _event, data);
     }
 }
 

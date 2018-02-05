@@ -240,6 +240,7 @@ export default function createWebSocketPlugin (socket) {
 		 * @param message {string} contenu du message
 		 */
 		function send_ms_say(tab, message) {
+			console.log({channel:tab, message});
 			socket.emit('MS_SAY', {channel:tab, message});
 		}
 
@@ -276,6 +277,7 @@ export default function createWebSocketPlugin (socket) {
 					break;
 
 				case 'chat/message':
+					console.log('ms said', action.payload.message);
                     send_ms_say(action.payload.tab, action.payload.message);
 					break;
 			}
