@@ -3,8 +3,8 @@ const mutations = {
     
     /**
      * Équipe le player d'un item
-     * @param context
-     * @param {Object} oItem informations sur l'équipement de l'item
+     * @param {Object} inventaire (state)
+     * @param {Object} infoEquipement informations sur l'équipement de l'item
      */
     [types.PLAYER_INVENTORY_EQUIPER]: function({inventaire}, infoEquipement) {
         // on équipe l'item
@@ -21,8 +21,8 @@ const mutations = {
 
     /**
      * Ranger un item
-     * @param context
-     * @param {Object} oItem informations sur l'équipement de l'item
+     * @param {Object} inventaire (state)
+     * @param {Object} infoRangement informations sur l'équipement de l'item
      */
     [types.PLAYER_INVENTORY_RANGER]: function({inventaire}, infoRangement) {
         inventaire.forEach((item) => {
@@ -34,8 +34,8 @@ const mutations = {
 
     /**
      * Ranger un item
-     * @param context
-     * @param {Object} oItem informations sur l'équipement de l'item
+     * @param state
+     * @param {Object} newInventaire informations sur l'équipement de l'item
      */
     [types.PLAYER_INVENTORY_UPDATE]: function(state, newInventaire) {
         state.inventaire = newInventaire;

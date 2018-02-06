@@ -15,7 +15,7 @@
                 <personnage></personnage>
             </tab>
         </tabs>
-        <bordered-card class="btn close" @click.native="close"><strong>X</strong></bordered-card>
+        <bordered-card class="btn close" :bevel=0.25 @click.native="close"><strong>X</strong></bordered-card>
     </bordered-card>
 </template>
 
@@ -107,9 +107,9 @@
     .game-menu-window {
         position: absolute !important;
         top: 5vh;
-        left: 5vw;
+        right: 5vw;
         height: 90vh;
-        width: 90vw;
+        width: 30vw;
         /*border: 1px solid rgb(227, 190, 88);*/
         /*box-shadow:*/
                 /*-1px  -1px  5px  rgb(227, 190, 88),*/

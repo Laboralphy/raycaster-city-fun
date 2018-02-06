@@ -4,7 +4,7 @@ const actions = {
     /**
      * Équipe le player d'un item
      * @param context
-     * @param {Object} oItem informations sur l'équipement de l'item
+     * @param {Object} infoEquipement informations sur l'équipement de l'item
      */
     [types.PLAYER_INVENTORY_EQUIPER]: function(context, infoEquipement) {
         // @todo: Message webSocket
@@ -18,11 +18,19 @@ const actions = {
     /**
      * Équipe le player d'un item
      * @param context
-     * @param {Object} oItem informations sur l'équipement de l'item
+     * @param {Object} infoEquipement informations sur l'équipement de l'item
      */
     [types.PLAYER_INVENTORY_RANGER]: function(context, infoEquipement) {
         // @todo: Message webSocket
         context.commit(types.PLAYER_INVENTORY_RANGER, infoEquipement);
+    },
+    /**
+     * Réorganise l'inventaire
+     * @param context
+     * @param {Array} newInventaire : le nouvel inventaire réoganisé
+     */
+    [types.PLAYER_INVENTORY_UPDATE]: function(context, newInventaire) {
+        context.commit(types.PLAYER_INVENTORY_UPDATE, newInventaire);
     }
 };
 

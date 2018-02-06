@@ -24,9 +24,9 @@
 <style scoped>
     .item {
         display: inline-block;
-        width: 5rem;
-        height: 5rem;
-        margin: 1rem;
+        width: 4rem;
+        height: 4rem;
+        margin: 0.5rem;
         user-select: none;
         cursor: -webkit-grab;
         cursor: grab;

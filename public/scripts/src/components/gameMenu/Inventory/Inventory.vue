@@ -1,26 +1,7 @@
 <template>
     <bordered-card color="rgb(113, 227, 204)" class="game-menu-tab">
         <div class="row">
-            <div class="col md-9 md-8 sm-6 inventory">
-                <draggable v-model="inventaire"
-                           class="dragArea"
-                           :options="{group:'inventaire'}"
-                           @start="showDesc=false">
-                    <transition-group name="list-complete">
-                        <item
-                                v-for="item in inventaire"
-                                :item="item"
-                                :key="item.id"
-                                v-if="!item.emplacement"
-                                @dblclick.native="equiper({idItem:item.id}); showDesc=false;"
-                                @mousemove.native="showFocusedItem(item, $event)"
-                                @mouseleave.native="showDesc = false">
-
-                        </item>
-                    </transition-group>
-                </draggable>
-            </div>
-            <div class="col md-3 md-4 sm-6 skull">
+            <div class="skull">
                 <bordered-card
                         v-for="item in equipement"
                         :key="item.emplacement"
@@ -40,6 +21,27 @@
                                   @mouseleave.native="showDesc = false"></item>
                         </draggable>
                 </bordered-card>
+            </div>
+        </div>
+        <div class="row">
+            <div class="inventory">
+                <draggable v-model="inventaire"
+                           class="dragArea"
+                           :options="{group:'inventaire'}"
+                           @start="showDesc=false">
+                    <transition-group name="list-complete">
+                        <item
+                                v-for="item in inventaire"
+                                :item="item"
+                                :key="item.id"
+                                v-if="!item.emplacement"
+                                @dblclick.native="equiper({idItem:item.id}); showDesc=false;"
+                                @mousemove.native="showFocusedItem(item, $event)"
+                                @mouseleave.native="showDesc = false">
+
+                        </item>
+                    </transition-group>
+                </draggable>
             </div>
         </div>
         <div class="itemInfo" ref="itemInfo" :style="itemInfoStyle">
@@ -84,6 +86,12 @@
             draggable,
             Item
         },
+        mounted: function() {
+            document.body.appendChild(this.$refs['itemInfo']);
+        },
+        destroyed: function() {
+            this.$refs['itemInfo'].remove();
+        },
         data: function() {
             return {
                 focusedItem: null,
@@ -96,21 +104,22 @@
         methods: Object.assign(
             {
                 showFocusedItem(item, e) {
+                    const mouseOffset = 25;
                     this.itemInfoStyle = {
-                        top: e.clientY +'px'
+                        top: (e.clientY + mouseOffset ) +'px'
                     };
-                    console.log(e);
+
                     if (e.clientX >= window.innerWidth * 0.55) {
-                        this.itemInfoStyle.left = (e.clientX - this.$refs['itemInfo'].offsetWidth)+'px';
+                        this.itemInfoStyle.left = (e.clientX - this.$refs['itemInfo'].offsetWidth - mouseOffset) +'px';
                     } else {
-                        this.itemInfoStyle.left = e.clientX +'px';
+                        this.itemInfoStyle.left = (e.clientX + mouseOffset) +'px';
                     }
 
                     this.focusedItem = item;
                     this.showDesc = true;
                 },
                 handleRanger(info, $event) {
-                    if ($event.to.className.indexOf('itemWrapper') === -1) { //changement de slot (pour le cas du changement de main uniquement)
+                    if ($event.to.className.indexOf('itemWrapper') === -1) { // changement de slot (pour le cas du changement de main uniquement)
                         this.ranger(info);
                     }
                 }
@@ -128,19 +137,14 @@
                     },
                     set(value) {
                         if (value.length === this.$store.state.player.inventory.inventaire.length) { // On commit uniquement les changements d'ordre, pas les transfèrements
-                            this.$store.commit('player/inventory/update', value);
+                            this.$store.dispatch('player/inventory/update', value);
                         }
-                    }
-                },
-                equipement: {
-                    get() {
-                        return this.$store.getters['player/inventory/getEquipement'];
-                    },
-                    set(value) {
-//                        this.$store.commit('player/inventory/update', value)
                     }
                 }
             },
+            mapGetters({
+                "equipement": 'getEquipement'
+            })
         )
     }
 </script>
@@ -148,18 +152,21 @@
 <style scoped>
     .itemSlot {
         display: block;
-        width: 5rem;
-        height: 5rem;
+        width: 4rem;
+        height: 4rem;
         margin: 1rem;
         user-select: none;
         cursor: -webkit-grab;
         cursor: grab;
     }
-    .skull, .inventory {
-        height: calc(80vh - 20px);
+    .inventory {
+        height: calc(30vh - 20px);
     }
     .skull {
-        border-left: 1px dashed rgb(113, 227, 204);
+        height: calc(50vh - 20px);
+    }
+    .skull {
+        border-bottom: 1px dashed rgb(113, 227, 204);
     }
     .skull .itemSlot {
         position: absolute;
@@ -185,27 +192,27 @@
         margin: 0;
     }
     .itemSlot.tete {
-        left: calc(50% - 2.5rem);
+        left: calc(50% - 2rem);
     }
     .itemSlot.torse {
-        left: calc(50% - 2.5rem);
-        top: 7.5rem;
+        left: calc(50% - 2rem);
+        top: 6rem;
     }
     .itemSlot.jambes {
-        left: calc(50% - 2.5rem);
-        top: 50%;
+        left: calc(50% - 2rem);
+        top: 60%;
     }
     .itemSlot.pieds {
-        left: calc(50% - 2.5rem);
-        bottom: 1rem;
+        left: calc(50% - 2rem);
+        bottom: 0.5rem;
     }
     .itemSlot.mainDroite {
         top: 45%;
-        left:calc(50% - 8.5rem);
+        left:calc(50% - 8rem);
     }
     .itemSlot.mainGauche {
         top: calc(45%);
-        right: calc(50% - 9.5rem);
+        right: calc(50% - 9rem);
     }
     .itemInfo {
         position: fixed;

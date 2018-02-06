@@ -31,6 +31,10 @@
             color: {
                 type: String,
                 default: 'rgb(227, 190, 88)'
+            },
+            bevel: {
+                type: Number,
+                default: 0.10
             }
         },
         methods: {
@@ -43,7 +47,7 @@
         computed: {
             edgeSize() {
                 const longer = Math.max(this.rootWidth, this.rootHeight);
-                return longer * 0.10;
+                return longer * this.bevel;
             },
             height() {
                 return this.$el.outerHeight;

@@ -1,10 +1,12 @@
 <template>
     <bordered-card color="rgb(255, 0, 0)" class="game-menu-tab">
         <div class="row">
-            <div class="col lg-6">
+            <div>
                 <infos-personnage></infos-personnage>
             </div>
-            <div class="col lg-6">
+        </div>
+        <div class="row">
+            <div>
                 <stats-araignee></stats-araignee>
             </div>
         </div>
