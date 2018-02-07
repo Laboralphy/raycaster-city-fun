@@ -1,7 +1,6 @@
 const ServiceAbstract = require('./Abstract');
 const logger = require('../../Logger');
-const Config = require('../Config/index');
-const STRINGS = require('../consts/strings')[Config.general.lang];
+const STRINGS = require('../consts/strings');
 
 class ServiceLogin extends ServiceAbstract {
     constructor() {

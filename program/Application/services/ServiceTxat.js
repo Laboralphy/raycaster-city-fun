@@ -1,8 +1,7 @@
 const ServiceAbstract = require('./Abstract');
 const TinyTxat = require('../../TinyTxat/index');
 const logger = require('../../Logger');
-const Config = require('../Config');
-const STRINGS = require('../consts/strings')[Config.general.lang];
+const STRINGS = require('../consts/strings');
 
 class ServiceTxat extends ServiceAbstract {
 

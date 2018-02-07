@@ -3,6 +3,8 @@ const Mobile = require('./Mobile');
 const Area = require('./Area');
 const uniqid = require('uniqid');
 const Emitter = require('events');
+const DataManager = require('./DataManager');
+const asyncfs = require('../../asyncfs');
 
 
 /**
@@ -15,6 +17,7 @@ class CentralProcessor {
         this._mobiles = {};
         this._blueprints = {};
         this.emitter = new Emitter();
+        this._dataManager = new DataManager();
     }
 
 //  ####   ######   #####   #####  ######  #####    ####
@@ -34,11 +37,19 @@ class CentralProcessor {
      * @return Area
      */
     async getArea(id) {
-        if (id in this._areas) {
-            return this._areas[id];
-        } else {
-            throw new Error('there is no such area : ' + id);
-        }
+        return new Promise(async resolve => {
+            let area;
+            if (id in this._areas) {
+                area = this._areas[id];
+            } else {
+                area = new Area();
+                console.log(id);
+                let level = await this._dataManager.loadLevel(id);
+                console.log(level);
+                area.data(level);
+            }
+            resolve(area);
+        });
     }
 
 	/**
@@ -47,10 +58,9 @@ class CentralProcessor {
      * @return {Array.<Mobile>}
 	 */
 	getAreaMobiles(area) {
-	    let id = area.id;
 		return Object
 			.values(this._mobiles)
-			.filter(px => px.location.area === id);
+			.filter(px => px.location.area === area);
     }
 
 	/**
@@ -58,10 +68,9 @@ class CentralProcessor {
 	 * @param area
 	 */
 	getAreaPlayers(area) {
-		let id = area.id;
 		return Object
 			.values(this._players)
-			.filter(px => px.location.area === id);
+			.filter(px => px.location.area === area);
     }
 
 
@@ -90,7 +99,7 @@ class CentralProcessor {
 	    if (Array.isArray(player)) {
 	        player.forEach(p => this.transmit(p, event, packet));
         } else {
-            this.emitter.emit(player.id, event, packet);
+            this.emitter.emit('transmit', player.id, event, packet);
         }
     }
 
@@ -175,15 +184,19 @@ class CentralProcessor {
      * Création d'une instance Player et d'une instance Mobile correspondant
      * @param id
      */
-    createPlayer(id) {
+    async createPlayer(id, {x, y, angle, area}) {
+        console.log('cp', area);
         let p = new Player();
         p.id = id;
         this._players[id] = p;
         // obtenir et remplir la location
         // en cas d'absence de location, en créer une a partir de la position de départ du niveau
-        let area = this.getArea(p.location.area());
-        p.location.assign(area._startpoint); // @todo récupérer la position mise en persistance.
+        p.location.x = x;
+        p.location.y = y;
+        p.location.heading(angle);
+        p.location.area(area);
 		this.createMobile(id, p.type, p.location);
+		return p;
     }
 
 	/**
@@ -230,16 +243,19 @@ class CentralProcessor {
      * il faut créer une instance et renseigner tous les joueur de la zone
      * de sa présence, et renseigner le joueur sur son état complet
      * @param id {string} identifiant du client
+     * @param sSymbolicId {string}
      */
-    async clientIdentified(id) {
+    async clientIdentified(client) {
+        let id = client.id;
         // client identifié
-        // creation player
-        this.createPlayer(id);
-        p = this._players[id];
         // recherche de son emplacement
-        // p.location =...
+        let playerData = await this._dataManager.loadClientData(client.name);
+        // creation player
+        console.log(playerData);
+        let p = await this.createPlayer(id, playerData.location);
         // transmettre la carte au client
-        let area = await this.getArea(p.location.area);
+        console.log('x',p.location.area());
+        let area = await this.getArea(p.location.area());
         this.transmit(p, 'G_ENTER_LEVEL', {
             id: area.id,
             name: area.name,

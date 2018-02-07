@@ -20,5 +20,6 @@ class Player {
         // il va falloir renseigner à ce client la situation complete du joueur
 
     }
-
 }
+
+module.exports = Player;

@@ -1,10 +1,9 @@
-const Config = require('../Config');
 const ClientManager = require('../ClientManager/index');
 const TinyTxat = require('../../TinyTxat/index');
 const logger = require('../../Logger/index');
 
 const util = require('util');
-const STRINGS = require('../consts/strings')[Config.general.lang];
+const STRINGS = require('../consts/strings');
 
 class Service {
     constructor() {
@@ -12,7 +11,9 @@ class Service {
         this._plugins = [];
         this
             .plugin('ServiceLogin')
-            .plugin('ServiceTxat');
+            .plugin('ServiceTxat')
+            .plugin('ServiceGame')
+        ;
     }
 
 	/**

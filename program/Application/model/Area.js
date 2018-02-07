@@ -59,6 +59,7 @@ module.exports = class Area {
         } else {
 	        this._level = l;
 	        this.data(l.render());
+	        return this;
         }
     }
 

@@ -1,3 +1,5 @@
+const Config = require('../Config');
+
 const STRINGS = {
 	en: {
 		service: {
@@ -22,4 +24,4 @@ const STRINGS = {
 	}
 };
 
-module.exports = STRINGS;
+module.exports = STRINGS[Config.general.lang];

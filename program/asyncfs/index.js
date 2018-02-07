@@ -11,10 +11,10 @@ const fs = require('fs');
  * @return {Promise<any>}
  */
 async function readFile(sFile, options) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         fs.readFile(sFile, options, (err, data) => {
             if (err) {
-                resolve(null);
+                reject(err);
             } else {
                 resolve(data);
             }
