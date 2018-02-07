@@ -1,5 +1,7 @@
 const o876 = require('../../o876');
 const EventEmitter = require('events');
+const logger = require('../../Logger');
+const STRINGS = require('../consts/strings');
 
 class Abstract {
 
@@ -34,7 +36,11 @@ class Abstract {
 	 * @private
 	 */
     _emit(idClient, sEvent, data) {
-        this._socket(idClient).emit(sEvent, data);
+    	try {
+			this._socket(idClient).emit(sEvent, data);
+		} catch (e) {
+			logger.logfmt(STRINGS.service.error.bad_client, idClient);
+		}
     }
 
     /**

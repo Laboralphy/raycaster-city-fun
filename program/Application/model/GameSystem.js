@@ -5,17 +5,19 @@ const uniqid = require('uniqid');
 const Emitter = require('events');
 const DataManager = require('./DataManager');
 const asyncfs = require('../../asyncfs');
-
+const logger = require('../../Logger');
+const STRINGS = require('../consts/strings');
 
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
  */
-class CentralProcessor {
+class GameSystem {
     constructor() {
         this._areas = {};
         this._players = {};
         this._mobiles = {};
         this._blueprints = {};
+
         this.emitter = new Emitter();
         this._dataManager = new DataManager();
     }
@@ -37,19 +39,14 @@ class CentralProcessor {
      * @return Area
      */
     async getArea(id) {
-        return new Promise(async resolve => {
-            let area;
-            if (id in this._areas) {
-                area = this._areas[id];
-            } else {
-                area = new Area();
-                console.log(id);
-                let level = await this._dataManager.loadLevel(id);
-                console.log(level);
-                area.data(level);
-            }
-            resolve(area);
-        });
+		let area;
+		if (id in this._areas) {
+			area = this._areas[id];
+		} else {
+			area = this.buildArea(id);
+			this.linkArea(id, area);
+		}
+		return area;
     }
 
 	/**
@@ -166,6 +163,19 @@ class CentralProcessor {
         };
     }
 
+	/**
+	 * Construction d'une nouvelle zone
+	 * @param id {string} identifiant de référence de la zone
+	 */
+	async buildArea(id) {
+		logger.logfmt(STRINGS.service.game_events.building_level, id);
+		let area = new Area();
+		let level = await this._dataManager.loadLevel(id);
+		area.data(level);
+		logger.logfmt(STRINGS.service.game_events.level_built, id);
+		return area;
+	}
+
 
 
 
@@ -185,7 +195,6 @@ class CentralProcessor {
      * @param id
      */
     async createPlayer(id, {x, y, angle, area}) {
-        console.log('cp', area);
         let p = new Player();
         p.id = id;
         this._players[id] = p;
@@ -195,7 +204,7 @@ class CentralProcessor {
         p.location.y = y;
         p.location.heading(angle);
         p.location.area(area);
-		this.createMobile(id, p.type, p.location);
+		//this.createMobile(id, p.type, p.location);
 		return p;
     }
 
@@ -212,7 +221,7 @@ class CentralProcessor {
         m.location.assign(location);
         m.blueprint = ref;
         this._mobiles[id] = m;
-        this.transmitToArea(location.area, 'G_CREATE_MOBILE', CentralProcessor.buildMobileCreationPacket(m));
+        this.transmitToArea(location.area, 'G_CREATE_MOBILE', GameSystem.buildMobileCreationPacket(m));
         return m;
     }
 
@@ -246,24 +255,32 @@ class CentralProcessor {
      * @param sSymbolicId {string}
      */
     async clientIdentified(client) {
-        let id = client.id;
-        // client identifié
-        // recherche de son emplacement
-        let playerData = await this._dataManager.loadClientData(client.name);
-        // creation player
-        console.log(playerData);
-        let p = await this.createPlayer(id, playerData.location);
-        // transmettre la carte au client
-        console.log('x',p.location.area());
-        let area = await this.getArea(p.location.area());
-        this.transmit(p, 'G_ENTER_LEVEL', {
-            id: area.id,
-            name: area.name,
-            data: area.data(),
-            doors: null, // @todo information permettant d'indiquer les portes ouvertes
-        });
-        this._players[id] = p;
+		let id = client.id;
+		logger.logfmt(STRINGS.service.game_events.player_auth, id);
+		// client identifié
+		// recherche de son emplacement
+		let playerData = await this._dataManager.loadClientData(client.name);
+		logger.logfmt(STRINGS.service.game_events.player_data_loaded, id);
+		// creation player
+
+
+		let p = await this.createPlayer(id, playerData.location);
+		logger.logfmt(STRINGS.service.game_events.player_created, id);
+		this._players[id] = p;
     }
+
+	/**
+	 * Le client est pret à télécharger le niveau dans lequel il est
+	 * @param client
+	 * @returns {Promise<void>}
+	 */
+	async clientWantsToLoadLevel(client) {
+		// transmettre la carte au client
+		let area = await this.getArea(p.location.area());
+		logger.logfmt(STRINGS.service.game_events.player_downloading_area, id, p.location.area());
+		let doors = null;
+		return {area, doors};
+	}
 
     /**
      * ### use case Client Has Loaded Level
@@ -281,11 +298,11 @@ class CentralProcessor {
             .values(this._mobiles)
             .filter(px => px.location.area === area.id)
             .map(px => px.id);
-        let aPackets = aMobiles.map(CentralProcessor.buildMobileCreationPacket);
+        let aPackets = aMobiles.map(GameSystem.buildMobileCreationPacket);
         this.transmit(id, 'G_CREATE_MOBILES', aPackets);
 
         // transmettre aux clients la position du nouveau
     }
 }
 
-module.exports = CentralProcessor;
+module.exports = GameSystem;

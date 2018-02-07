@@ -6,29 +6,48 @@ export default function createWebSocketPlugin (socket) {
 	return store => {
 		let chanCache = {};
 		let userCache = {};
-        let G;
 
-		/// GAME
-        function startGame() {
-        	console.log('starting game...');
-        	G = new Game();
-            MAIN.configure(CONFIG);
-            MAIN.run(G);
+		let G;
+
+		/**
+		 * Démarrage du jeu...
+		 * plein de chose à initialiser
+		 */
+		function startGame() {
+			MAIN.configure(CONFIG); 		// configurer le MAIN
+			G = new Game(CONFIG);			// créer une instance du jeu
+			MAIN.run(G._game);				// G est une Game Instance version ES-6
+											// G._game est une Game Instance version ES-5
+
+			/**
+			 * Evenement de sortie du pointerlock
+			 */
+			MAIN.pointerlock.on('exit', event => {
+				G.showOverlay();
+				store.dispatch('ui/showSection', {id: 'chat'});
+				store.dispatch('ui/show');
+				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
+			});
+
+			/**
+			 * Evènement d'entrée dans le pointerlock
+			 */
             MAIN.pointerlock.on('enter', event => {
                 store.dispatch('ui/hide');
                 G.hideOverlay();
                 document.querySelector('canvas#screen').style.filter = '';
             });
-            G.on('blur', event => {
-                store.dispatch('ui/showSection', {id: 'chat'});
-                store.dispatch('ui/show');
-                document.querySelector('canvas#screen').style.filter = 'blur(5px)';
-            });
+
+            /*G._game.on('raycaster', async event => {
+            	let level = await req_dl_level();
+
+			});*/
+
             document.body.setAttribute('class', 'playing');
         }
 
         function endGame() {
-			G._halt();
+			G._game._halt();
             document.body.setAttribute('class', '');
         }
 
@@ -104,6 +123,13 @@ export default function createWebSocketPlugin (socket) {
 			});
 		});
 
+
+		/**
+		 * Serveur : "un utilisateur reçoit le niveau dans lequel il doit évoluer
+		 */
+		socket.on('G_ENTER_LEVEL', ({id, name, data, doors}) => {
+			G.loadLevel(data);
+		});
 
 
 
@@ -195,15 +221,14 @@ export default function createWebSocketPlugin (socket) {
 
 
 		/**
-		 * Chargement d'un niveau spécifique
-		 * @param ref {string} référence du niveau
+		 * Le client est pret pour le Chargement d'un niveau
 		 * @return {Promise<void>}
 		 */
-		async function req_lev_load(ref) {
+		async function req_dl_level() {
 			return new Promise(resolve => {
 				socket.emit(
-					'REQ_LEV_LOAD',
-					{ref},
+					'REQ_DL_LEVEL',
+					{},
 					(data) => {
 						resolve(data);
 					}

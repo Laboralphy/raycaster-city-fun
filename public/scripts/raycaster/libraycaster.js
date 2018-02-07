@@ -4096,7 +4096,7 @@ O2.createClass('O876.Rasterize', {
 	_processImg: function(img, cb) {
 		var sSrc = img.getAttribute('src');
 		var sSign = 'data:image/';
-		if (sSrc.substr(0, sSign.length) == sSign) {
+		if (sSrc.substr(0, sSign.length) === sSign) {
 			setTimeout(cb, 0);
 			return;
 		}
@@ -6470,16 +6470,17 @@ O2.createClass('O876_Raycaster.Horde',  {
 				nSectorLength = oSector.length;
 				for (iOther = 0; iOther < nSectorLength; ++iOther) {
 					oOther = oSector[iOther];
-					if (oOther != oMobile) {
+					if (oOther !== oMobile) {
 						if (oMobile.hits(oOther)) {
 							oMobile.oMobileCollision = oOther;
-							return;
+							return true;
 						}
 					}
 				}
 			}
 		}
 		oMobile.oMobileCollision = null;
+		return false;
 	},
 	
 	getAllocatedMemory: function() {
@@ -6596,34 +6597,50 @@ O2.createObject('MAIN', {
 	configure: function(c) {
 		MAIN.config = c;
 	},
-	
+
+
+	setupScreen: function() {
+		var screen = document.getElementById(MAIN.config.raycaster.canvas);
+		if (screen === null) {
+			throw new Error('the final canvas does not exist');
+		}
+		MAIN.screen = screen;
+		if (MAIN.config.raycaster.canvasAutoResize) {
+			MAIN.screenResize();
+			window.addEventListener('resize', MAIN.screenResize);
+		}
+	},
+
+	setupPointerlock: function() {
+		var PL = MAIN.pointerlock = new O876_Raycaster.PointerLock();
+		if (MAIN.config.game.fpsControl && PL.init()) {
+			MAIN.screen.addEventListener('click', function(oEvent) {
+				MAIN.lockPointer();
+			});
+		}
+	},
+
+	setupGameInstance: function(oGameInstance) {
+		if (oGameInstance) {
+			MAIN.game = oGameInstance;
+		} else {
+			var sNamespace = MAIN.config.game.namespace;
+			MAIN.game = new window[sNamespace].Game();
+			MAIN.game.setConfig(MAIN.config);
+		}
+	},
+
 	/**
 	 * Will start a game
 	 * requires a CONFIG object
 	 */
 	run: function(oGameInstance) {
-		var PL = MAIN.pointerlock = new O876_Raycaster.PointerLock();
 		if (!(MAIN.config)) {
 			throw new Error('Where is my CONFIG object ? (use MAIN.configure)');
 		}
-		var oConfig = MAIN.config;
-		MAIN.screen = document.getElementById(oConfig.raycaster.canvas);
-		if (oConfig.raycaster.canvasAutoResize) {
-			MAIN.screenResize();
-			window.addEventListener('resize', MAIN.screenResize);
-		}
-		if (oGameInstance) {
-			MAIN.game = oGameInstance;
-		} else {
-			var sNamespace = oConfig.game.namespace;
-			MAIN.game = new window[sNamespace].Game();
-		}
-		MAIN.game.setConfig(oConfig);
-		if (oConfig.game.fpsControl && PL.init()) {
-			MAIN.screen.addEventListener('click', function(oEvent) {
-				MAIN.lockPointer();
-			});
-		}
+		MAIN.setupScreen();
+		MAIN.setupPointerlock();
+		MAIN.setupGameInstance(oGameInstance);
 	},
 	
 	/**
@@ -6634,7 +6651,7 @@ O2.createObject('MAIN', {
 	lockPointer: function() {
 		var G = MAIN.game;
 		var rc = G.oRaycaster;
-		var oElement = MAIN.screen; // précédemment : rc.getScreenCanvas();
+		var oElement = rc.getScreenCanvas();
 		var rcc = rc.oCamera;
 		var rcct = rcc.oThinker;
 		if (!rcc || !rcct) {
@@ -6679,7 +6696,7 @@ O2.createObject('MAIN', {
 		}
 		oCanvas.style.width = (wf | 0).toString() + 'px';
 		oCanvas.style.height = (hf | 0).toString() + 'px';
-		oCanvas.__ratio = wf / cw;
+		oCanvas.__aspect = wf / cw;
 		if (oCanvas.style.position === 'absolute' && oCanvas.style['margin-left'] === 'auto') {
 			oCanvas.style.left = ((w - wf) >> 1 | 0).toString() + 'px';
 		}
@@ -6933,6 +6950,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 			this.oThinker.oMobile = this;
 		}
 		this.oWallCollision = {x: 0, y: 0};
+		this.bWallCollision = false;
 		this.gotoLimbo();
 	},
 
@@ -7086,7 +7104,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 		if (nDist > nSize) {
 			var vSubSpeed = this._vecScale(vSpeed, nSize);
 			var nModDist = nDist % nSize;
-			var r, pos, speed;
+			var r, pos, speed = {x: 0, y: 0};
 			if (nModDist) {
 				var vModSpeed = this._vecScale(vSpeed, nModDist);
 				r = this.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
@@ -7099,7 +7117,8 @@ O2.createClass('O876_Raycaster.Mobile', {
 			for (var iIter = 0; iIter < nDist; iIter += nSize) {
 				r = this.computeWallCollisions(pos, vSubSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
 				pos = r.pos;
-				speed = speed.add(r.speed);
+				speed.x += r.speed.x;
+				speed.y += r.speed.y;
 			}
 			return {
 				pos: pos,
@@ -7135,6 +7154,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
+					oWallCollision.y = yci;
 				}
 				oWallCollision.x = xci;
 				bCorrection = true;
@@ -7143,6 +7163,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 				dy = 0;
 				if (bCrashWall) {
 					dx = 0;
+					oWallCollision.x = xci;
 				}
 				oWallCollision.y = yci;
 				bCorrection = true;
@@ -7193,7 +7214,9 @@ O2.createClass('O876_Raycaster.Mobile', {
 	    this.setXY(r.pos.x, r.pos.y);
         this.xSpeed = r.speed.x;
         this.ySpeed = r.speed.y;
-        this.oWallCollision = r.wcf;
+        var wcf = r.wcf;
+        this.oWallCollision = wcf;
+        this.bWallCollision = wcf.x !== 0 || wcf.y !== 0;
     },
 
 
@@ -7203,7 +7226,7 @@ O2.createClass('O876_Raycaster.Mobile', {
      * @param fDist {number} Distance de déplacement
 	 */
 	move: function(fAngle, fDist) {
-		if (this.fMovingAngle != fAngle || this.fMovingSpeed != fDist) {
+		if (this.fMovingAngle !== fAngle || this.fMovingSpeed !== fDist) {
 			this.fMovingAngle = fAngle;
 			this.fMovingSpeed = fDist;
 			this.xInertie = Math.cos(fAngle) * fDist;
@@ -7947,9 +7970,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	},
 
 	initCanvas : function() {
-		if (typeof this.oConfig.canvas == 'string') {
+		if (typeof this.oConfig.canvas === 'string') {
 			this._oCanvas = document.getElementById(this.oConfig.canvas);
-		} else if (typeof this.oConfig.canvas == 'object' && this.oConfig.canvas !== null) {
+		} else if (typeof this.oConfig.canvas === 'object' && this.oConfig.canvas !== null) {
 			this._oCanvas = this.oConfig.canvas;
 		} else {
 			throw new Error('initCanvas failed: configuration object needs a valid canvas entry (dom or string id)');
@@ -10859,13 +10882,15 @@ O2.createClass('O876_Raycaster.WeaponLayer', {
 
 	fire: function() {
 		this.firetime = this.time + 700;
-		this.playAnimation(1);
+		this.playAnimation(8);
 	},
 
 	playAnimation: function(n) {
 		if (this.tile.aAnimations[n]) {
 			this.animation = new O876_Raycaster.Animation();
             this.animation.assign(this.tile.aAnimations[n]);
+		} else {
+			throw new Error('bad anim : ' + n);
 		}
 	},
 
@@ -12458,8 +12483,6 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 
 	// onEnterLevel: null,
 
-	// onMenuLoop: null,
-
 	// onDoomLoop: null,
 
 	// onFrameRendered: null,
@@ -12474,19 +12497,8 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 		this._callGameEvent('onInitialize');
 		this.TIME_FACTOR = this.nInterval = this._oConfig.game.interval;
 		this._oConfig.game.doomloop = this._oConfig.game.doomloop || 'raf';
-		this.setDoomloop('stateMenuLoop');
+		this.setDoomloop('stateStartRaycaster');
 		this.resume();
-	},
-
-	/**
-	 * Attend le choix d'une partie. Le programme doit afficher un menu ou un
-	 * écran d'accueil. Pour lancer la partie, l'évènement onMenuLoop doit
-	 * retourner la valeur 'true';
-	 */
-	stateMenuLoop : function() {
-		if (this._callGameEvent('onMenuLoop')) {
-			this.setDoomloop('stateStartRaycaster');
-		}
 	},
 
 	/**
@@ -12503,8 +12515,22 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 		this.oRaycaster.initialize();
 		this.oThinkerManager = this.oRaycaster.oThinkerManager;
 		this.oThinkerManager.oGameInstance = this;
+		this._callGameEvent('onRaycasterReady', this.oRaycaster);
 		this._callGameEvent('onLoading', 'lvl', 0, 2);
-		this.setDoomloop('stateBuildLevel');
+		this.setDoomloop('stateWaitingForLevel');
+	},
+
+
+	/**
+	 * attend que le level soit fournit
+	 * à l'époque ou cette fonction à été créer on n'avait pas de promise
+	 */
+	stateWaitingForLevel: function() {
+		var oData = this._callGameEvent('onRequestLevelData');
+		if (typeof oData === 'object' && oData !== null) {
+			this.oRaycaster.defineWorld(oData);
+			this.setDoomloop('stateBuildLevel');
+		}
 	},
 
 	/**
@@ -12512,12 +12538,6 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	 */
 	stateBuildLevel : function() {
 		// Evènement chargement de niveau
-		var oData = this._callGameEvent('onRequestLevelData');
-		if (typeof oData != 'object') {
-			this._halt('no world data : without world data I can\'t build the world. (onRequestLevelData did not return object)');
-			return;
-		}
-		this.oRaycaster.defineWorld(oData);
 		try {
 			this.oRaycaster.buildLevel();
 		} catch (e) {
@@ -12846,8 +12866,6 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
  Appelé dès qu'une exception non gérée est déclenchée
 
 
- menuloop
- - exit : boolean true par défaut, mettre à false pour rester dans le menu.
 
 
  leveldata
@@ -12924,19 +12942,11 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 			this.trigger('error', {message: sError, data: oError});
 		}
 	},
-	
-	/**
-	 * Cette évènement doit renvoyer TRUE pour pouvoir passer à l'étape suivante
-	 * @return bool
-	 */
-	onMenuLoop: function() {
-		var data = { exit: true };
-		this.trigger('menuloop', data);
-		return data.exit;
-		// Doit retourner TRUE pour indiquer la validation du menu et passer à l'étape suivante
-		// ici il n'y a pas de menu donc "true" pour passer directement à l'étape suivante
+
+	onRaycasterReady: function(oRaycasyter) {
+		this.trigger('raycaster', {raycaster: oRaycasyter});
 	},
-	
+
 	
 	/**
 	 * Evènement appelé lors du chargement d'un niveau,
@@ -13352,7 +13362,7 @@ O2.extendClass('O876_Raycaster.CommandThinker', O876_Raycaster.Thinker, {
 	ANIMATION_DEATH : 3,
 
 	setMovement : function(a, s) {
-		if (this.fma != a || this.fms != s) {
+		if (this.fma !== a || this.fms !== s) {
 			this.fma = a;
 			this.fms = s;
 			var oSprite = this.oMobile.oSprite;
@@ -13738,10 +13748,10 @@ O2.extendClass('O876_Raycaster.MissileThinker', O876_Raycaster.Thinker, {
   bExiting: true,			// Temoin de sortie du canon pour eviter les fausse collision avec le tireur
   oLastHitMobile: null,		// Dernier mobile touché
   nStepSpeed: 4,			// Nombre de déplacement par frame
-  
-  ANIMATION_EXPLOSION: 0,
-  ANIMATION_MOVING: 1,
-  
+
+  ANIMATION_MOVING: 0,
+  ANIMATION_EXPLOSION: 1,
+
   nLifeOut: 0,
   
   __construct: function() {
@@ -13754,10 +13764,10 @@ O2.extendClass('O876_Raycaster.MissileThinker', O876_Raycaster.Thinker, {
     var bWallCollision = this.oMobile.bWallCollision;  // collision murale
     var bMobileCollision = this.oMobile.oMobileCollision !== null;                        // collision avec un mobile
     var nTargetType = bMobileCollision ? this.oMobile.oMobileCollision.getType() : 0;
-    var bOwnerCollision = this.oMobile.oMobileCollision == this.oOwner;                   // collision avec le tireur
+    var bOwnerCollision = this.oMobile.oMobileCollision === this.oOwner;                   // collision avec le tireur
     var bSolidCollision = bMobileCollision &&                                             // collision avec un mobile solide (non missile, et non item)
-      nTargetType != RC.OBJECT_TYPE_MISSILE &&
-      nTargetType != RC.OBJECT_TYPE_ITEM;
+      nTargetType !== RC.OBJECT_TYPE_MISSILE &&
+      nTargetType !== RC.OBJECT_TYPE_ITEM;
 
     if (bWallCollision) {
       this.oMobile.oMobileCollision = null;

@@ -14,10 +14,23 @@ const STRINGS = {
 				user_said: '[%s] %s (%s): %s'
 			},
 			plugin_loaded: 'plugin "%s" has been loaded',
+
+
+
+			game_events: {
+				building_level: 'building level (id "%s")',
+				level_built: 'level built (id "%s")',
+				player_created: 'player\'s mobile instance created (id "%s")',
+				player_auth: 'player is now connected to game (id "%s")',
+				player_data_loaded: 'player\'s data loaded (id "%s")',
+				player_downloading_area: 'player is downloading area (client "%s" area "%s")'
+			},
+
 			error: {
 				invalid_channel: 'user send message to a wrong channel (user "%s" channel "%s")',
 				login_failed: 'user access denied (user "%s" nickname "%s")',
-				level_not_found: 'error when loading level (user "%s" level "%s")'
+				level_not_found: 'error when loading level (user "%s" level "%s")',
+				bad_client: 'client not found - possibly just disconnected (id "%s")'
 			}
 
 		},

@@ -744,8 +744,8 @@ describe('model', function() {
 
 
 
-	describe('CentralProcessor', function() {
-		const CentralProcessor = require('../model/CentralProcessor');
+	describe('GameSystem', function() {
+		const GameSystem = require('../model/GameSystem');
 		const Area = require('../model/Area');
         const Level = require('../model/Level');
         const Location = require('../model/Location');
@@ -768,7 +768,7 @@ describe('model', function() {
                     [0x21, 0x21, 0x33, 0x21]
                 ]);
             area.level(level);
-            let cp = new CentralProcessor();
+            let cp = new GameSystem();
             cp.linkArea('test', area);
 
             it('should contain an area', function () {
@@ -795,7 +795,7 @@ describe('model', function() {
                         [0x21, 0x21, 0x33, 0x21]
                     ]);
                 area.level(level);
-                let cp = new CentralProcessor();
+                let cp = new GameSystem();
                 cp.linkArea('test', area);
 
                 let loc = new Location();
