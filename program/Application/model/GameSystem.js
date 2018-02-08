@@ -270,16 +270,21 @@ class GameSystem {
     }
 
 	/**
-	 * Le client est pret à télécharger le niveau dans lequel il est
+	 * Le client est pret à télécharger le niveau dans lequel il est sensé se rendre
 	 * @param client
 	 * @returns {Promise<void>}
 	 */
 	async clientWantsToLoadLevel(client) {
 		// transmettre la carte au client
-		let area = await this.getArea(p.location.area());
-		logger.logfmt(STRINGS.service.game_events.player_downloading_area, id, p.location.area());
-		let doors = null;
-		return {area, doors};
+        let id = client.id;
+        let p = this._players[id];
+        if (!p) {
+            throw new Error('player ' + id + ' has not been instanciated');
+        }
+        let area = await this.getArea(p.location.area());
+        logger.logfmt(STRINGS.service.game_events.player_downloading_area, id, p.location.area());
+        let doors = null;
+        return {area, doors};
 	}
 
     /**

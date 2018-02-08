@@ -7,23 +7,23 @@ export default function createWebSocketPlugin (socket) {
 		let chanCache = {};
 		let userCache = {};
 
-		let G;
+		let game;
 
 		/**
 		 * Démarrage du jeu...
 		 * plein de chose à initialiser
 		 */
-		function startGame() {
+		function gameInit() {
 			MAIN.configure(CONFIG); 		// configurer le MAIN
-			G = new Game(CONFIG);			// créer une instance du jeu
-			MAIN.run(G._game);				// G est une Game Instance version ES-6
+			game = new Game(CONFIG);			// créer une instance du jeu
+			MAIN.run(game._game);				// G est une Game Instance version ES-6
 											// G._game est une Game Instance version ES-5
 
 			/**
 			 * Evenement de sortie du pointerlock
 			 */
 			MAIN.pointerlock.on('exit', event => {
-				G.showOverlay();
+				game.showOverlay();
 				store.dispatch('ui/showSection', {id: 'chat'});
 				store.dispatch('ui/show');
 				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
@@ -34,7 +34,7 @@ export default function createWebSocketPlugin (socket) {
 			 */
             MAIN.pointerlock.on('enter', event => {
                 store.dispatch('ui/hide');
-                G.hideOverlay();
+                game.hideOverlay();
                 document.querySelector('canvas#screen').style.filter = '';
             });
 
@@ -47,9 +47,21 @@ export default function createWebSocketPlugin (socket) {
         }
 
         function endGame() {
-			G._game._halt();
+			game._game._halt();
             document.body.setAttribute('class', '');
         }
+
+        /**
+		 * Affiche une erreur dans la console
+         * @param s {string} libelle
+         * @param e {string} erreur issu du serveur
+         */
+        function error(s, e) {
+            console.group('error');
+            console.error(s);
+            console.error(e);
+            console.groupEnd('error');
+		}
 
 
 
@@ -124,11 +136,18 @@ export default function createWebSocketPlugin (socket) {
 		});
 
 
+        /**
+         * Serveur : "un utilisateur reçoit un message d'erreur suite à sa dernière requete
+         */
+        socket.on('G_ERROR', ({err}) => {
+            console.error(err);
+        });
+
 		/**
 		 * Serveur : "un utilisateur reçoit le niveau dans lequel il doit évoluer
 		 */
-		socket.on('G_ENTER_LEVEL', ({id, name, data, doors}) => {
-			G.loadLevel(data);
+		socket.on('G_ENTER_LEVEL', ({level, doors}) => {
+			game.loadLevel(level);
 		});
 
 
@@ -220,30 +239,6 @@ export default function createWebSocketPlugin (socket) {
 		}
 
 
-		/**
-		 * Le client est pret pour le Chargement d'un niveau
-		 * @return {Promise<void>}
-		 */
-		async function req_dl_level() {
-			return new Promise(resolve => {
-				socket.emit(
-					'REQ_DL_LEVEL',
-					{},
-					(data) => {
-						resolve(data);
-					}
-				)
-			});
-		}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -267,6 +262,15 @@ export default function createWebSocketPlugin (socket) {
 		function send_ms_say(tab, message) {
 			console.log({channel:tab, message});
 			socket.emit('MS_SAY', {channel:tab, message});
+		}
+
+        /**
+		 * Lorsque le client a fini la phase d'identification et qu'il attend
+		 * des données du serveur il utilise ce message pour indiquer qu'il est près à les
+		 * recevoir.
+         */
+		function send_g_ready() {
+            socket.emit('G_READY', {});
 		}
 
 
@@ -295,7 +299,8 @@ export default function createWebSocketPlugin (socket) {
                         //
                         await store.dispatch('ui/hideSection', {id: 'login'});
                         await store.dispatch('ui/hide');
-                        startGame();
+                        gameInit();
+                        send_g_ready();
                     } else {
                         // on a eu un soucis d'identification
                     }

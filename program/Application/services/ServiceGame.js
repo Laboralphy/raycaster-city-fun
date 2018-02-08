@@ -21,14 +21,23 @@ class ServiceLogin extends ServiceAbstract {
         super.connectClient(client);
         let socket = client.socket;
 
-
-        socket.on('REQ_DL_LEVEL', ({}, ack) => {
+        /**
+         * Le client a fini son initialisation
+         * on lui envoie un niveau
+         */
+        socket.on('G_READY', async ({}) => {
             // chargement d'un niveau
-            let data = this._gs.clientWantsToLoadLevel(client);
-            ack({
-                level: data.area.data(),
-                doors: data.doors
-            });
+            try {
+                let data = await this._gs.clientWantsToLoadLevel(client);
+                this._emit(client.id, 'G_ENTER_LEVEL', {
+                    level: data.area.data(),
+                    doors: data.doors
+                });
+            } catch (e) {
+                this._emit(client.id, 'G_ERROR', {
+                    err: 'G_READY ' + e.toString()
+                });
+            }
         });
     }
 }

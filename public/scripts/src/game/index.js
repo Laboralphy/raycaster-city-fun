@@ -7,6 +7,10 @@ class Game {
 		this.init();
 	}
 
+    /**
+	 * Renvoie l'instance du raycaster
+     * @return {O876_Raycaster.Raycaster}
+     */
 	raycaster() {
 		return this._raycaster;
 	}
@@ -16,27 +20,15 @@ class Game {
 	 * @param data {*} donnée du niveau
 	 */
 	loadLevel(data) {
-		this._nextLevel = data;
-	}
+		this._game.initRaycaster(data);
+        this._raycaster = this._game.oRaycaster;
+    }
 
 
 	init() {
-		//console.log('start of init');
-		this._nextLevel = null;
-		this._game.on('leveldata', this.gameEventRequestLevel.bind(this));
 		this._game.on('key.down', event => this.gameEventKey(event));
 		this._game.on('enter', event => this.gameEventEnter(event));
 		this._game.on('load', event => this.gameEventLoad(event));
-		this._game.on('raycaster', event => this._raycaster = event.raycaster);
-	}
-
-	/**
-	 * Lorsqu'un niveau doit être chargé , cet évènement est lancé
-	 * @param wd
-	 */
-	gameEventRequestLevel(wd) {
-		console.log('requesting level', this._nextLevel);
-		wd.data = this._nextLevel;
 	}
 
 	/**
