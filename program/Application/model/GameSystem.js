@@ -7,6 +7,7 @@ const DataManager = require('./DataManager');
 const asyncfs = require('../../asyncfs');
 const logger = require('../../Logger');
 const STRINGS = require('../consts/strings');
+const PLAYER_STATUS = require('../consts/playerStatus');
 
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
@@ -138,8 +139,7 @@ class GameSystem {
             x: mpos.x,
             y: mpos.y,
             a: mloc.heading(),
-            sx: mspd.x,
-            sy: mspd.y,
+            s: mspd,
             bp: m.blueprint
         };
     }
@@ -158,8 +158,7 @@ class GameSystem {
             x: mpos.x,
             y: mpos.y,
             a: mloc.heading(),
-            sx: mspd.x,
-            sy: mspd.y
+			s: mspd
         };
     }
 
@@ -197,6 +196,7 @@ class GameSystem {
     async createPlayer(id, {x, y, angle, area}) {
         let p = new Player();
         p.id = id;
+        p.status = PLAYER_STATUS.UNIDENTIFIED;
         this._players[id] = p;
         // obtenir et remplir la location
         // en cas d'absence de location, en créer une a partir de la position de départ du niveau
@@ -221,7 +221,7 @@ class GameSystem {
         m.location.assign(location);
         m.blueprint = ref;
         this._mobiles[id] = m;
-        this.transmitToArea(location.area, 'G_CREATE_MOBILE', GameSystem.buildMobileCreationPacket(m));
+        //this.transmitToArea(location.area, 'G_CREATE_MOBILE', GameSystem.buildMobileCreationPacket(m));
         return m;
     }
 
@@ -294,18 +294,25 @@ class GameSystem {
      * position de tous les mobiles
      * il faut transmettre aux autres client la position du nouveau
      */
-    clientHasLoadedLevel(id) {
+    clientHasLoadedLevel(client) {
+    	let id = client.id;
         let p = this._players[id];
         let area = this._areas[p.location.area];
 
         // transmettre la position de tous les mobiles
-        let aMobiles = Object
+        let mobiles = Object
             .values(this._mobiles)
             .filter(px => px.location.area === area.id)
-            .map(px => px.id);
-        let aPackets = aMobiles.map(GameSystem.buildMobileCreationPacket);
-        this.transmit(id, 'G_CREATE_MOBILES', aPackets);
-
+            .map(px => GameSystem.buildMobileCreationPacket(px.id));
+        let subject = this.createMobile(id, p.blueprint, p.location);
+        // déterminer la liste des joueur présents dans la zone
+		let players = this.getAreaPlayers(area).map(p => p.id);
+        return {
+        	subject,
+			mobiles,
+			players
+		}
+        // this.transmit(id, 'G_CREATE_MOBILES', aPackets);
         // transmettre aux clients la position du nouveau
     }
 }

@@ -17,22 +17,39 @@ class ServiceLogin extends ServiceAbstract {
         });
     }
 
-    connectClient(client) {
+	/**
+     * appelée automatiquement lorsqu'un client se connecte au service
+	 * @param client
+	 */
+	connectClient(client) {
         super.connectClient(client);
         let socket = client.socket;
 
         /**
-         * Le client a fini son initialisation
-         * on lui envoie un niveau
+         * Le client indique qu' "il est prêt"
+         * voir le détail de chaque phase
          */
-        socket.on('G_READY', async ({}) => {
+        socket.on('G_READY', async ({phase}) => {
             // chargement d'un niveau
             try {
-                let data = await this._gs.clientWantsToLoadLevel(client);
-                this._emit(client.id, 'G_ENTER_LEVEL', {
-                    level: data.area.data(),
-                    doors: data.doors
-                });
+                let data;
+                switch (phase) {
+                    case 0: // le client est pret à recevoir les données d'un niveau
+						data = await this._gs.clientWantsToLoadLevel(client);
+						this._emit(client.id, 'G_LOAD_LEVEL', {
+							level: data.area.data(),
+							doors: data.doors
+						});
+						break;
+
+                    case 1: // Le client a chargé le niveau, il est prèt à recevoir les
+						data = this._gs.clientHasLoadedLevel(client);
+						// transmettre au client la liste de tous les mobiles
+						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
+						// transmettre à tous les autres clients la création du client
+						this._emit(data.players, 'G_CREATE_MOBILE', {mob: data.subject});
+                        break;
+                }
             } catch (e) {
                 this._emit(client.id, 'G_ERROR', {
                     err: 'G_READY ' + e.toString()

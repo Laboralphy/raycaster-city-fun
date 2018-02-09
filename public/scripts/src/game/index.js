@@ -1,18 +1,13 @@
-class Game {
+
+
+
+class Game extends O876_Raycaster.GameAbstract {
 
 	constructor(config) {
-		this._raycaster = null;
-		this._game = new O876_Raycaster.GameAbstract();
-		this._game.setConfig(config);
+		super(config);
+		this.__construct(config);
+		this._mobiles = {};
 		this.init();
-	}
-
-    /**
-	 * Renvoie l'instance du raycaster
-     * @return {O876_Raycaster.Raycaster}
-     */
-	raycaster() {
-		return this._raycaster;
 	}
 
 	/**
@@ -20,15 +15,14 @@ class Game {
 	 * @param data {*} donnée du niveau
 	 */
 	loadLevel(data) {
-		this._game.initRaycaster(data);
-        this._raycaster = this._game.oRaycaster;
+		this.initRaycaster(data);
     }
 
 
 	init() {
-		this._game.on('key.down', event => this.gameEventKey(event));
-		this._game.on('enter', event => this.gameEventEnter(event));
-		this._game.on('load', event => this.gameEventLoad(event));
+		this.on('key.down', event => this.gameEventKey(event));
+		this.on('enter', event => this.gameEventEnter(event));
+		this.on('load', event => this.gameEventLoad(event));
 	}
 
 	/**
@@ -39,8 +33,8 @@ class Game {
 		let s = oEvent.phase;
 		let n = oEvent.progress;
 		let nMax = oEvent.max;
-		let oCanvas = this._game.oRaycaster.getScreenCanvas();
-		let oContext = this._game.oRaycaster.getScreenContext();
+		let oCanvas = this.oRaycaster.getScreenCanvas();
+		let oContext = this.oRaycaster.getScreenContext();
 		oContext.clearRect(0, 0, oCanvas.width, oCanvas.height);
 		let sMsg = s;
 		let y = oCanvas.height >> 1;
@@ -54,6 +48,7 @@ class Game {
 		oContext.fillStyle = 'rgb(255, 128, 48)';
 		oContext.fillRect(nPad, y + 12, n * xMax / nMax, 8);
 	}
+
 
 
 
@@ -85,7 +80,7 @@ class Game {
 	 * @return O876_Raycaster.Mobile
 	 */
 	getPlayer() {
-    	return this._game.oRaycaster.oCamera;
+    	return this.oRaycaster.oCamera;
 	}
 
 	/**
@@ -106,6 +101,46 @@ class Game {
 		this.getPlayer().getThinker().thaw();
 	}
 
+
+	/**
+	 * Creation d'un mobile
+	 * @param id {string} identifiant
+	 * @param x {number} position
+	 * @param y {number}
+	 * @param s {number} vitesse
+	 * @param a {number} angle
+	 * @param bp {string} blueprints
+	 */
+	mspawn({id, x, y, s, a, bp}) {
+		console.log('spawn', id);
+		let m = this.spawnMobile(bp, x, y, a);
+		m.getThinker().setMovement(a, s);
+		this._mobiles[id] = m;
+	}
+
+	/**
+	 * Mise à jour de mobile
+	 * @param id {string} identifiant
+	 * @param x {number} position
+	 * @param y {number}
+	 * @param s {number} vitesse
+	 * @param a {number} angle
+	 */
+	mupdate({id, x, y, s, a}) {
+		this.getMobile();
+		let m = this.spawnMobile(bp, x, y, a);
+		let th = m.getThinker();
+		th.setMovement(a, s);
+	}
+
+	/**
+	 * destruction de mobile
+	 * @param id {string} identifiant
+	 */
+	mdestroy({id}) {
+		console.log('destroy', id);
+		this._mobiles[id].getThinker().die();
+	}
 }
 
 export default Game;

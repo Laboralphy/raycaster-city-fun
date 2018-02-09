@@ -243,6 +243,7 @@ module.exports = class Mobile {
             false,
             (x, y) => area.isSolidPoint(x, y)
         );
+		this.speed = vSpeed;
         this.location.position(vPos.add(vSpeed));
 	}
 };

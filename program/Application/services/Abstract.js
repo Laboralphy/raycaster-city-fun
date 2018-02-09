@@ -30,14 +30,20 @@ class Abstract {
 
 	/**
      * Emission d'un packet à destination d'un client
-	 * @param idClient {string} identifiant destinataire
+	 * @param idClient {string|string[]} identifiant ou liste d'identifiants destinataire
 	 * @param sEvent {string} évènement
 	 * @param data {*}
 	 * @private
 	 */
     _emit(idClient, sEvent, data) {
     	try {
-			this._socket(idClient).emit(sEvent, data);
+    		if (Array.isArray(idClient)) {
+				idClient.forEach(id => {
+					this._socket(id).emit(sEvent, data);
+				});
+			} else {
+				this._socket(idClient).emit(sEvent, data);
+			}
 		} catch (e) {
 			logger.logfmt(STRINGS.service.error.bad_client, idClient);
 		}

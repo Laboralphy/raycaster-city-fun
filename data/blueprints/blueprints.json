@@ -4,17 +4,17 @@
 		"tile": "m_warlock_b",
 		"width": 16,
 		"height": 96,
-		"thinker": "",
+		"thinker": "O876_Raycaster.Command",
 		"fx": 0,
 		"data": null
 	},
 
 	"m_imp1": {
 		"type": 1,
-		"tile": "m_warlock_b",
+		"tile": "m_imp1",
 		"width": 16,
 		"height": 96,
-		"thinker": "",
+		"thinker": "O876_Raycaster.Command",
 		"fx": 0,
 		"data": null
 	},

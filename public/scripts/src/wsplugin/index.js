@@ -2,6 +2,7 @@ import STRINGS from "../data/strings";
 import Game from "../game";
 import CONFIG from "../game/config";
 
+
 export default function createWebSocketPlugin (socket) {
 	return store => {
 		let chanCache = {};
@@ -15,10 +16,8 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		function gameInit() {
 			MAIN.configure(CONFIG); 		// configurer le MAIN
-			game = new Game(CONFIG);			// créer une instance du jeu
-			MAIN.run(game._game);				// G est une Game Instance version ES-6
-											// G._game est une Game Instance version ES-5
-
+			game = new Game(CONFIG);		// créer une instance du jeu
+			MAIN.run(game);
 			/**
 			 * Evenement de sortie du pointerlock
 			 */
@@ -38,16 +37,18 @@ export default function createWebSocketPlugin (socket) {
                 document.querySelector('canvas#screen').style.filter = '';
             });
 
-            /*G._game.on('raycaster', async event => {
-            	let level = await req_dl_level();
-
-			});*/
+			/**
+			 * Evènement : le client a fini de construire le niveau
+			 */
+			game.on('enter', async event => {
+            	send_g_ready(1);
+			});
 
             document.body.setAttribute('class', 'playing');
         }
 
         function endGame() {
-			game._game._halt();
+			game._halt();
             document.body.setAttribute('class', '');
         }
 
@@ -137,19 +138,51 @@ export default function createWebSocketPlugin (socket) {
 
 
         /**
-         * Serveur : "un utilisateur reçoit un message d'erreur suite à sa dernière requete
+         * Serveur : vous recevez un message d'erreur suite à sa dernière requete
          */
         socket.on('G_ERROR', ({err}) => {
             console.error(err);
         });
 
 		/**
-		 * Serveur : "un utilisateur reçoit le niveau dans lequel il doit évoluer
+		 * Serveur : vous recevez les données du niveau dans lequel vous devez évoluer
 		 */
-		socket.on('G_ENTER_LEVEL', ({level, doors}) => {
+		socket.on('G_LOAD_LEVEL', ({level, doors}) => {
 			game.loadLevel(level);
 		});
 
+		/**
+		 * Serveur : vous devez créer ce ou ces mobiles.
+		 */
+		socket.on('G_CREATE_MOBILE', ({mob}) => {
+			if (Array.isArray(mob)) {
+				mob.forEach(m => game.spawnMobile(m));
+			} else {
+				game.spawnMobile(mob);
+			}
+		});
+
+		/**
+		 * Serveur : vous devez mettre à jour ce ou ces mobiles.
+		 */
+		socket.on('G_UPDATE_MOBILE', ({mob}) => {
+			if (Array.isArray(mob)) {
+				mob.forEach(m => game.updateMobile(m));
+			} else {
+				game.updateMobile(mob);
+			}
+		});
+
+		/**
+		 * Serveur : vous devez détruire ce ou ces mobiles.
+		 */
+		socket.on('G_DESTROY_MOBILE', ({mob}) => {
+			if (Array.isArray(mob)) {
+				mob.forEach(m => game.destroyMobile(m));
+			} else {
+				game.destroyMobile(mob);
+			}
+		});
 
 
 
@@ -265,13 +298,22 @@ export default function createWebSocketPlugin (socket) {
 		}
 
         /**
+		 * phase 0:
 		 * Lorsque le client a fini la phase d'identification et qu'il attend
 		 * des données du serveur il utilise ce message pour indiquer qu'il est près à les
 		 * recevoir.
+		 *
+		 * phase 1:
+		 * Lorsque le client a fini de charger le niveau et qu'il attend les données concernant les élément dynamiques
+		 * comme les mobiles
+		 *
+		 * phase 2:
+		 * Lorsque le client a fini de recevoir les données des entité dynamique et souhaite prendre le controle d'un mobile
          */
-		function send_g_ready() {
-            socket.emit('G_READY', {});
+		function send_g_ready(phase) {
+            socket.emit('G_READY', {phase});
 		}
+
 
 
 
@@ -300,7 +342,7 @@ export default function createWebSocketPlugin (socket) {
                         await store.dispatch('ui/hideSection', {id: 'login'});
                         await store.dispatch('ui/hide');
                         gameInit();
-                        send_g_ready();
+                        send_g_ready(0);
                     } else {
                         // on a eu un soucis d'identification
                     }
