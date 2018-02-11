@@ -4,6 +4,10 @@ const asyncfs = require('../../asyncfs');
 
 class DataManager {
 
+	constructor() {
+		this._resources = {};
+	}
+
     /**
 	 * Chargement d'un JSON
      * @param sDir
@@ -24,6 +28,21 @@ class DataManager {
 
 	async loadLevel(sLevel) {
 		return await this.loadJSON('levels', sLevel);
+	}
+
+    async loadResources(type) {
+        return await this.loadJSON(type, type);
+    }
+
+    async loadResource(type, id) {
+		if (!(type in this._resources)) {
+			this._resources[type] = await this.loadResources(type);
+        }
+        if (id in this._resources[type]) {
+			return this._resources[type][id];
+		} else {
+			throw new Error('resource not found (type ' + type + ' id ' + id + ')');
+		}
 	}
 }
 

@@ -17,6 +17,15 @@ class ServiceLogin extends ServiceAbstract {
         });
     }
 
+    error(client, e) {
+        let msg = e.toString();
+        console.err(e.stack);
+        logger.err(msg);
+        this._emit(client.id, 'G_ERROR', {
+            err: msg
+        });
+    }
+
 	/**
      * appelée automatiquement lorsqu'un client se connecte au service
 	 * @param client
@@ -24,6 +33,13 @@ class ServiceLogin extends ServiceAbstract {
 	connectClient(client) {
         super.connectClient(client);
         let socket = client.socket;
+
+        /**
+         * Le client à besoin d'une resources (blueprint)
+         */
+        socket.on('G_LOAD_BP', async({id}) => {
+
+        });
 
         /**
          * Le client indique qu' "il est prêt"
@@ -51,9 +67,7 @@ class ServiceLogin extends ServiceAbstract {
                         break;
                 }
             } catch (e) {
-                this._emit(client.id, 'G_ERROR', {
-                    err: 'G_READY ' + e.toString()
-                });
+                this.error(client, e);
             }
         });
     }

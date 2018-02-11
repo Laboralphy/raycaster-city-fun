@@ -74,23 +74,17 @@ O2.extendClass('MW.PlayerThinker', O876_Raycaster.MouseKeyboardThinker, {
 
 	thinkAlive: function() {
 		var m = this.oMobile;
+		// lire l'état du clavier si le mobile est actif
 		if (this.bActive) {
 			this.updateKeys();
 		}
+		// calculer un mask de déplacement
 		var nMask =
 			(this.aCommands.forward || this.aCommands.forward_w ? 8 : 0) |
 			(this.aCommands.backward ? 4 : 0) |
 			(this.aCommands.right || this.aCommands.right_e ? 2 : 0) |
 			(this.aCommands.left || this.aCommands.left_a ? 1 : 0);
-		if (nMask) {
-			if (this.isHeld()) {
-				this.wtfHeld();
-				nMask = 0;
-			} else if (this.isRooted()) {
-				this.wtfRoot();
-				nMask = 0;
-			}
-		}
+		// initialement : pas de vitesse calculée
 		m.fMovingSpeed = 0;
 		switch (nMask) {
 			case 1: // left
@@ -147,6 +141,7 @@ O2.extendClass('MW.PlayerThinker', O876_Raycaster.MouseKeyboardThinker, {
 			if (oTarget.getType() !== RC.OBJECT_TYPE_MISSILE) {
 				this.oMobile.rollbackXY();
 				// augmenter la distance entre les mobiles qui collisionnent
+				/*
 				var me = this.oMobile;
 				var mo = this.oMobile.oMobileCollision;
 				var xme = me.x;
@@ -161,6 +156,7 @@ O2.extendClass('MW.PlayerThinker', O876_Raycaster.MouseKeyboardThinker, {
 				me.move(a, 1);
 				me.xSpeed += sdx;
 				me.ySpeed += sdy;
+				*/
 			}
 		}
 	},
@@ -168,16 +164,11 @@ O2.extendClass('MW.PlayerThinker', O876_Raycaster.MouseKeyboardThinker, {
 
 
 	button0Down: function() {
-		if (this.isFree()) {
-			this.oGame.gm_attack(0);
-		} else {
-			this.wtfHeld();
-		}
-		this.nChargeStartTime = this.oGame.getTime();
+	    // start charge
 	},
 
 	button0Up: function() {
-		// attack
+		// attack release charge
 	},
 
 	button0Command: function() {
@@ -189,12 +180,15 @@ O2.extendClass('MW.PlayerThinker', O876_Raycaster.MouseKeyboardThinker, {
 	},
 
 	useDown: function() {
+	    // open door
 	},
 
 	wheelUp: function() {
+	    // change weapon
 	},
 
 	wheelDown: function() {
+	    // change weapon
 	},
 
 

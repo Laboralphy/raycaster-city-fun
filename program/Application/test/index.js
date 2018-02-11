@@ -331,7 +331,7 @@ describe('model', function() {
 				expect(v.wcf.y).toBe(0);
 			});
 
-			it ('should collide with west wall while going west', function() {
+			it ('should not move since several eye are collisionned', function() {
 				let v = Mobile.computeWallCollisions(
 					new Vector(57.5, 53),
 					new Vector(-8, 0),
@@ -341,11 +341,11 @@ describe('model', function() {
 					collisionWest
 				);
 
-				expect(v.pos.x).toBe(54);
+				expect(v.pos.x).toBe(57.5);
 				expect(v.pos.y).toBe(53);
-				expect(v.speed.x).toBe(-3.5);
+				expect(v.speed.x).toBe(0);
 				expect(v.speed.y).toBe(0);
-				expect(v.wcf.x).toBe(-1);
+				expect(v.wcf.x).toBe(0);
 				expect(v.wcf.y).toBe(0);
 			});
         });

@@ -156,9 +156,9 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		socket.on('G_CREATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.spawnMobile(m));
+				mob.forEach(m => game.mspawn(m));
 			} else {
-				game.spawnMobile(mob);
+				game.mspawn(mob);
 			}
 		});
 
@@ -167,9 +167,9 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		socket.on('G_UPDATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.updateMobile(m));
+				mob.forEach(m => game.mupdate(m));
 			} else {
-				game.updateMobile(mob);
+				game.mupdate(mob);
 			}
 		});
 
@@ -178,9 +178,9 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		socket.on('G_DESTROY_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.destroyMobile(m));
+				mob.forEach(m => game.mdestroy(m));
 			} else {
-				game.destroyMobile(mob);
+				game.mdestroy(mob);
 			}
 		});
 
@@ -202,7 +202,13 @@ export default function createWebSocketPlugin (socket) {
 		 * Envoi au serveur des données d'identification,
 		 * renvoie par Promise un identifiant client si l'identification a réussi, sinon, renvoie null.
 		 * @param name {string} nom
-		 * @param pass {string} mot de passe
+		 * @param pass {string}		if (this.isFree()) {
+			this.oGame.gm_attack(0);
+		} else {
+			this.wtfHeld();
+		}
+		this.nChargeStartTime = this.oGame.getTime();
+ mot de passe
 		 */
 		async function req_login(name, pass) {
 			return new Promise(

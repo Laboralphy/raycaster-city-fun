@@ -28,6 +28,8 @@ module.exports = class Mobile {
 		this._dummy = null;
 		// aspect
 		this.blueprint = '';
+		// flags
+		this.flagCrash = false; // ne glisse pas sur les mur ; explose.
 	}
 
 	/**
@@ -40,6 +42,11 @@ module.exports = class Mobile {
 			this._dummy = null;
 			this._collider = null;
 		}
+	}
+
+	hasHitWall() {
+		let wc = this.wallCollisions;
+		return wc.x !== 0 || wc.y !== 0;
 	}
 
 	/**
@@ -106,31 +113,6 @@ module.exports = class Mobile {
 	 * @param pSolidFunction {function} fonction permettant de déterminer si un point est dans une zone collisionnable
 	 */
 	static computeWallCollisions(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
-		let nDist = vSpeed.distance();
-		if (nDist > nSize) {
-			let vSubSpeed = vSpeed.normalize().mul(nSize);
-			let nModDist = nDist % nSize;
-			let r, pos, speed;
-			if (nModDist) {
-				let vModSpeed = vSpeed.normalize().mul(nModDist);
-				r = Mobile.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
-				pos = r.pos;
-				speed = r.speed;
-			} else {
-				pos = vPos;
-				speed = Vector.zero();
-			}
-			for (let iIter = 0; iIter < nDist; iIter += nSize) {
-				r = Mobile.computeWallCollisions(pos, vSubSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
-				pos = r.pos;
-				speed = speed.add(r.speed);
-			}
-			return {
-				pos,
-				speed,
-				wcf: r.wcf
-			};
-		}
 		// par defaut pas de colision détectée
 		let oWallCollision = {x: 0, y: 0};
 		let dx = vSpeed.x;
@@ -159,16 +141,18 @@ module.exports = class Mobile {
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
+					oWallCollision.y = yci || oWallCollision.y;
 				}
-				oWallCollision.x = xci;
+				oWallCollision.x = xci || oWallCollision.x;
 				bCorrection = true;
 			}
 			if (yClip) {
 				dy = 0;
 				if (bCrashWall) {
 					dx = 0;
+                    oWallCollision.x = xci || oWallCollision.x;
 				}
-				oWallCollision.y = yci;
+				oWallCollision.y = yci || oWallCollision.y;
 				bCorrection = true;
 			}
 		}
@@ -234,16 +218,43 @@ module.exports = class Mobile {
 		let oLocation = this.location;
         let vPos = oLocation.position();
         let area = oLocation.area();
-        this.computeWallCollisions(
+
+        let nDist = MathTools.distance(vSpeed.x, vSpeed.y);
+        let nSize = this._size;
+        let nPlaneSpacing = RC_CONST.plane_spacing;
+        let bCrashWall = this.flagCrash;
+        let r;
+        let pSolidFunction = (x, y) => area.isSolidPoint(x, y);
+        if (nDist > nSize) {
+            let vSubSpeed = vSpeed.mul(nSize);
+            let nModDist = nDist % nSize;
+            if (nModDist) {
+                let vModSpeed = vSpeed.mul(nModDist);
+                this.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
+            }
+            for (let iIter = 0; iIter < nDist; iIter += nSize) {
+                this.move(vSubSpeed);
+                if (bCrashWall && this.hasHitWall()) {
+                    break;
+                }
+            }
+            return;
+        }
+        r = this.computeWallCollisions(
             vPos,
             vSpeed,
-            this._size,
-            RC_CONST.plane_spacing,
+            nSize,
+            nPlaneSpacing,
             this.wallCollisions,
-            false,
+            bCrashWall,
             (x, y) => area.isSolidPoint(x, y)
         );
 		this.speed = vSpeed;
-        this.location.position(vPos.add(vSpeed));
+		this.updatePosition(vPos.add(vSpeed));
+        this.wallCollisions = r.wcf;
+	}
+
+	updatePosition(vPos) {
+        this.location.position(vPos);
 	}
 };
