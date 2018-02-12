@@ -1,11 +1,10 @@
 export default {
 	game: {
-		namespace: 'CITYX',
+		namespace: 'CITY',
 		interval: 40,
 		doomLoop: 'raf',
 		fullScreen: false,
-		fpsControl: true,
-		controlThinker: null,
+		controlThinker: 'CITY.Player',
 		mute: false
 	},
 	raycaster: {
