@@ -19,7 +19,7 @@ class ServiceLogin extends ServiceAbstract {
 
     error(client, e) {
         let msg = e.toString();
-        console.err(e.stack);
+        console.error(e.stack);
         logger.err(msg);
         this._emit(client.id, 'G_ERROR', {
             err: msg

@@ -2,9 +2,11 @@ export default {
 	game: {
 		namespace: 'CITY',
 		interval: 40,
-		doomLoop: 'raf',
 		fullScreen: false,
-		controlThinker: 'CITY.Player',
+		fpsControl: true,
+		devices: {
+			keyboard: 'O876_Raycaster.ES6KeyboardDevice'
+		},
 		mute: false
 	},
 	raycaster: {

@@ -1,4 +1,4 @@
-
+import PlayerThinker from './thinkers/PlayerThinker';
 
 
 class Game extends O876_Raycaster.GameAbstract {
@@ -53,8 +53,12 @@ class Game extends O876_Raycaster.GameAbstract {
 
 
 	gameEventEnter(oEvent) {
-
-	}
+		// player thinker configuration
+		let player = this.oRaycaster.oCamera;
+		let ct = new PlayerThinker();
+		this.oRaycaster.oCamera.setThinker(ct.game(this).mobile(player));
+        ct.on('use.down', () => this.activateWall(player));
+    }
 
 
     /**

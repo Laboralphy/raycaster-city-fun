@@ -5051,6 +5051,120 @@ O2.createClass('O876_Raycaster.Blueprint', {
 
 O2.mixin(O876_Raycaster.Blueprint, O876.Mixin.Data);
 
+/** Entrée sortie clavier - utilise les code ES6
+ * O876 Raycaster project
+ * @date 2018-02-12
+ * @author Raphaël Marandet 
+ * Memorise les touches clavier enfoncées
+ */
+O2.createClass('O876_Raycaster.ES6KeyboardDevice', {
+	oKeys: null,	// Index inversée Code->Action
+	aKeyBuffer: null,
+	nKeyBufferSize: 16,
+	bUseBuffer: true,
+	aAliases: null,
+	oHandlers: null,
+
+	__construct: function() {
+		this.oKeys = {};
+		this.oHandlers = {};
+		this.aAliases = {};
+		// Gros tableau pour capter plus rapidement les touches...
+		// peu élégant et peu économe mais efficace.
+		this.aKeyBuffer = [];
+	},
+
+    getKey: function(sCode) {
+		if (sCode in this.oKeys) {
+            return this.oKeys[sCode];
+		} else {
+			return 0;
+		}
+    },
+
+    setAliases: function(a) {
+		this.aAliases = a;
+	},
+
+	keyAction: function(sCode, nVal) {
+        this.oKeys[sCode] = nVal;
+	},
+
+	keyBufferPush: function(nKey) {
+		if (this.bUseBuffer && nKey && this.aKeyBuffer.length < this.nKeyBufferSize) {
+			this.aKeyBuffer.push(nKey);
+		}
+	},
+
+	eventKeyUp: function(oEvent) {
+		var sCode = oEvent.key;
+		if (sCode in this.aAliases) {
+			sCode = this.aAliases[sCode];
+		}
+		this.keyBufferPush('-' + sCode);
+		this.keyAction(sCode, 2);
+		return false;
+	},
+
+	eventKeyDown: function(oEvent) {
+		var sCode = oEvent.key;
+		if (sCode in this.aAliases) {
+			sCode = this.aAliases[sCode];
+		}
+		this.keyBufferPush(sCode);
+		this.keyAction(sCode, 1);
+		return false;
+	},
+
+	/** 
+	 * renvoie le code clavier de la première touche enfoncée du buffer FIFO
+	 * renvoie 0 si aucune touche n'a été enfoncée
+	 * @return int
+	 */
+	inputKey: function() {
+		if (this.aKeyBuffer.length) {
+			return this.aKeyBuffer.shift();
+		} else {
+			return 0;
+		}
+	},
+
+	/**
+	 * Will add event listener and keep track of it for future remove
+	 * @param sEvent DOM Event name
+	 * @param pHandler event handler function
+	 */
+	plugHandler: function(sEvent, pHandler) {
+		var p = pHandler.bind(this);
+		this.oHandlers[sEvent] = p;
+		document.addEventListener(sEvent, p, false);
+	},
+
+	/**
+	 * Will remove previously added event handler
+	 * Will do nothing if handler has not been previously added
+	 * @param sEvent DOM event name
+	 */
+	unplugHandler: function(sEvent) {
+		if (sEvent in this.oHandlers) {
+			var p = this.oHandlers[sEvent];
+			document.removeEventListener(sEvent, p);
+			delete this.oHandlers[sEvent];
+		}
+	},
+
+	plugHandlers: function() {
+		this.plugHandler('keyup', this.eventKeyUp);
+		this.plugHandler('keydown', this.eventKeyDown);
+	},
+	
+	unplugHandlers: function() {
+		this.unplugHandler('keyup');
+		this.unplugHandler('keydown');
+	}
+});
+
+
 /** Entrée sortie clavier
  * O876 Raycaster project
  * @date 2012-01-01
@@ -5075,6 +5189,10 @@ O2.createClass('O876_Raycaster.KeyboardDevice', {
 			this.aKeys.push(0);	 
 		}
 		this.aKeyBuffer = [];
+	},
+
+	getKey: function(n) {
+		return this.aKeys[n];
 	},
 	
 	setAliases: function(a) {
@@ -7184,7 +7302,6 @@ O2.createClass('O876_Raycaster.Mobile', {
         var vSpeed = {x: dx, y: dy};
         var rc = this.oRaycaster;
 
-
 		var nDist = MathTools.distance(vSpeed.x, vSpeed.y);
 		var nSize = this.nSize;
 		var nPlaneSpacing = rc.nPlaneSpacing;
@@ -7194,7 +7311,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 		if (nDist > nSize) {
 			var vSubSpeed = this._vecScale(vSpeed, nSize);
 			var nModDist = nDist % nSize;
-			var pos, speed = {x: 0, y: 0};
 			if (nModDist) {
 				var vModSpeed = this._vecScale(vSpeed, nModDist);
 				this.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
@@ -10753,7 +10869,6 @@ O2.createClass('O876_Raycaster.Transistate', {
 	oInterval : null,
 	oRafInterval: null,
 	pDoomloop : null,
-	sDoomloopType : 'interval',
 	sDefaultDoomloopType: 'interval',
 	bPause : false,
 	nTimeModulo : 0,
@@ -10764,8 +10879,7 @@ O2.createClass('O876_Raycaster.Transistate', {
 	/** Definie la procédure à lancer à chaque doomloop
 	 * @param sProc nom de la méthode de l'objet à lancer
 	 */
-	setDoomloop : function(sProc, sType) {
-		this.sDoomloopType = sType;
+	setDoomloop : function(sProc) {
 		if (!(sProc in this)) {
 			throw new Error('"' + sProc + '" is not a valid timer proc');
 		}
@@ -10823,7 +10937,7 @@ O2.createClass('O876_Raycaster.Transistate', {
 	 */
 	resume : function() {
 		if (this.bPause) {
-			this.setDoomloop(this.getDoomLoop(), this.sDoomloopType);
+			this.setDoomloop(this.getDoomLoop());
 			this.bPause = false;
 		}
 	}
@@ -12339,8 +12453,26 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	 */
 	getKeyboardDevice : function() {
 		if (this.oKbdDevice === null) {
-			this.oKbdDevice = new O876_Raycaster.KeyboardDevice();
-			this.oKbdDevice.plugHandlers();
+			var kbd = null;
+			var cfgGame = this._oConfig.game;
+			if ('devices' in cfgGame) {
+				var cfgDev = cfgGame.devices;
+				if (typeof cfgDev !== 'object') {
+					throw new Error('config.game.devices must be an object');
+				}
+				if (!cfgDev) {
+                    throw new Error('config.game.devices must not be null');
+				}
+				if ('keyboard' in cfgDev) {
+                    var pClass = new O2.loadObject(cfgDev.keyboard);
+                    kbd = new pClass();
+				}
+			}
+			if (!kbd) {
+				kbd = new O876_Raycaster.KeyboardDevice();
+			}
+            kbd.plugHandlers();
+			this.oKbdDevice = kbd;
 		}
 		return this.oKbdDevice;
 	},
@@ -13488,7 +13620,7 @@ O2.extendClass('O876_Raycaster.FirstPersonThinker', O876_Raycaster.Thinker,
             aKeyData = kb[nKey];
             sEvent = aKeyData[0];
             sProc = '';
-            switch (oKbd.aKeys[nKey]) {
+            switch (oKbd.getKey(nKey)) {
                 case 1: // down
                     if (aKeyData[1] === 0) {
                         sProc = sEvent + '.down';
@@ -13646,7 +13778,7 @@ O2.extendClass('O876_Raycaster.KeyboardThinker', O876_Raycaster.Thinker, {
 
 	updateKeys : function() {
 		var sKey = '', nKey, sProc, pProc, aButton;
-		var aKeys = this.aKeys;
+		var aKeys = this.oKeys;
 		var aCmds = this.aCommands;
 		var oKbd = this.oGame.getKeyboardDevice();
 		var aKeyData;
@@ -13658,7 +13790,7 @@ O2.extendClass('O876_Raycaster.KeyboardThinker', O876_Raycaster.Thinker, {
 			aKeyData = kb[nKey];
 			sEvent = aKeyData[0];
 			sProc = '';
-			switch (oKbd.aKeys[nKey]) {
+			switch (oKbd.getKey(nKey)) {
 				case 1: // down
 					if (aKeyData[1] === 0) {
 						sProc = sEvent + '.down';

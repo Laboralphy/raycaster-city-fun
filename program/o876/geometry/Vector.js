@@ -74,7 +74,7 @@ module.exports = class Vector {
 		if (f instanceof Vector) {
 			return this.x * f.x + this.y * f.y;
 		} else if (typeof f === 'number') {
-			return new Vector(this.x * f, this.y * f);S
+			return new Vector(this.x * f, this.y * f);
 		} else {
 			throw new Error('vector product accepts only vectors or number as parameter');
 		}
