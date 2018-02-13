@@ -10,8 +10,8 @@ class FPSThinker extends AbstractThinker {
         super();
         this.emitter = new o876.Emitter();
         this.oCommands = null;
-        this.aKeyBindings = null; // binds keycodes to symbolic events
-        this.aKeyBoundList = null; // keeps a list of bound key
+        this.aKeyBindings = null; // attacher les codes de touches à des évènements symbolique
+        this.aKeyBoundList = null; // liste simple des touches qui ont été bindées, pour une indexation rapide
         this._mouseSensitivity = 166;
         this._bFrozen = false;
         this.defineKeys({
@@ -23,7 +23,7 @@ class FPSThinker extends AbstractThinker {
         });
 
         MAIN.pointerlock.on('mousemove', event => this.readMouseMovement(event));
-        this.setThinker('Idle');
+        this.setThinker('Active');
     }
 
     /**
@@ -52,6 +52,7 @@ class FPSThinker extends AbstractThinker {
         }
         this.aKeyBindings[sKey] = [sEvent, 0];
         this.oCommands[sEvent] = false;
+        // indexer les touches
         if (this.aKeyBoundList.indexOf(sKey) < 0) {
             this.aKeyBoundList.push(sKey);
         }
@@ -92,7 +93,7 @@ class FPSThinker extends AbstractThinker {
         let nKey, sProc, aButton;
         let oCmds = this.oCommands;
         let oKbd = this._game.getKeyboardDevice();
-        let aKeyData;
+        let aKeyData; // [0] : code touche, [1] : status touche
         let sEvent;
         let kbl = this.aKeyBoundList;
         let kb = this.aKeyBindings;
@@ -195,7 +196,7 @@ class FPSThinker extends AbstractThinker {
     /**
      * Procedure de pensée
      */
-    thinkIdle() {
+    thinkActive() {
         if (!this._bFrozen) {
             this.updateKeys();
         }
