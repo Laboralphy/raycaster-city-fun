@@ -70,6 +70,16 @@ class ServiceLogin extends ServiceAbstract {
                 this.error(client, e);
             }
         });
+
+        socket.on('G_UPDATE_PLAYER', ({a, x, y, ma, ms}) => {
+			// appliquer la modification du mobile
+			try {
+				let id = client.id;
+				this._gs.mup
+			} catch (e) {
+				this.error(client, e);
+			}
+		});
     }
 }
 

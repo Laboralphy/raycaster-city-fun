@@ -43,6 +43,7 @@ export default function createWebSocketPlugin (socket) {
 			game.on('enter', async event => {
             	send_g_ready(1);
 			});
+			game.on('player-update', send_g_update_player);
 
             document.body.setAttribute('class', 'playing');
         }
@@ -318,6 +319,18 @@ export default function createWebSocketPlugin (socket) {
          */
 		function send_g_ready(phase) {
             socket.emit('G_READY', {phase});
+		}
+
+		/**
+		 * transmet le mouvement du joueur au serveur
+		 * @param data.a {number} angle visé par le mobile (direction dans laquelle il "regarde")
+		 * @param data.x {number} position x du mobile
+		 * @param data.y {number} position y du mobile
+		 * @param data.ma {number} angle adopté par le mouvement du mobile
+		 * @param data.ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
+		 */
+		function send_g_update_player(data) {
+			socket.emit('G_UPDATE_PLAYER', data);
 		}
 
 

@@ -77,7 +77,17 @@ class Game extends O876_Raycaster.GameAbstract {
     }
 
 
-
+	/**
+	 * Transmet au serveur les information de déplacement du mobile controlé par le joueur
+	 * @param a {number} angle visé par le mobile (direction dans laquelle il "regarde")
+	 * @param x {number} position x du mobile
+	 * @param y {number} position y du mobile
+	 * @param ma {number} angle adopté par le mouvement du mobile
+	 * @param ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
+	 */
+	updatePlayerMobile(a, x, y, ma, ms) {
+		this.trigger('update.player', {a, x, y, ma, ms});
+	}
 
 	/**
 	 * Renvoi l'instance du joueur local

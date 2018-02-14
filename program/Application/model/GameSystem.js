@@ -6,6 +6,9 @@ const Emitter = require('events');
 const DataManager = require('./DataManager');
 const asyncfs = require('../../asyncfs');
 const logger = require('../../Logger');
+const o876 = require('../../o876');
+const Vector = o876.geometry.Vector;
+
 const STRINGS = require('../consts/strings');
 const PLAYER_STATUS = require('../consts/playerStatus');
 
@@ -315,6 +318,37 @@ class GameSystem {
         // this.transmit(id, 'G_CREATE_MOBILES', aPackets);
         // transmettre aux clients la position du nouveau
     }
+
+	/**
+	 * Le mobile d'un client a mis à jours sont mouvement
+	 * @param a
+	 * @param x
+	 * @param y
+	 * @param ma
+	 * @param ms
+	 */
+    clientMobileUpdate(client, {a, x, y, ma, ms}) {
+		let id = client.id;
+		let mob = this._mobiles[id];
+		let pos = mob.location.position();
+		// mettre à jour l'angle
+		pos.heading(a);
+		// mettre à jour la position par la vitesse
+		mob.move(new Vector(ms.x, ms.y));
+		// déterminer la nouvelle position
+		let xNew = pos.x;
+		let yNew = pos.y;
+		let xSpeed = mob.speed.x;
+		let ySpeed = mob.speed.y;
+		// il faut transmettre cette nouvelle position à tous les voisin du mobile
+		let oUpdatePacket = {
+			a,
+			x: xNew,
+			y: yNew,
+			sx, xSpeed,
+			sy: ySpeed
+		}
+	}
 }
 
 module.exports = GameSystem;
