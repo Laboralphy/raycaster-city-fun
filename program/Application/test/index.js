@@ -802,7 +802,7 @@ describe('model', function() {
                 loc.position().x = 100;
                 loc.position().y = 120;
                 loc.heading(1);
-                loc.area(area);
+                loc.area(area.id);
                 expect(loc.position().x).toBe(100);
                 expect(loc.position().y).toBe(120);
                 expect(loc.heading()).toBe(1);

@@ -1,6 +1,9 @@
 /**
  * Permet d'associer un client à une zone de données persistante
  */
+
+const STATUS = require('../consts/status');
+
 class Client {
 	constructor() {
 		this.reset();
@@ -14,6 +17,7 @@ class Client {
 		this.idStorage = 0;
 		this.name = '';
 		this.socket = null;
+		this.status = STATUS.UNIDENTIFIED;
 	}
 
 	/**

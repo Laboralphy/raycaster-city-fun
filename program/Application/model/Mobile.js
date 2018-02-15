@@ -257,4 +257,16 @@ module.exports = class Mobile {
 	updatePosition(vPos) {
         this.location.position(vPos);
 	}
+
+	/**
+	 * utilise un object de prediction de mouvement pour effectuer les mouvements
+	 * @param cp
+	 */
+	runPrediction(cp) {
+		let aPackets = cp.packets();
+		let vSpeed = new Vector();
+		aPackets.forEach(({t, a, x, y, ma, ms, v}) => {
+			vSpeed.set(x, y);
+		});
+	}
 };

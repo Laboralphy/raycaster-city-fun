@@ -1,7 +1,7 @@
 import STRINGS from "../data/strings";
 import Game from "../game";
 import CONFIG from "../game/config";
-
+import STATUS from "../../../../program/Application/consts/status";
 
 export default function createWebSocketPlugin (socket) {
 	return store => {
@@ -9,6 +9,8 @@ export default function createWebSocketPlugin (socket) {
 		let userCache = {};
 
 		let game;
+		let expectedPhase = 0;
+		let receivedPhase = 0;
 
 		/**
 		 * Démarrage du jeu...
@@ -41,9 +43,9 @@ export default function createWebSocketPlugin (socket) {
 			 * Evènement : le client a fini de construire le niveau
 			 */
 			game.on('enter', async event => {
-            	send_g_ready(1);
+            	send_g_ready(STATUS.ENTERING_LEVEL);
 			});
-			game.on('player-update', send_g_update_player);
+			game.on('update.player', req_g_update_player);
 
             document.body.setAttribute('class', 'playing');
         }
@@ -278,8 +280,22 @@ export default function createWebSocketPlugin (socket) {
 			);
 		}
 
-
-
+		/**
+		 * transmet le mouvement du joueur au serveur
+		 * @param data.a {number} angle visé par le mobile (direction dans laquelle il "regarde")
+		 * @param data.x {number} position x du mobile
+		 * @param data.y {number} position y du mobile
+		 * @param data.ma {number} angle adopté par le mouvement du mobile
+		 * @param data.ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
+		 * @param data.c {number} commandes de tir, d'activation etc...
+		 */
+		function req_g_update_player(packet) {
+			return new Promise(
+				resolve => {
+					socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data));
+				}
+			);
+		}
 
 
 
@@ -321,17 +337,6 @@ export default function createWebSocketPlugin (socket) {
             socket.emit('G_READY', {phase});
 		}
 
-		/**
-		 * transmet le mouvement du joueur au serveur
-		 * @param data.a {number} angle visé par le mobile (direction dans laquelle il "regarde")
-		 * @param data.x {number} position x du mobile
-		 * @param data.y {number} position y du mobile
-		 * @param data.ma {number} angle adopté par le mouvement du mobile
-		 * @param data.ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
-		 */
-		function send_g_update_player(data) {
-			socket.emit('G_UPDATE_PLAYER', data);
-		}
 
 
 
@@ -361,7 +366,7 @@ export default function createWebSocketPlugin (socket) {
                         await store.dispatch('ui/hideSection', {id: 'login'});
                         await store.dispatch('ui/hide');
                         gameInit();
-                        send_g_ready(0);
+                        send_g_ready(STATUS.GAME_INITIALIZED);
                     } else {
                         // on a eu un soucis d'identification
                     }

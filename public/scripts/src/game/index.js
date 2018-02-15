@@ -1,11 +1,12 @@
 import PlayerThinker from './thinkers/PlayerThinker';
-
+import ClientPrediction from './ClientPrediction';
 
 class Game extends O876_Raycaster.GameAbstract {
 
 	constructor(config) {
 		super(config);
 		this.__construct(config);
+		this._clientPrediction = new ClientPrediction();
 		this._mobiles = {};
 		this.init();
 	}
@@ -79,14 +80,18 @@ class Game extends O876_Raycaster.GameAbstract {
 
 	/**
 	 * Transmet au serveur les information de déplacement du mobile controlé par le joueur
+	 * Mise en tampon
 	 * @param a {number} angle visé par le mobile (direction dans laquelle il "regarde")
 	 * @param x {number} position x du mobile
 	 * @param y {number} position y du mobile
-	 * @param ma {number} angle adopté par le mouvement du mobile
-	 * @param ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
+	 * @param sx {number} angle adopté par le mouvement du mobile
+	 * @param sy {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
+	 * @param c {number} commandes
 	 */
-	updatePlayerMobile(a, x, y, ma, ms) {
-		this.trigger('update.player', {a, x, y, ma, ms});
+	updatePlayerMobile(a, x, y, sx, sy, c) {
+		let packet = {a, x, y, sx, sy, c};
+		this._clientPrediction.pushMovement(packet);
+		this.trigger('update.player', this._clientPrediction.getUnsentPackets());
 	}
 
 	/**

@@ -1,19 +1,25 @@
 const ServiceAbstract = require('./Abstract');
 const logger = require('../../Logger');
 const STRINGS = require('../consts/strings');
+const STATUS = require('../consts/status');
 const GameSystem = require('../model/GameSystem');
 
-class ServiceLogin extends ServiceAbstract {
+class ServiceGame extends ServiceAbstract {
     constructor() {
         super();
         let gs = new GameSystem();
+		this._gs = gs;
+
+		// Le game system va parfois transmettre de l'information
+		// ces info sont transférées au réseau
         gs.emitter.on('transmit', (id, event, data) => {
             logger.log('transmit', event, 'to', id);
             this._emit(id, event, data);
         });
-        this._gs = gs;
-        this.events.on('service-login', ({client}) => {
-            this._gs.clientIdentified(client);
+
+		// A l'écoute du service login. Dès qu'un client s'identifie, on passe l'identifiant au game systeme
+        this.events.on('service-login', async ({client}) => {
+            await this._gs.clientIdentified(client);
         });
     }
 
@@ -26,6 +32,13 @@ class ServiceLogin extends ServiceAbstract {
         });
     }
 
+	disconnectClient(client) {
+    	super.disconnectClient(client);
+    	// supprimer l'entité du client
+		let id = client.id;
+		this._gs.clientHasLeft(client);
+	}
+
 	/**
      * appelée automatiquement lorsqu'un client se connecte au service
 	 * @param client
@@ -37,7 +50,7 @@ class ServiceLogin extends ServiceAbstract {
         /**
          * Le client à besoin d'une resources (blueprint)
          */
-        socket.on('G_LOAD_BP', async({id}) => {
+        socket.on('G_LOAD_BP', async ({id}) => {
 
         });
 
@@ -50,7 +63,7 @@ class ServiceLogin extends ServiceAbstract {
             try {
                 let data;
                 switch (phase) {
-                    case 0: // le client est pret à recevoir les données d'un niveau
+                    case STATUS.GAME_INITIALIZED: // le client est pret à recevoir les données d'un niveau
 						data = await this._gs.clientWantsToLoadLevel(client);
 						this._emit(client.id, 'G_LOAD_LEVEL', {
 							level: data.area.data(),
@@ -58,7 +71,7 @@ class ServiceLogin extends ServiceAbstract {
 						});
 						break;
 
-                    case 1: // Le client a chargé le niveau, il est prèt à recevoir les
+                    case STATUS.ENTERING_LEVEL: // Le client a chargé le niveau, il est prèt à recevoir les
 						data = this._gs.clientHasLoadedLevel(client);
 						// transmettre au client la liste de tous les mobiles
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
@@ -71,11 +84,17 @@ class ServiceLogin extends ServiceAbstract {
             }
         });
 
-        socket.on('G_UPDATE_PLAYER', ({a, x, y, ma, ms}) => {
+        socket.on('REQ_G_UPDATE_PLAYER', (packets, ack) => {
 			// appliquer la modification du mobile
 			try {
 				let id = client.id;
-				this._gs.mup
+				packets.forEach(({t, a, x, y, sx, sy, id, c}) => {
+					console.log(t, a, x, y, sx, sy, id, c);
+				});
+				// on renvoie un packet contenant les dernière données validées/corrigées
+				ack({
+
+				});
 			} catch (e) {
 				this.error(client, e);
 			}
@@ -83,4 +102,4 @@ class ServiceLogin extends ServiceAbstract {
     }
 }
 
-module.exports = ServiceLogin;
+module.exports = ServiceGame;

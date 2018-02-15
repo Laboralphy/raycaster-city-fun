@@ -2,30 +2,20 @@
  * Thinker du personnage controlé par le joueur
  */
 import FPSThinker from './FPSThinker';
-
-const MAX_UPDATE_TIME = 500;
+import * as COMMANDS from '../../../../../program/Application/consts/commands'
 
 class PlayerThinker extends FPSThinker {
-    constructor() {
-        super();
-        this.on('forward.command', () => {
-            this._mobile.moveForward();
-            this.checkCollision();
-        });
-        this.on('left.command', () => {
-            this._mobile.strafeLeft();
-            this.checkCollision();
-        });
-        this.on('right.command', () => {
-            this._mobile.strafeRight();
-            this.checkCollision();
-        });
-        this.on('backward.command', () => {
-            this._mobile.moveBackward();
-            this.checkCollision();
-        });
-    }
 
+	constructor() {
+		super();
+		this.defineKeys({
+			df : ['z', 'w'],
+			db : 's',
+			dl : ['q', 'a'],
+			dr : 'd',
+			cu : ' '
+		});
+	}
 
     checkCollision() {
         let m = this._mobile;
@@ -37,46 +27,44 @@ class PlayerThinker extends FPSThinker {
         }
     }
 
+	$active() {
+		super.$active();
+		let n = 0;
+		let mob = this.mobile();
+		this._aCurrentEvents.forEach(c => {
+			switch (c) {
+				case 'df.c':
+					mob.moveForward();
+					break;
 
-	/**
-	 * Retransmet les mouvements au Game
-	 * Pour qu'il les renvoie au serveur
-     *
-	 */
-	transmitMovement() {
-		let bUpdate = false; // si ce flag passe à true, on fait une mise à jour
-        // la mise à jour consiste simplement à transmettre au serveur les coordonnées/vitesse/angle du mobile au serveur
-		let m = this.oMobile;
-		// angle de caméra
-		let f = m.fTheta;
-		// position
-		let x = m.x;
-		let y = m.y;
-		// vitesse
-		let fms = m.fMovingSpeed;
-		let fma = m.fMovingAngle;
-		let nLUT = this.oGame.getTime() - this.nLastUpdateTime;
-		if (nLUT > MAX_UPDATE_TIME) {
-		    // trop de temps sans mettre à jour :
-            // forcer la mise à jour
-			if (x !== this.xLast || y !== this.yLast) {
-				this.xLast = x;
-				this.yLast = y;
-				bUpdate = true;
+				case 'dl.c':
+					mob.strafeLeft();
+					break;
+
+				case 'dr.c':
+					mob.strafeRight();
+					break;
+
+				case 'db.c':
+					mob.moveBackward();
+					break;
+
+				case 'b0.d':
+					n |= COMMANDS.MOUSE_LEFT;
+					break;
+
+				case 'u.d':
+					n |= COMMANDS.ACTIVATE;
+					break;
 			}
-		}
-		if (bUpdate || this.fLastMovingSpeed !== fms || this.fLastMovingAngle !== fma || this.fLastTheta !== f) {
-			this.fLastMovingSpeed = fms;
-			this.fLastMovingAngle = fma;
-			this.fLastTheta = f;
-			bUpdate = true;
-		}
-		if (bUpdate) {
-			this._game.updatePlayerMobile(f, x, y, fma, fms);
-			this.nLastUpdateTime = this._game.getTime();
-		}
+		});
+		let f = mob.fTheta;
+		let x = mob.x;
+		let y = mob.y;
+		let sx = mob.xSpeed;
+		let sy = mob.ySpeed;
+		this._game.updatePlayerMobile(f, x, y, sx, sy, n);
 	}
 }
-
 
 export default PlayerThinker;

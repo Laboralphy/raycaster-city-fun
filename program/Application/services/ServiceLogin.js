@@ -1,6 +1,7 @@
 const ServiceAbstract = require('./Abstract');
 const logger = require('../../Logger');
 const STRINGS = require('../consts/strings');
+const STATUS = require('../consts/status');
 
 class ServiceLogin extends ServiceAbstract {
     constructor() {
@@ -23,14 +24,14 @@ class ServiceLogin extends ServiceAbstract {
          */
         socket.on('REQ_LOGIN', ({name, pass}, ack) => {
             // si le client est déja identifié...
-            if (client.id) {
-                ack({id: client.id});
+            if (client.status !== STATUS.UNIDENTIFIED) {
+                throw new Error('Invalid login request : client "' + client.id + '" (name "' + client.name + '") is already identified !');
             }
             if (name.length > 2) {
                 client.name = name;
                 client.id = socket.client.id;
                 logger.logfmt(STRINGS.service.event.assign_name, client.id, client.name);
-                this._share('service-login', {client});
+				this._share('service-login', {client});
                 ack({id: client.id});
             } else {
                 logger.logfmt(STRINGS.service.error.login_failed, client.id, client.name);

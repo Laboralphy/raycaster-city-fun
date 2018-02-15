@@ -8,22 +8,15 @@ class FPSThinker extends AbstractThinker {
 
     constructor() {
         super();
+        this._aCurrentEvents = [];
         this.emitter = new o876.Emitter();
         this.oCommands = null;
         this.aKeyBindings = null; // attacher les codes de touches à des évènements symbolique
         this.aKeyBoundList = null; // liste simple des touches qui ont été bindées, pour une indexation rapide
         this._mouseSensitivity = 166;
         this._bFrozen = false;
-        this.defineKeys({
-            forward : ['z', 'w'],
-            backward : 's',
-            left : ['q', 'a'],
-            right : 'd',
-            use : ' '
-        });
-
         MAIN.pointerlock.on('mousemove', event => this.readMouseMovement(event));
-        this.setThinker('Active');
+        this.state('active');
     }
 
     /**
@@ -92,30 +85,31 @@ class FPSThinker extends AbstractThinker {
     updateKeys() {
         let nKey, sProc, aButton;
         let oCmds = this.oCommands;
-        let oKbd = this._game.getKeyboardDevice();
-        let aKeyData; // [0] : code touche, [1] : status touche
+        let oKeyboarDevice = this._game.getKeyboardDevice();
+        let aKeySwitches; // [0] : code touche, [1] : status touche
         let sEvent;
         let kbl = this.aKeyBoundList;
         let kb = this.aKeyBindings;
+        let aCommandList = [];
         for (let iKey = 0, l = kbl.length; iKey < l; ++iKey) {
             nKey = kbl[iKey];
-            aKeyData = kb[nKey];
-            sEvent = aKeyData[0];
+            aKeySwitches = kb[nKey];
+            sEvent = aKeySwitches[0];
             sProc = '';
-            switch (oKbd.getKey(nKey)) {
+            switch (oKeyboarDevice.getKey(nKey)) {
                 case 1: // down
-                    if (aKeyData[1] === 0) {
-                        sProc = sEvent + '.down';
+                    if (aKeySwitches[1] === 0) {
+                        sProc = sEvent + '.d';
                         oCmds[sEvent] = true;
-                        aKeyData[1] = 1;
+                        aKeySwitches[1] = 1;
                     }
                     break;
 
-                case 2: // Up
-                    if (aKeyData[1] === 1) {
-                        sProc = sEvent + '.up';
+                case 2: // up
+                    if (aKeySwitches[1] === 1) {
+                        sProc = sEvent + '.u';
                         oCmds[sEvent] = false;
-                        aKeyData[1] = 0;
+                        aKeySwitches[1] = 0;
                     }
                     break;
                 default:
@@ -123,13 +117,13 @@ class FPSThinker extends AbstractThinker {
                     break;
             }
             if (sProc) {
-                this.emitter.trigger(sProc);
+				aCommandList.push(sProc);
             }
         }
-        let oMouse = this._game.getMouseDevice();
-        while (aButton = oMouse.readMouse()) {
+        let oMouseDevice = this._game.getMouseDevice();
+        while (aButton = oMouseDevice.readMouse()) {
             nKey = aButton[3];
-            sEvent = 'button' + nKey;
+            sEvent = 'b' + nKey;
             sProc = '';
             switch (aButton[0]) {
                 case 1: // button down
@@ -138,16 +132,16 @@ class FPSThinker extends AbstractThinker {
                     break;
 
                 case 0: // button up
-                    sProc = sEvent + '.up';
+                    sProc = sEvent + '.u';
                     oCmds[sEvent] = false;
                     break;
 
                 case 3:
-                    sProc = 'wheel.up';
+                    sProc = 'w.u';
                     break;
 
                 case -3:
-                    sProc = 'wheel.down';
+                    sProc = 'w.d';
                     break;
 
                 default:
@@ -155,17 +149,18 @@ class FPSThinker extends AbstractThinker {
                     break;
             }
             if (sProc) {
-                this.emitter.trigger(sProc);
+				aCommandList.push(sProc);
             }
         }
         for (sEvent in oCmds) {
             if (oCmds[sEvent]) {
-                sProc = sEvent + '.command';
+                sProc = sEvent + '.c';
                 if (sProc) {
-                    this.emitter.trigger(sProc);
+					aCommandList.push(sProc);
                 }
             }
         }
+        this._aCurrentEvents = aCommandList;
     }
 
     /**
@@ -196,7 +191,7 @@ class FPSThinker extends AbstractThinker {
     /**
      * Procedure de pensée
      */
-    thinkActive() {
+    $active() {
         if (!this._bFrozen) {
             this.updateKeys();
         }

@@ -5,14 +5,14 @@
 
 const Location = require('./Location');
 
-const PLAYER_STATUS = require('../consts/playerStatus');
+const STATUS = require('../consts/status');
 
 class Player {
     constructor() {
         // identifiant
         this.id = '';
         // status :
-        this.status = PLAYER_STATUS.UNIDENTIFIED;
+        this.status = STATUS.UNIDENTIFIED;
         // aspect / type
         this.type = 'none';
         // position & angle dans cette zone

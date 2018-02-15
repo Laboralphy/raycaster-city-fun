@@ -13,7 +13,7 @@ class Manager {
 	 */
 	register(id) {
 		if (id in this.clients) {
-			return this.clients[id];
+			throw new Error('Client "' + id + '" is already registered !');
 		}
 		let oClient = new Client();
 		this.clients[id] = oClient;

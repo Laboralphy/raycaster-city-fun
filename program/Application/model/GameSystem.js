@@ -10,7 +10,7 @@ const o876 = require('../../o876');
 const Vector = o876.geometry.Vector;
 
 const STRINGS = require('../consts/strings');
-const PLAYER_STATUS = require('../consts/playerStatus');
+const STATUS = require('../consts/status');
 
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
@@ -61,7 +61,7 @@ class GameSystem {
 	getAreaMobiles(area) {
 		return Object
 			.values(this._mobiles)
-			.filter(px => px.location.area === area);
+			.filter(px => px.location.area() === area);
     }
 
 	/**
@@ -71,7 +71,7 @@ class GameSystem {
 	getAreaPlayers(area) {
 		return Object
 			.values(this._players)
-			.filter(px => px.location.area === area);
+			.filter(px => px.location.area() === area);
     }
 
 
@@ -199,7 +199,7 @@ class GameSystem {
     async createPlayer(id, {x, y, angle, area}) {
         let p = new Player();
         p.id = id;
-        p.status = PLAYER_STATUS.UNIDENTIFIED;
+        p.status = STATUS.UNIDENTIFIED;
         this._players[id] = p;
         // obtenir et remplir la location
         // en cas d'absence de location, en créer une a partir de la position de départ du niveau
@@ -207,7 +207,6 @@ class GameSystem {
         p.location.y = y;
         p.location.heading(angle);
         p.location.area(area);
-		//this.createMobile(id, p.type, p.location);
 		return p;
     }
 
@@ -237,6 +236,22 @@ class GameSystem {
 	    this._areas[id] = area;
     }
 
+	/**
+	 * Rejoue les movement du client pour mise en conformité
+	 */
+	predictClientMovement(id, packets) {
+		let mob = this._mobiles[id];
+		let vSpeed = new Vector();
+		let loc = mob.location;
+		packets.forEach(({t, a, x, y, ma, ms, id, c}) => {
+			loc.heading(a);
+			vSpeed.set(ms.x, ms.y);
+			for (let i = 0; i < t; ++i) {
+				mob.move(vSpeed);
+			}
+		});
+	}
+
 
 
 // #    #   ####   ######           ####     ##     ####   ######   ####
@@ -254,7 +269,7 @@ class GameSystem {
      * un client s'est connecté et s'est identifié
      * il faut créer une instance et renseigner tous les joueur de la zone
      * de sa présence, et renseigner le joueur sur son état complet
-     * @param id {string} identifiant du client
+     * @param client {Client} identifiant du client
      * @param sSymbolicId {string}
      */
     async clientIdentified(client) {
@@ -265,8 +280,6 @@ class GameSystem {
 		let playerData = await this._dataManager.loadClientData(client.name);
 		logger.logfmt(STRINGS.service.game_events.player_data_loaded, id);
 		// creation player
-
-
 		let p = await this.createPlayer(id, playerData.location);
 		logger.logfmt(STRINGS.service.game_events.player_created, id);
 		this._players[id] = p;
@@ -300,12 +313,15 @@ class GameSystem {
     clientHasLoadedLevel(client) {
     	let id = client.id;
         let p = this._players[id];
-        let area = this._areas[p.location.area];
+        let area = this._areas[p.location.area()];
+        if (!area) {
+        	throw new Error('There is no such area : "' + p.location.area() + '"');
+		}
 
         // transmettre la position de tous les mobiles
         let mobiles = Object
             .values(this._mobiles)
-            .filter(px => px.location.area === area.id)
+            .filter(px => px.location.area() === area.id)
             .map(px => GameSystem.buildMobileCreationPacket(px.id));
         let subject = this.createMobile(id, p.blueprint, p.location);
         // déterminer la liste des joueur présents dans la zone
@@ -319,35 +335,33 @@ class GameSystem {
         // transmettre aux clients la position du nouveau
     }
 
+
 	/**
-	 * Le mobile d'un client a mis à jours sont mouvement
+	 * Le mobile d'un client a mis à jour son mouvement
 	 * @param a
 	 * @param x
 	 * @param y
-	 * @param ma
-	 * @param ms
+	 * @param sx
+	 * @param sy
 	 */
-    clientMobileUpdate(client, {a, x, y, ma, ms}) {
+    clientMobileUpdate(client, packets) {
 		let id = client.id;
 		let mob = this._mobiles[id];
+		this.predictClientMovement(client.id, packets);
 		let pos = mob.location.position();
-		// mettre à jour l'angle
-		pos.heading(a);
-		// mettre à jour la position par la vitesse
-		mob.move(new Vector(ms.x, ms.y));
-		// déterminer la nouvelle position
-		let xNew = pos.x;
-		let yNew = pos.y;
-		let xSpeed = mob.speed.x;
-		let ySpeed = mob.speed.y;
-		// il faut transmettre cette nouvelle position à tous les voisin du mobile
-		let oUpdatePacket = {
-			a,
-			x: xNew,
-			y: yNew,
-			sx, xSpeed,
-			sy: ySpeed
+		this.transmit(this._players[id]);
+	}
+
+
+	clientHasLeft(client) {
+    	let id = client.id;
+    	let mob = this._mobiles[id];
+    	// détruire ce mobile : mob
+		if (mob) {
+			mob.finalize();
 		}
+		delete this._mobiles[id];
+		delete this._players[id];
 	}
 }
 

@@ -46,6 +46,24 @@ module.exports = class SpellBook {
         return Array.prototype.slice.call(a, 0)
     }
 
+    static typeof(x) {
+		let tx = (typeof x);
+		switch (tx) {
+			case 'object':
+				if (x === null) {
+					return 'u';
+				} else if (Array.isArray(x)) {
+					return 'a';
+				} else {
+					return 'o';
+				}
+				break;
+
+			default:
+				return tx.charAt(0);
+		}
+	}
+
     /**
      * maps an array into a string
      * converting all elements into there "type" counterpart.
@@ -78,7 +96,6 @@ module.exports = class SpellBook {
 					} else {
 						return 'o';
 					}
-					break;
 
 				default:
 					return tx.charAt(0);

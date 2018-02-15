@@ -48,6 +48,7 @@ class Service {
         let id = client.id;
         this._plugins.forEach(p => p.disconnectClient(client));
         this.clientManager.unregisterClient(id);
+		client.id = null;
     }
 
 	/**
