@@ -8,10 +8,13 @@ const RC_CONST = require('../consts/raycaster');
 const Door = require('./Door');
 const ActiveList = require('./ActiveList');
 
+
 module.exports = class Area {
     constructor() {
+    	// identifiant
+    	this.id = '';
         // nom eventuel de la zone
-        this._name = '';
+        this.name = '';
         // graine de génération aléatoire
         this.seed = '';
         // données initiale de la zone telle que générées par le générateur ou le level builder
@@ -28,6 +31,7 @@ module.exports = class Area {
         this._startpoint = null;
     }
 
+
 	/**
      * Commande l'ouverture d'une porte en x, y
      * Si c'est un passage secret cela commandera aussi l'ouverture du block adjacent
@@ -35,7 +39,8 @@ module.exports = class Area {
 	 * @param y
 	 */
 	openDoor(x, y) {
-        let oDoor = this._physicMap[y][x].door;
+		let oCell = this.getCell(x, y);
+        let oDoor = oCell ? oCell.door : null;
         if (oDoor) {
             if (oDoor.open()) {
 				if (oDoor.isSecret()) {
@@ -96,13 +101,26 @@ module.exports = class Area {
         }
     }
 
+    _checkRange(a, x) {
+    	return x >= 0 && x < a.length;
+	}
+
+    getCell(x, y) {
+    	let pm = this._physicMap;
+		if (this._checkRange(pm, y) && this._checkRange(pm[y], x)) {
+			return pm[y][x];
+		} else {
+			throw new Error('this cell does not exist (' + x + ', ' + y + ')');
+		}
+	}
+
     /**
      * Renvoie true si le block spécifié est solide
      * c'est à dire que personne ne peut le traverser
      * cette methode prend en compte les porte et leur état
      */
     isSolid(x, y) {
-        let pm = this._physicMap[y][x];
+        let pm = this.getCell(x, y);
         switch (pm.code) {
             case RC_CONST.phys_none:
                 return false;

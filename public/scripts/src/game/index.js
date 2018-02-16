@@ -90,8 +90,32 @@ class Game extends O876_Raycaster.GameAbstract {
 	 */
 	updatePlayerMobile(a, x, y, sx, sy, c) {
 		let packet = {a, x, y, sx, sy, c};
-		this._clientPrediction.pushMovement(packet);
-		this.trigger('update.player', this._clientPrediction.getUnsentPackets());
+		let cp = this._clientPrediction;
+		if (cp.pushMovement(packet)) {
+			this.trigger('update.player', cp.getUnsentPackets());
+		}
+	}
+
+
+	/**
+	 * Le serveur a ordonné une correction de position du mobile
+	 */
+	applyMobileCorrection({a, x, y, sx, sy, id}) {
+		// retrouver le packet id
+		let mob = this.getPlayer();
+		let cp = this._clientPrediction;
+		let packets = cp.getPacketsAfter(id);
+		mob.fTheta = a;
+		mob.setXY(x, y);
+		cp.flush(id);
+		if (packets.length) {
+			packet.forEach(({t, a, x, y, sx, sy, id, c}) => {
+				for (let i = 0; i < t; ++i) {
+					mob.fTheta = a;
+					mob.slide(sx, sy);
+				}
+			});
+		}
 	}
 
 	/**

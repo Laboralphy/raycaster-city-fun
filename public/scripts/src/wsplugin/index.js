@@ -1,7 +1,19 @@
 import STRINGS from "../data/strings";
 import Game from "../game";
+import PingMonitor from "../game/PingMonitor";
 import CONFIG from "../game/config";
 import STATUS from "../../../../program/Application/consts/status";
+
+/**
+ * Plugin de Vuex
+ * Intercepte les actions dispatchée dans les composants.
+ * Intercepte les messages réseaux issu du serveur.
+ * Manage une instance de Game
+ * Pour chaque action, on peut transmettre des données au serveur si on veut.
+ *
+ * @param socket
+ * @returns {function(*=)}
+ */
 
 export default function createWebSocketPlugin (socket) {
 	return store => {
@@ -9,8 +21,16 @@ export default function createWebSocketPlugin (socket) {
 		let userCache = {};
 
 		let game;
-		let expectedPhase = 0;
-		let receivedPhase = 0;
+		let pingMonitor = new PingMonitor({
+			width: 48,
+			height: 32,
+			threshold: 50,
+			colors: {
+				min: 'green',
+				threshold: 'yellow',
+				max: 'red'
+			}
+		});
 
 		/**
 		 * Démarrage du jeu...
@@ -20,8 +40,11 @@ export default function createWebSocketPlugin (socket) {
 			MAIN.configure(CONFIG); 		// configurer le MAIN
 			game = new Game(CONFIG);		// créer une instance du jeu
 			MAIN.run(game);
+			document.body.setAttribute('class', 'playing');
+
 			/**
 			 * Evenement de sortie du pointerlock
+			 * Mettre à flou le canvas de jeu et afficher l'UI
 			 */
 			MAIN.pointerlock.on('exit', event => {
 				game.showOverlay();
@@ -32,6 +55,7 @@ export default function createWebSocketPlugin (socket) {
 
 			/**
 			 * Evènement d'entrée dans le pointerlock
+			 * Cache l'interface et rétabli la netteté du canvas
 			 */
             MAIN.pointerlock.on('enter', event => {
                 store.dispatch('ui/hide');
@@ -41,15 +65,41 @@ export default function createWebSocketPlugin (socket) {
 
 			/**
 			 * Evènement : le client a fini de construire le niveau
+			 * Envoie un message "ready" pour indiquer qu'on est pret à jouer
 			 */
 			game.on('enter', async event => {
             	send_g_ready(STATUS.ENTERING_LEVEL);
 			});
-			game.on('update.player', req_g_update_player);
 
-            document.body.setAttribute('class', 'playing');
+			game.on('frame', event => {
+				// rendu du moniteur de ping
+				let cvs = game.oRaycaster.getRenderCanvas();
+				game
+					.oRaycaster
+					.getRenderContext()
+					.drawImage(
+						pingMonitor.render(),
+						cvs.width - 4 - pingMonitor._canvas.width,
+						cvs.height - 4 - pingMonitor._canvas.height
+					);
+			});
+
+			/**
+			 * Evènement : le client a bougé son mobile
+			 * transmetter au serveur la nouvelle situation geometrique
+			 */
+			game.on('update.player', async packets => {
+				let t1 = performance.now();
+				let aCorrPacket = await req_g_update_player(packets);
+				let t2 = performance.now();
+				pingMonitor.sample(t2 - t1);
+				this._game.applyMobileCorrection(aCorrPacket);
+			});
         }
 
+		/**
+		 * Fonction sensée terminer le jeu
+		 */
         function endGame() {
 			game._halt();
             document.body.setAttribute('class', '');
@@ -289,7 +339,7 @@ export default function createWebSocketPlugin (socket) {
 		 * @param data.ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
 		 * @param data.c {number} commandes de tir, d'activation etc...
 		 */
-		function req_g_update_player(packet) {
+		async function req_g_update_player(packet) {
 			return new Promise(
 				resolve => {
 					socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data));

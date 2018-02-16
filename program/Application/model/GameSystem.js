@@ -47,7 +47,7 @@ class GameSystem {
 		if (id in this._areas) {
 			area = this._areas[id];
 		} else {
-			area = this.buildArea(id);
+			area = await this.buildArea(id);
 			this.linkArea(id, area);
 		}
 		return area;
@@ -66,7 +66,7 @@ class GameSystem {
 
 	/**
      * Renvoie la liste des joueurs qui sont dan sla zone
-	 * @param area
+	 * @param area {Area}
 	 */
 	getAreaPlayers(area) {
 		return Object
@@ -102,16 +102,6 @@ class GameSystem {
         } else {
             this.emitter.emit('transmit', player.id, event, packet);
         }
-    }
-
-	/**
-     * Transmission d'un packet à tous les joueur d'une zone
-	 * @param area {Area} zone
-	 * @param event {string} nom de l'évnèmenet
-	 * @param packet {*} contenu du packet
-	 */
-	transmitToArea(area, event, packet) {
-        this.transmit(this.getAreaPlayers(area), event, packet);
     }
 
 
@@ -172,6 +162,8 @@ class GameSystem {
 	async buildArea(id) {
 		logger.logfmt(STRINGS.service.game_events.building_level, id);
 		let area = new Area();
+		area.id = id;
+		area.name = id;
 		let level = await this._dataManager.loadLevel(id);
 		area.data(level);
 		logger.logfmt(STRINGS.service.game_events.level_built, id);
@@ -193,10 +185,16 @@ class GameSystem {
     // Les mutateurs permettent de modifier l'etat du jeu
 
     /**
-     * Création d'une instance Player et d'une instance Mobile correspondant
+     * Création d'une instance Player et chargement des données initiale
      * @param id
+	 * @param playerData {object} données persistante du joueur
      */
-    async createPlayer(id, {x, y, angle, area}) {
+    async createPlayer(id, playerData) {
+		let location = playerData.location;
+		let x = location.x;
+		let y = location.y;
+		let angle = location.angle;
+		let area = await this.getArea(location.area);
         let p = new Player();
         p.id = id;
         p.status = STATUS.UNIDENTIFIED;
@@ -236,20 +234,38 @@ class GameSystem {
 	    this._areas[id] = area;
     }
 
+
+    playClientAction(id, action) {
+
+	}
+
 	/**
 	 * Rejoue les movement du client pour mise en conformité
 	 */
-	predictClientMovement(id, packets) {
+	playClientMovement(id, packets) {
 		let mob = this._mobiles[id];
 		let vSpeed = new Vector();
 		let loc = mob.location;
-		packets.forEach(({t, a, x, y, ma, ms, id, c}) => {
+		let lastId = packets.reduce((prev, {t, a, x, y, sx, sy, id, c}) => {
 			loc.heading(a);
-			vSpeed.set(ms.x, ms.y);
+			if (c) {
+				this.playClientAction(id, c);
+			}
+			vSpeed.set(sx, sy);
 			for (let i = 0; i < t; ++i) {
 				mob.move(vSpeed);
 			}
-		});
+			return id;
+		}, 0);
+		// renvoyer au client les dernière information validée
+		return {
+			a: loc.heading(),
+			x: mob.x,
+			y: mob.y,
+			sx: mob.speed.x,
+			sy: mob.speed.y,
+			id: lastId
+		};
 	}
 
 
@@ -264,27 +280,6 @@ class GameSystem {
     // fonction appelée par les services pour indiquer des cas d'utilisation
     // généralement des action du client
 
-    /**
-     * ### use case Client Identified
-     * un client s'est connecté et s'est identifié
-     * il faut créer une instance et renseigner tous les joueur de la zone
-     * de sa présence, et renseigner le joueur sur son état complet
-     * @param client {Client} identifiant du client
-     * @param sSymbolicId {string}
-     */
-    async clientIdentified(client) {
-		let id = client.id;
-		logger.logfmt(STRINGS.service.game_events.player_auth, id);
-		// client identifié
-		// recherche de son emplacement
-		let playerData = await this._dataManager.loadClientData(client.name);
-		logger.logfmt(STRINGS.service.game_events.player_data_loaded, id);
-		// creation player
-		let p = await this.createPlayer(id, playerData.location);
-		logger.logfmt(STRINGS.service.game_events.player_created, id);
-		this._players[id] = p;
-    }
-
 	/**
 	 * Le client est pret à télécharger le niveau dans lequel il est sensé se rendre
 	 * @param client
@@ -295,10 +290,13 @@ class GameSystem {
         let id = client.id;
         let p = this._players[id];
         if (!p) {
-            throw new Error('player ' + id + ' has not been instanciated');
+			let playerData = await this._dataManager.loadClientData(client.name);
+			p = await this.createPlayer(id, playerData);
+			logger.logfmt(STRINGS.service.game_events.player_created, id);
+			this._players[id] = p;
         }
-        let area = await this.getArea(p.location.area());
-        logger.logfmt(STRINGS.service.game_events.player_downloading_area, id, p.location.area());
+        let area = p.location.area();
+        logger.logfmt(STRINGS.service.game_events.player_downloading_area, id, area.name);
         let doors = null;
         return {area, doors};
 	}
@@ -313,15 +311,12 @@ class GameSystem {
     clientHasLoadedLevel(client) {
     	let id = client.id;
         let p = this._players[id];
-        let area = this._areas[p.location.area()];
-        if (!area) {
-        	throw new Error('There is no such area : "' + p.location.area() + '"');
-		}
+        let area = p.location.area();
 
         // transmettre la position de tous les mobiles
         let mobiles = Object
             .values(this._mobiles)
-            .filter(px => px.location.area() === area.id)
+            .filter(px => px.location.area() === area)
             .map(px => GameSystem.buildMobileCreationPacket(px.id));
         let subject = this.createMobile(id, p.blueprint, p.location);
         // déterminer la liste des joueur présents dans la zone
@@ -347,7 +342,7 @@ class GameSystem {
     clientMobileUpdate(client, packets) {
 		let id = client.id;
 		let mob = this._mobiles[id];
-		this.predictClientMovement(client.id, packets);
+		this.playClientMovement(client.id, packets);
 		let pos = mob.location.position();
 		this.transmit(this._players[id]);
 	}

@@ -44,16 +44,17 @@ class ClientPrediction {
 	 */
 	pushMovement({a, x, y, sx, sy, c = 0}) {
 		let last = this.lastPacket();
+		let bNoLast = !last; // si true alors : c'est le premier packet, y'en n'a pas d'autre
 		let bPush = false;
-		if (!last) {
-			// premier packet : on push d'office
-			bPush = true;
-		} else if (last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c) {
-			// packet très différent ou précédent packet trop ancien ou commande "c" renseignée
+		if (bNoLast || last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c !== last.c) {
+			// packet très différent du précédent ou ...
+			// précédent packet trop ancien ou ..
+			// commande "c" différente du précédent ou ...
+			// premier packet de la serie alors
 			// on push
 			bPush = true;
 		} else {
-			// packet identique et assez récent : on incrémente "t" du precedent packet
+			// réutilisation du packet précédent
 			++last.t;
 		}
 		if (bPush) {
@@ -66,10 +67,11 @@ class ClientPrediction {
 				sx, sy, 	// vitesse aux axes
 				id: ++this._id,  // identifiant seq
 				c, 				// commandes
-				send: false, 	// peut etre envoyé ? oui/non
+				send: bNoLast, 	// peut etre envoyé ? oui/non
 				sent: false		// a été envoyé ? oui/non
 			});
 		}
+		return bPush;
 	}
 
 	getUnsentPackets() {
@@ -85,6 +87,11 @@ class ClientPrediction {
 	flush(id) {
 		this._packets = this._packets.filter(p => p.id > id);
 	}
+
+	getPacketsAfter(id) {
+		return this._packets.filter(p => p.id > id);
+	}
+
 }
 
 

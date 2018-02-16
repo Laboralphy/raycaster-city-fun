@@ -134,9 +134,9 @@ module.exports = class Mobile {
 			yci = ((3 - i) & 1) * Math.sign(i - 1);
 			ix = nSize * xci + x;
 			iy = nSize * yci + y;
-			// déterminer les collsion en x et y
-			xClip = pSolidFunction(ix + dx, iy);
-			yClip = pSolidFunction(ix, iy + dy);
+			// déterminer les col
+			xClip = pSolidFunction((ix + dx) / nPlaneSpacing | 0, iy / nPlaneSpacing | 0);
+			yClip = pSolidFunction(ix / nPlaneSpacing | 0, (iy + dy) / nPlaneSpacing | 0);
 			if (xClip) {
 				dx = 0;
 				if (bCrashWall) {
@@ -219,18 +219,17 @@ module.exports = class Mobile {
         let vPos = oLocation.position();
         let area = oLocation.area();
 
-        let nDist = MathTools.distance(vSpeed.x, vSpeed.y);
+        let nDist = vSpeed.distance();
         let nSize = this._size;
         let nPlaneSpacing = RC_CONST.plane_spacing;
         let bCrashWall = this.flagCrash;
         let r;
-        let pSolidFunction = (x, y) => area.isSolidPoint(x, y);
         if (nDist > nSize) {
             let vSubSpeed = vSpeed.mul(nSize);
             let nModDist = nDist % nSize;
             if (nModDist) {
                 let vModSpeed = vSpeed.mul(nModDist);
-                this.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
+                Mobile.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, (x, y) => area.isSolidPoint(x, y));
             }
             for (let iIter = 0; iIter < nDist; iIter += nSize) {
                 this.move(vSubSpeed);
@@ -240,14 +239,13 @@ module.exports = class Mobile {
             }
             return;
         }
-        r = this.computeWallCollisions(
+        r = Mobile.computeWallCollisions(
             vPos,
             vSpeed,
             nSize,
             nPlaneSpacing,
-            this.wallCollisions,
             bCrashWall,
-            (x, y) => area.isSolidPoint(x, y)
+			(x, y) => area.isSolidPoint(x, y)
         );
 		this.speed = vSpeed;
 		this.updatePosition(vPos.add(vSpeed));
@@ -258,15 +256,4 @@ module.exports = class Mobile {
         this.location.position(vPos);
 	}
 
-	/**
-	 * utilise un object de prediction de mouvement pour effectuer les mouvements
-	 * @param cp
-	 */
-	runPrediction(cp) {
-		let aPackets = cp.packets();
-		let vSpeed = new Vector();
-		aPackets.forEach(({t, a, x, y, ma, ms, v}) => {
-			vSpeed.set(x, y);
-		});
-	}
 };

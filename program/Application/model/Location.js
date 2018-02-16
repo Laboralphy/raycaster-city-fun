@@ -1,7 +1,7 @@
 /**
  * Une localisation
  */
-
+const Area = require('./Area');
 const o876 = require('../../o876');
 
 module.exports = class Location {
@@ -23,7 +23,12 @@ module.exports = class Location {
 	}
 
 	area(a) {
-        return o876.SpellBook.prop(this, '_area', a);
+		if (a) {
+			if (typeof a !== 'object' || a.constructor.name !== 'Area') {
+				throw new Error('location.area must be an instance of Area. Instance of : "' + a.constructor.name + '" given');
+			}
+		}
+        return o876.SpellBook.prop(this, '_area', a, 'o');
 	}
 
     /**

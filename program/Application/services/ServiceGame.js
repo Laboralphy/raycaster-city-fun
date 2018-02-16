@@ -16,11 +16,6 @@ class ServiceGame extends ServiceAbstract {
             logger.log('transmit', event, 'to', id);
             this._emit(id, event, data);
         });
-
-		// A l'écoute du service login. Dès qu'un client s'identifie, on passe l'identifiant au game systeme
-        this.events.on('service-login', async ({client}) => {
-            await this._gs.clientIdentified(client);
-        });
     }
 
     error(client, e) {
@@ -88,13 +83,10 @@ class ServiceGame extends ServiceAbstract {
 			// appliquer la modification du mobile
 			try {
 				let id = client.id;
-				packets.forEach(({t, a, x, y, sx, sy, id, c}) => {
-					console.log(t, a, x, y, sx, sy, id, c);
-				});
+				// les packet doivent être joués.
+				let aCorrPacket = this._gs.playClientMovement(id, packets);
 				// on renvoie un packet contenant les dernière données validées/corrigées
-				ack({
-
-				});
+				ack(aCorrPacket);
 			} catch (e) {
 				this.error(client, e);
 			}

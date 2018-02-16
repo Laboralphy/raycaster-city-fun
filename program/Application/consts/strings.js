@@ -21,7 +21,7 @@ const STRINGS = {
 				building_level: 'building area (id "%s")',
 				level_built: 'area built (id "%s")',
 				player_created: 'client\'s mobile instance created (id "%s")',
-				player_auth: 'client is now identified in the game system (id "%s")',
+				player_auth: 'client\'s identity transmitted to game system (id "%s")',
 				player_data_loaded: 'client\'s data loaded (id "%s")',
 				player_downloading_area: 'transmitting area to client (id "%s" area "%s")'
 			},
