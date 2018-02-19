@@ -1,6 +1,5 @@
 import STRINGS from "../data/strings";
 import Game from "../game";
-import PingMonitor from "../game/PingMonitor";
 import CONFIG from "../game/config";
 import STATUS from "../../../../program/Application/consts/status";
 
@@ -21,16 +20,7 @@ export default function createWebSocketPlugin (socket) {
 		let userCache = {};
 
 		let game;
-		let pingMonitor = new PingMonitor({
-			width: 48,
-			height: 32,
-			threshold: 50,
-			colors: {
-				min: 'green',
-				threshold: 'yellow',
-				max: 'red'
-			}
-		});
+		let localId = '';
 
 		/**
 		 * Démarrage du jeu...
@@ -73,15 +63,6 @@ export default function createWebSocketPlugin (socket) {
 
 			game.on('frame', event => {
 				// rendu du moniteur de ping
-				let cvs = game.oRaycaster.getRenderCanvas();
-				game
-					.oRaycaster
-					.getRenderContext()
-					.drawImage(
-						pingMonitor.render(),
-						cvs.width - 4 - pingMonitor._canvas.width,
-						cvs.height - 4 - pingMonitor._canvas.height
-					);
 			});
 
 			/**
@@ -92,8 +73,8 @@ export default function createWebSocketPlugin (socket) {
 				let t1 = performance.now();
 				let aCorrPacket = await req_g_update_player(packets);
 				let t2 = performance.now();
-				pingMonitor.sample(t2 - t1);
-				this._game.applyMobileCorrection(aCorrPacket);
+				game.ping(t2 - t1);
+				game.applyMobileCorrection(aCorrPacket);
 			});
         }
 
@@ -209,10 +190,14 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		socket.on('G_CREATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.mspawn(m));
+				mob.forEach(m => game.netSpawnMobile(m));
 			} else {
-				game.mspawn(mob);
+				game.netSpawnMobile(mob);
 			}
+		});
+
+		socket.on('G_YOUR_ID', ({id}) => {
+			game.localId(id);
 		});
 
 		/**
@@ -220,9 +205,9 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		socket.on('G_UPDATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.mupdate(m));
+				mob.forEach(m => game.netUpdateMobile(m));
 			} else {
-				game.mupdate(mob);
+				game.netUpdateMobile(mob);
 			}
 		});
 
@@ -231,9 +216,9 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		socket.on('G_DESTROY_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.mdestroy(m));
+				mob.forEach(m => game.netDestroyMobile(m));
 			} else {
-				game.mdestroy(mob);
+				game.netDestroyMobile(mob);
 			}
 		});
 

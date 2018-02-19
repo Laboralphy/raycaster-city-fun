@@ -6754,10 +6754,17 @@ O2.createObject('MAIN', {
 		MAIN.setupGameInstance(oGameInstance);
 	},
 
+	/**
+	 * Auto stats game using default config
+	 * @param config
+	 */
 	autorun: function(config) {
 		MAIN.configure(config);
         window.addEventListener('load', function() {
             MAIN.configure(MAIN.config);
+            if (!('namespace' in MAIN.config.game)) {
+            	throw new Error('"namespace" key is mandatory in CONFIG.game while using autorun feature');
+			}
             var ns = MAIN.config.game.namespace;
             var gcn = ns + '.Game';
             var gc = O2.loadObject(gcn);
@@ -7246,8 +7253,10 @@ O2.createClass('O876_Raycaster.Mobile', {
 			ix = nSize * xci + x;
 			iy = nSize * yci + y;
 			// déterminer les collsion en x et y
-			xClip = pSolidFunction(ix + dx, iy);
-			yClip = pSolidFunction(ix, iy + dy);
+			// xClip = pSolidFunction(ix + dx, iy);
+			// yClip = pSolidFunction(ix, iy + dy);
+			xClip = pSolidFunction((ix + dx) / nPlaneSpacing | 0, iy / nPlaneSpacing | 0);
+			yClip = pSolidFunction(ix / nPlaneSpacing | 0, (iy + dy) / nPlaneSpacing | 0);
 			if (xClip) {
 				dx = 0;
 				if (bCrashWall) {
@@ -7307,7 +7316,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 		var nPlaneSpacing = rc.nPlaneSpacing;
 		var bCrashWall = !this.bSlideWall;
 		var r;
-		var pSolidFunction = function(x, y) { return rc.clip(x, y, 1); };
+		var pSolidFunction = function(x, y) { return rc.getMapPhys(x, y); };
 		if (nDist > nSize) {
 			var vSubSpeed = this._vecScale(vSpeed, nSize);
 			var nModDist = nDist % nSize;
@@ -13229,7 +13238,7 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 		var x = rcc.xSector;
 		var y = rcc.ySector;
 		var sTag = this.getBlockTag(x, y);
-		if (sTag && sTag != this._sTag) {
+		if (sTag && sTag !== this._sTag) {
 			sTag = this.triggerTag(x, y, sTag);
 		}
 		this._sTag = sTag;
@@ -13260,7 +13269,7 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 
 		var oMsg = rc.addGXEffect(O876_Raycaster.GXMessage);
 		oMsg.setMessage(sMessage);
-		this._sLastPopupMessage == sMessage;
+		this._sLastPopupMessage = sMessage;
 		return oMsg;
 	},
 	

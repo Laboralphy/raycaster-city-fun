@@ -250,16 +250,16 @@ describe('model', function() {
 
 		describe('wall collisions', function() {
 			function collisionNorth(x, y) {
-				return y < 50;
+				return y < 5;
 			}
 			function collisionSouth(x, y) {
-				return y >= 60;
+				return y >= 6;
 			}
 			function collisionWest(x, y) {
-				return x < 50;
+				return x < 5;
 			}
 			function collisionEast(x, y) {
-				return x >= 60;
+				return x >= 6;
 			}
 
             it ('should not collide while going north', function() {

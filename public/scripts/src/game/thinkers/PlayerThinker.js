@@ -29,32 +29,36 @@ class PlayerThinker extends FPSThinker {
 
 	$active() {
 		super.$active();
-		let n = 0;
+		let c = 0;
 		let mob = this.mobile();
-		this._aCurrentEvents.forEach(c => {
-			switch (c) {
+		this._aCurrentEvents.forEach(e => {
+			switch (e) {
 				case 'df.c':
 					mob.moveForward();
+//					c |= COMMANDS.UP;
 					break;
 
 				case 'dl.c':
 					mob.strafeLeft();
+//					c |= COMMANDS.LEFT;
 					break;
 
 				case 'dr.c':
 					mob.strafeRight();
+//					c |= COMMANDS.RIGHT;
 					break;
 
 				case 'db.c':
 					mob.moveBackward();
+//					c |= COMMANDS.DOWN;
 					break;
 
 				case 'b0.d':
-					n |= COMMANDS.MOUSE_LEFT;
+					c |= COMMANDS.MOUSE_LEFT;
 					break;
 
 				case 'u.d':
-					n |= COMMANDS.ACTIVATE;
+					c |= COMMANDS.ACTIVATE;
 					break;
 			}
 		});
@@ -63,7 +67,7 @@ class PlayerThinker extends FPSThinker {
 		let y = mob.y;
 		let sx = mob.xSpeed;
 		let sy = mob.ySpeed;
-		this._game.updatePlayerMobile(f, x, y, sx, sy, n);
+		this._game.netUpdatePlayerMobile(f, x, y, sx, sy, c);
 	}
 }
 

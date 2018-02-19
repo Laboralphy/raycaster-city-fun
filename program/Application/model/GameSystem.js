@@ -201,8 +201,7 @@ class GameSystem {
         this._players[id] = p;
         // obtenir et remplir la location
         // en cas d'absence de location, en créer une a partir de la position de départ du niveau
-        p.location.x = x;
-        p.location.y = y;
+        p.location.position().set(x, y);
         p.location.heading(angle);
         p.location.area(area);
 		return p;
@@ -260,8 +259,8 @@ class GameSystem {
 		// renvoyer au client les dernière information validée
 		return {
 			a: loc.heading(),
-			x: mob.x,
-			y: mob.y,
+			x: loc.position().x,
+			y: loc.position().y,
 			sx: mob.speed.x,
 			sy: mob.speed.y,
 			id: lastId
@@ -316,11 +315,11 @@ class GameSystem {
         // transmettre la position de tous les mobiles
         let mobiles = Object
             .values(this._mobiles)
-            .filter(px => px.location.area() === area)
+            .filter(px => px.location.area() === area && px.id !== id)
             .map(px => GameSystem.buildMobileCreationPacket(px.id));
         let subject = this.createMobile(id, p.blueprint, p.location);
         // déterminer la liste des joueur présents dans la zone
-		let players = this.getAreaPlayers(area).map(p => p.id);
+		let players = this.getAreaPlayers(area).filter(p => p.id !== id).map(p => p.id);
         return {
         	subject,
 			mobiles,

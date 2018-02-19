@@ -225,10 +225,12 @@ module.exports = class Mobile {
         let bCrashWall = this.flagCrash;
         let r;
         if (nDist > nSize) {
-            let vSubSpeed = vSpeed.mul(nSize);
+        	//throw new Error('high velocity movement are not allowed. speed: ' + nDist + ' size: ' + nSize);
+			let vNorm = vSpeed.normalize();
+        	let vSubSpeed = vNorm.mul(nSize);
             let nModDist = nDist % nSize;
             if (nModDist) {
-                let vModSpeed = vSpeed.mul(nModDist);
+                let vModSpeed = vNorm.mul(nModDist);
                 Mobile.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, (x, y) => area.isSolidPoint(x, y));
             }
             for (let iIter = 0; iIter < nDist; iIter += nSize) {

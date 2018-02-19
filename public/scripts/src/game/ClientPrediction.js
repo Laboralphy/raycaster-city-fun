@@ -27,10 +27,10 @@ class ClientPrediction {
 
 	/**
 	 * Renvoie le dernier packet transmis
-	 * @returns {{t, a, x, y, ma, ms, v}}
+	 * @returns {{t, a, x, y, ma, ms, v}|null}
 	 */
 	lastPacket() {
-		return this._packets[this._packets.length - 1];
+		return this._packets.length > 0 ? this._packets[this._packets.length - 1] : null;
 	}
 
 	/**
@@ -44,9 +44,11 @@ class ClientPrediction {
 	 */
 	pushMovement({a, x, y, sx, sy, c = 0}) {
 		let last = this.lastPacket();
-		let bNoLast = !last; // si true alors : c'est le premier packet, y'en n'a pas d'autre
+		let bNoPreviousPacket = !last; // si true alors : c'est le premier packet, y'en n'a pas d'autre
 		let bPush = false;
-		if (bNoLast || last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c !== last.c) {
+		if (bNoPreviousPacket) {
+			bPush = true;
+		} else if (last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c !== last.c) {
 			// packet très différent du précédent ou ...
 			// précédent packet trop ancien ou ..
 			// commande "c" différente du précédent ou ...
@@ -67,8 +69,8 @@ class ClientPrediction {
 				sx, sy, 	// vitesse aux axes
 				id: ++this._id,  // identifiant seq
 				c, 				// commandes
-				send: bNoLast, 	// peut etre envoyé ? oui/non
-				sent: false		// a été envoyé ? oui/non
+				send: bNoPreviousPacket, 	// peut etre envoyé ? oui/non
+				sent: false,		// a été envoyé ? oui/non
 			});
 		}
 		return bPush;
@@ -85,7 +87,8 @@ class ClientPrediction {
 	 * @param id
 	 */
 	flush(id) {
-		this._packets = this._packets.filter(p => p.id > id);
+		let iLast = this._packets.length - 1;
+		this._packets = this._packets.filter((p, i) => p.id > id || i === iLast);
 	}
 
 	getPacketsAfter(id) {
