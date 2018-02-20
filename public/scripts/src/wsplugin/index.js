@@ -63,6 +63,7 @@ export default function createWebSocketPlugin (socket) {
 
 			game.on('frame', event => {
 				// rendu du moniteur de ping
+				game.renderPing();
 			});
 
 			/**

@@ -14,9 +14,6 @@ class Game extends O876_Raycaster.GameAbstract {
 		this._localId = '';
 		this.setupPingMonitor();
 		this.setupListeners();
-		setInterval(() => {
-			if (this._localId) console.log(this.getPlayer().x, this.getPlayer().y);
-		}, 1000);
 	}
 
 	/**

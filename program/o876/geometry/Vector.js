@@ -37,7 +37,7 @@ module.exports = class Vector {
      */
 	set(x, y) {
 		if (x instanceof Vector) {
-			return this.set(v.x, v.y);
+			return this.set(x.x, x.y);
 		}
 		this.x = x;
 		this.y = y;

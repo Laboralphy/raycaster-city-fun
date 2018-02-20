@@ -7311,13 +7311,13 @@ O2.createClass('O876_Raycaster.Mobile', {
         var vSpeed = {x: dx, y: dy};
         var rc = this.oRaycaster;
 
-		var nDist = MathTools.distance(vSpeed.x, vSpeed.y);
+		//var nDist = MathTools.distance(vSpeed.x, vSpeed.y);
 		var nSize = this.nSize;
 		var nPlaneSpacing = rc.nPlaneSpacing;
 		var bCrashWall = !this.bSlideWall;
 		var r;
 		var pSolidFunction = function(x, y) { return rc.getMapPhys(x, y); };
-		if (nDist > nSize) {
+		/*if (nDist > nSize) {
 			var vSubSpeed = this._vecScale(vSpeed, nSize);
 			var nModDist = nDist % nSize;
 			if (nModDist) {
@@ -7331,7 +7331,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 				}
 			}
 			return;
-		}
+		}*/
 		r = this.computeWallCollisions(
 			vPos,
 			vSpeed,

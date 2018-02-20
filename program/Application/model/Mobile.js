@@ -135,8 +135,8 @@ module.exports = class Mobile {
 			ix = nSize * xci + x;
 			iy = nSize * yci + y;
 			// déterminer les col
-			xClip = pSolidFunction((ix + dx) / nPlaneSpacing | 0, iy / nPlaneSpacing | 0);
-			yClip = pSolidFunction(ix / nPlaneSpacing | 0, (iy + dy) / nPlaneSpacing | 0);
+			xClip = pSolidFunction(ix + dx, iy);
+			yClip = pSolidFunction(ix, iy + dy);
 			if (xClip) {
 				dx = 0;
 				if (bCrashWall) {
@@ -212,19 +212,19 @@ module.exports = class Mobile {
     /**
 	 * Déplace le mobile selon le vector spécifié
 	 * Gestion des collisions
-	 * @param {o876.geometry.Vector} vSpeed
+	 * @param {Vector} vSpeed
 	 */
 	move(vSpeed) {
 		let oLocation = this.location;
         let vPos = oLocation.position();
         let area = oLocation.area();
 
-        let nDist = vSpeed.distance();
+        //let nDist = vSpeed.distance();
         let nSize = this._size;
         let nPlaneSpacing = RC_CONST.plane_spacing;
         let bCrashWall = this.flagCrash;
         let r;
-        if (nDist > nSize) {
+        /*if (nDist > nSize) {
         	//throw new Error('high velocity movement are not allowed. speed: ' + nDist + ' size: ' + nSize);
 			let vNorm = vSpeed.normalize();
         	let vSubSpeed = vNorm.mul(nSize);
@@ -240,7 +240,7 @@ module.exports = class Mobile {
                 }
             }
             return;
-        }
+        }*/
         r = Mobile.computeWallCollisions(
             vPos,
             vSpeed,
@@ -249,13 +249,8 @@ module.exports = class Mobile {
             bCrashWall,
 			(x, y) => area.isSolidPoint(x, y)
         );
-		this.speed = vSpeed;
-		this.updatePosition(vPos.add(vSpeed));
+		this.speed = r.speed;
+		vPos.set(r.pos);
         this.wallCollisions = r.wcf;
 	}
-
-	updatePosition(vPos) {
-        this.location.position(vPos);
-	}
-
 };

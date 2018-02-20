@@ -16,9 +16,6 @@ class ServiceGame extends ServiceAbstract {
             logger.log('transmit', event, 'to', id);
             this._emit(id, event, data);
         });
-		setInterval(() => {
-			if (Object.keys(this._gs._mobiles).length) console.log(this._gs._mobiles[Object.keys(this._gs._mobiles)[0]].location.position()); else console.log('no mobile');
-		}, 1000);
     }
 
     error(client, e) {

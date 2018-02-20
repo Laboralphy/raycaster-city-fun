@@ -63,7 +63,7 @@ class ClientPrediction {
 			if (last) {
 				last.send = true;
 			}
-			this._packets.push({
+			let packet = {
 				t: 1,		// iteration max
 				a, x, y, 	// angle, position
 				sx, sy, 	// vitesse aux axes
@@ -71,7 +71,8 @@ class ClientPrediction {
 				c, 				// commandes
 				send: bNoPreviousPacket, 	// peut etre envoyé ? oui/non
 				sent: false,		// a été envoyé ? oui/non
-			});
+			};
+			this._packets.push(packet);
 		}
 		return bPush;
 	}
@@ -84,6 +85,7 @@ class ClientPrediction {
 
 	/**
 	 * Supprimer les id inférieurs à celui spécifié
+	 * on ne supprime pas le dernier packet
 	 * @param id
 	 */
 	flush(id) {

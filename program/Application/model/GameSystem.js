@@ -241,8 +241,8 @@ class GameSystem {
 	/**
 	 * Rejoue les movement du client pour mise en conformité
 	 */
-	playClientMovement(id, packets) {
-		let mob = this._mobiles[id];
+	playClientMovement(idm, packets) {
+		let mob = this._mobiles[idm];
 		let vSpeed = new Vector();
 		let loc = mob.location;
 		let lastId = packets.reduce((prev, {t, a, x, y, sx, sy, id, c}) => {
@@ -256,7 +256,7 @@ class GameSystem {
 			}
 			return id;
 		}, 0);
-		// renvoyer au client les dernière information validée
+		// renvoyer au client les dernières informations validées
 		return {
 			a: loc.heading(),
 			x: loc.position().x,
@@ -328,23 +328,6 @@ class GameSystem {
         // this.transmit(id, 'G_CREATE_MOBILES', aPackets);
         // transmettre aux clients la position du nouveau
     }
-
-
-	/**
-	 * Le mobile d'un client a mis à jour son mouvement
-	 * @param a
-	 * @param x
-	 * @param y
-	 * @param sx
-	 * @param sy
-	 */
-    clientMobileUpdate(client, packets) {
-		let id = client.id;
-		let mob = this._mobiles[id];
-		this.playClientMovement(client.id, packets);
-		let pos = mob.location.position();
-		this.transmit(this._players[id]);
-	}
 
 
 	clientHasLeft(client) {
