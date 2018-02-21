@@ -63,16 +63,16 @@ export default function createWebSocketPlugin (socket) {
 
 			game.on('frame', event => {
 				// rendu du moniteur de ping
-				game.renderPing();
+				//game.renderPing();
 			});
 
 			/**
 			 * Evènement : le client a bougé son mobile
 			 * transmetter au serveur la nouvelle situation geometrique
 			 */
-			game.on('update.player', async packets => {
+			game.on('update.player', async packet => {
 				let t1 = performance.now();
-				let aCorrPacket = await req_g_update_player(packets);
+				let aCorrPacket = await req_g_update_player(packet);
 				let t2 = performance.now();
 				game.ping(t2 - t1);
 				game.applyMobileCorrection(aCorrPacket);
@@ -141,7 +141,7 @@ export default function createWebSocketPlugin (socket) {
 			await store.dispatch('chat/postLine', {
 				tab: oChannel.id,
 				client: null,
-				message: STRINGS.ui.chat.joined.with({user: oUser.name, chan: oChannel.name})
+				message: oUser.name + ' rejoint le canal ' + oChannel.name
 			});
 		});
 
@@ -154,7 +154,7 @@ export default function createWebSocketPlugin (socket) {
 			await store.dispatch('chat/postLine', {
 				tab: oChannel.id,
 				client: null,
-				message: STRINGS.ui.chat.left.with({user: oUser.name, chan: oChannel.name})
+				message: oUser.name + ' quitte le canal ' + oChannel.name
 			});
 		});
 
@@ -186,13 +186,31 @@ export default function createWebSocketPlugin (socket) {
 			game.loadLevel(level);
 		});
 
+		function checkUndef(x, a) {
+			try {
+				console.log(x);
+				let missing = a.filter(m => !(m in x));
+				if (missing.length) {
+					console.log(missing);
+				}
+			} catch (e) {
+				console.error(x);
+			}
+		}
+
 		/**
 		 * Serveur : vous devez créer ce ou ces mobiles.
 		 */
 		socket.on('G_CREATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				mob.forEach(m => game.netSpawnMobile(m));
+				mob.forEach(m => {
+					checkUndef(m, 'id x y s a bp'.split(' '));
+					console.log(m);
+					game.netSpawnMobile(m);
+				});
 			} else {
+				checkUndef(mob, 'id x y s a bp'.split(' '));
+				console.log(mob);
 				game.netSpawnMobile(mob);
 			}
 		});
@@ -204,11 +222,11 @@ export default function createWebSocketPlugin (socket) {
 		/**
 		 * Serveur : vous devez mettre à jour ce ou ces mobiles.
 		 */
-		socket.on('G_UPDATE_MOBILE', ({mob}) => {
-			if (Array.isArray(mob)) {
-				mob.forEach(m => game.netUpdateMobile(m));
+		socket.on('G_UPDATE_MOBILE', ({m}) => {
+			if (Array.isArray(m)) {
+				m.forEach(mov => game.netUpdateMobile(mov));
 			} else {
-				game.netUpdateMobile(mob);
+				game.netUpdateMobile(m);
 			}
 		});
 
@@ -316,6 +334,9 @@ export default function createWebSocketPlugin (socket) {
 			);
 		}
 
+
+
+
 		/**
 		 * transmet le mouvement du joueur au serveur
 		 * @param data.a {number} angle visé par le mobile (direction dans laquelle il "regarde")
@@ -326,13 +347,10 @@ export default function createWebSocketPlugin (socket) {
 		 * @param data.c {number} commandes de tir, d'activation etc...
 		 */
 		async function req_g_update_player(packet) {
-			return new Promise(
-				resolve => {
-					socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data));
-				}
-			);
+			return new Promise(resolve => {
+				socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data))
+			});
 		}
-
 
 
 
@@ -372,8 +390,6 @@ export default function createWebSocketPlugin (socket) {
 		function send_g_ready(phase) {
             socket.emit('G_READY', {phase});
 		}
-
-
 
 
 

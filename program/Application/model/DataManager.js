@@ -27,7 +27,10 @@ class DataManager {
 	}
 
 	async loadLevel(sLevel) {
-		return await this.loadJSON('levels', sLevel);
+		let level = await this.loadJSON('levels', sLevel);
+		level.tiles = await this.loadJSON('tiles', 'tiles');
+		level.blueprints = await this.loadJSON('blueprints', 'blueprints');
+		return level;
 	}
 
     async loadResources(type) {

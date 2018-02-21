@@ -2094,6 +2094,15 @@ O2.createObject('O876.CanvasFactory', {
 	defaultImageSmoothing: false,
 
 	/**
+	 * Return true if "c" is a canvas
+	 * @param c
+	 * @return {boolean}
+	 */
+	isCanvas: function(c) {
+		return c instanceof HTMLCanvasElement;
+	},
+
+	/**
 	 * Create a new canvas
      * @param w {int} width of the new canvas
      * @param h {int} height of the new canvas
@@ -7317,21 +7326,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 		var bCrashWall = !this.bSlideWall;
 		var r;
 		var pSolidFunction = function(x, y) { return rc.getMapPhys(x, y); };
-		/*if (nDist > nSize) {
-			var vSubSpeed = this._vecScale(vSpeed, nSize);
-			var nModDist = nDist % nSize;
-			if (nModDist) {
-				var vModSpeed = this._vecScale(vSpeed, nModDist);
-				this.computeWallCollisions(vPos, vModSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction);
-			}
-			for (var iIter = 0; iIter < nDist; iIter += nSize) {
-				this.slide(vSubSpeed.x, vSubSpeed.y);
-				if (bCrashWall && this.bWallCollision) {
-					break;
-				}
-			}
-			return;
-		}*/
 		r = this.computeWallCollisions(
 			vPos,
 			vSpeed,
@@ -7945,7 +7939,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			return true;
 		}
 		var w, i = '';
-        if (!this.oWall.image.complete) {
+        if (!O876.CanvasFactory.isCanvas(this.oWall.image) && !this.oWall.image.complete) {
 			console.warn('shadeprocess : the wall image ' + this.oWall.image.src + ' is not loaded yet.');
         }
         try {
@@ -7956,7 +7950,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		this.oWall.image = w;
 		if (this.bFloor) {
 			try {
-                if (!this.oFloor.image.complete) {
+                if (!O876.CanvasFactory.isCanvas(this.oFloor.image) && !this.oFloor.image.complete) {
                     console.warn('shadeprocess : the flat image ' + this.oFloor.image.src + ' is not loaded yet.');
                 }
                 w = this.shadeImage(this.oFloor.image, false);
@@ -13466,7 +13460,14 @@ O2.extendClass('O876_Raycaster.CommandThinker', O876_Raycaster.Thinker, {
 	ANIMATION_ACTION : 2,
 	ANIMATION_DEATH : 3,
 
-	setMovement : function(a, s) {
+	setMovement : function(a, x, y, sx, sy) {
+		this.oMobile.setXY(x, y);
+		var s;
+		if (sy === undefined) {
+			s = sx;
+		} else {
+			s = Math.sqrt(sx * sx + sy * sy);
+		}
 		if (this.fma !== a || this.fms !== s) {
 			this.fma = a;
 			this.fms = s;

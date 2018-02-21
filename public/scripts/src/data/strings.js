@@ -3,9 +3,7 @@ const STRINGS_DB = {
         ui: {
             chat: {
                 title: 'Discussion',
-                placeholder: 'Message...',
-				joined: '$user a rejoin le canal $chan',
-				left: '$user a quitté le canal $chan'
+                placeholder: 'Message...'
             },
             login: {
                 title: 'Connexion',

@@ -1,17 +1,17 @@
 {
 	"m_warlock_b": {
-		"src": "/tiles/sprites/m_warlock_b.png",
+		"src": "/resources/sprites/m_warlock_b.png",
 		"width": 64,
 		"height": 96,
 		"frames": 27,
-		"animations": [ [ [ 8, 10, 12, 14, 0, 2, 4, 6 ], 1, 0, 0 ],		// stand
-			[ [ 8, 10, 12, 14, 0, 2, 4, 6 ], 2, 166, 1 ],				// walk
-			[ [ 8, 10, 12, 14, 0, 2, 4, 6 ], 1, 0, 0 ],					// attack
-			[ [ 16, 16, 16, 16, 16, 16, 16, 16 ], 11, 50, 0 ] ] 		// death
+		"animations": [ [ [ 8, 10, 12, 14, 0, 2, 4, 6 ], 1, 0, 0 ],
+			[ [ 8, 10, 12, 14, 0, 2, 4, 6 ], 2, 166, 1 ],
+			[ [ 8, 10, 12, 14, 0, 2, 4, 6 ], 1, 0, 0 ],
+			[ [ 16, 16, 16, 16, 16, 16, 16, 16 ], 11, 50, 0 ] ]
 	},
 
 	"m_imp1": {
-		"src": "/tiles/sprites/m_imp1.png",
+		"src": "/resources/sprites/m_imp1.png",
 		"width": 64,
 		"height": 96,
 		"frames": 59,
@@ -23,7 +23,7 @@
 	},
 
 	"p_magbolt": {
-		"src": "/tiles/sprites/p_magbolt.png",
+		"src": "/resources/sprites/p_magbolt.png",
 		"width": 48,
 		"height": 64,
 		"frames": 14,
@@ -33,7 +33,7 @@
 	},
 
 	"p_magbolt_c2": {
-		"src": "/tiles/sprites/p_magbolt_c2.png",
+		"src": "/resources/sprites/p_magbolt_c2.png",
 		"width": 48,
 		"height": 64,
 		"frames": 14,

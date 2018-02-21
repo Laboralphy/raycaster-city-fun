@@ -224,9 +224,6 @@ class Game extends O876_Raycaster.GameAbstract {
 		cp.flush(id);
 		mob.fTheta = a;
 		mob.setXY(x, y);
-		if (this.oRaycaster.clip(x, y, 1)) {
-			throw new Error('WTF inside a wall !', x, y);
-		}
 		if (packets.length) {
 			packets.forEach(({t, a, x, y, sx, sy, id, c}) => {
 				for (let i = 0; i < t; ++i) {
@@ -251,8 +248,9 @@ class Game extends O876_Raycaster.GameAbstract {
 	netUpdatePlayerMobile(a, x, y, sx, sy, c) {
 		let packet = {a, x, y, sx, sy, c};
 		let cp = this._clientPrediction;
-		if (cp.pushMovement(packet)) {
-			this.trigger('update.player', cp.getUnsentPackets());
+		let sendPacket = cp.pushMovement(packet);
+		if (sendPacket) {
+			this.trigger('update.player', sendPacket);
 		}
 	}
 
@@ -268,6 +266,7 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * @param bp {string} blueprints
 	 */
 	netSpawnMobile({id, x, y, s, a, bp}) {
+		console.log('spawning mobile', id, 'bp = ', bp);
 		if (id !== this.localId()) {
 			let m = this.spawnMobile(bp, x, y, a);
 			m.getThinker().setMovement(a, s);
@@ -283,11 +282,15 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * @param s {number} vitesse
 	 * @param a {number} angle
 	 */
-	netUpdateMobile({id, x, y, s, a}) {
-		//let m = this.getMobile(id);
-		//let m = this.spawnMobile(bp, x, y, a);
-		//let th = m.getThinker();
-		//th.setMovement(a, s);
+	netUpdateMobile({id, a, x, y, sx, sy}) {
+		if (id === this.localId()) {
+			return;
+		}
+		if (id in this._mobiles) {
+			let m = this._mobiles[id];
+			let th = m.getThinker();
+			th.setMovement(a, x, y, sx, sy);
+		}
 	}
 
 	/**
@@ -295,6 +298,7 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * @param id {string} identifiant
 	 */
 	netDestroyMobile({id}) {
+		console.log('destroy mobile', id);
 		this._mobiles[id].getThinker().die();
 	}
 }

@@ -16,6 +16,13 @@ class ClientPrediction {
 	}
 
 	/**
+	 * Supprime tous les packets
+	 */
+	clear() {
+		this._packets = [];
+	}
+
+	/**
 	 * getter/setter de packets
 	 * Renvoie l'ensemble des paquets
 	 * @param p
@@ -35,6 +42,7 @@ class ClientPrediction {
 
 	/**
 	 * Empile un mouvement dans la liste, à condition qu'il y ait un changement "significatif" dans les données
+	 * la function renvoie "true" si le mouvement doit être transmit au serveur;
 	 * @param a {number}
 	 * @param x {number}
 	 * @param y {number}
@@ -42,7 +50,7 @@ class ClientPrediction {
 	 * @param sy {number}
 	 * @param c {number} une commande spéciale d'action (tir, activation, utilisation d'un obj)
 	 */
-	pushMovement({a, x, y, sx, sy, c = 0}) {
+	pushMovement({a, x, y, sx, sy, c}) {
 		let last = this.lastPacket();
 		let bNoPreviousPacket = !last; // si true alors : c'est le premier packet, y'en n'a pas d'autre
 		let bPush = false;
@@ -61,7 +69,7 @@ class ClientPrediction {
 		}
 		if (bPush) {
 			if (last) {
-				last.send = true;
+				last.s = true;
 			}
 			let packet = {
 				t: 1,		// iteration max
@@ -69,18 +77,37 @@ class ClientPrediction {
 				sx, sy, 	// vitesse aux axes
 				id: ++this._id,  // identifiant seq
 				c, 				// commandes
-				send: bNoPreviousPacket, 	// peut etre envoyé ? oui/non
-				sent: false,		// a été envoyé ? oui/non
+				s: false,		// a été envoyé ? oui/non
+				lt: !!last ? last.t : 0
 			};
 			this._packets.push(packet);
+			return packet;
 		}
-		return bPush;
+		return false;
 	}
 
+	/**
+	 * ATTENTION !!
+	 * cette fonction modifie le flag "sent" de chaque packet
+	 * @returns {T[]}
+	 */
 	getUnsentPackets() {
-		let aPackets = this._packets.filter(p => !p.sent && p.send);
-		aPackets.forEach(p => p.sent = true);
+		let aPackets = this._packets.filter(p => !p.s);
+		aPackets.forEach(p => p.s = true);
 		return aPackets;
+	}
+
+	/**
+	 * Envoie des données au serveur en ne gardant que l'esse ntiel et en ajout un indicateur de durée de chaque mouvement
+	 * Comme cette fonction utilise getUnsentPacket, cela modifie le flag "sent" de chaque packet
+	 */
+	getContiguousPackets() {
+		// s'il y a plusieurs packet on va pouvoir effectuer des estimation de la durée de chaque paquet
+		/*let lastTime;
+		let p = this.getUnsentPackets().map(({t, a, x, y, sx, sy, id}) => {
+			return {t: }
+		});*/
+
 	}
 
 	/**

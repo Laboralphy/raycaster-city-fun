@@ -26,6 +26,7 @@ module.exports = class Mobile {
 		this._size = 16;
 		this.wallCollisions = Vector.zero();
 		this._dummy = null;
+		this._thinker = null,
 		// aspect
 		this.blueprint = '';
 		// flags
@@ -96,6 +97,14 @@ module.exports = class Mobile {
      */
 	size(n) {
 		return o876.SpellBook.prop(this, '_size', n);
+	}
+
+	thinker(th) {
+		return o876.SpellBook.prop(this, '_thinker', th);
+	}
+
+	think() {
+		this._thinker.think();
 	}
 
 	/**

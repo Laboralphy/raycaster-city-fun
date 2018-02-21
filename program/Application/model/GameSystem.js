@@ -1,16 +1,16 @@
 const Player = require('./Player');
 const Mobile = require('./Mobile');
 const Area = require('./Area');
-const uniqid = require('uniqid');
 const Emitter = require('events');
 const DataManager = require('./DataManager');
-const asyncfs = require('../../asyncfs');
 const logger = require('../../Logger');
 const o876 = require('../../o876');
 const Vector = o876.geometry.Vector;
+const MoverThinker = require('./thinkers/MoverThinker');
 
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
+const RC = require('../consts/raycaster');
 
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
@@ -24,6 +24,8 @@ class GameSystem {
 
         this.emitter = new Emitter();
         this._dataManager = new DataManager();
+
+        setInterval(() => this.doomloop(), RC.time_factor);
     }
 
 //  ####   ######   #####   #####  ######  #####    ####
@@ -104,6 +106,18 @@ class GameSystem {
         }
     }
 
+	/**
+	 * Transmission du changement de mouvement d'un mobile
+	 * @param mobile
+	 */
+	transmitMobileMovement(areas) {
+		for (let idArea in areas) {
+			let mobs = areas[idArea];
+			let a = this._areas[idArea];
+			let players = this.getAreaPlayers(a);
+			this.transmit(players, 'G_UPDATE_MOBILE', {m: mobs.map(mobile => mobile.thinker().getMovement())});
+		}
+	}
 
 
 
@@ -173,6 +187,36 @@ class GameSystem {
 
 
 
+ // #####    ####    ####   #    #  #        ####    ####   #####
+ // #    #  #    #  #    #  ##  ##  #       #    #  #    #  #    #
+ // #    #  #    #  #    #  # ## #  #       #    #  #    #  #    #
+ // #    #  #    #  #    #  #    #  #       #    #  #    #  #####
+ // #    #  #    #  #    #  #    #  #       #    #  #    #  #
+ // #####    ####    ####   #    #  ######   ####    ####   #
+
+
+	/**
+	 * Tous les mobiles sont déplacés en fonciton de la dernière vitesse calculée
+	 */
+	doomloop() {
+		let mobiles = this._mobiles;
+		let updateTheseMobiles = {};
+		for (let id in mobiles) {
+			let m = mobiles[id];
+			m.think();
+			if (m.thinker().hasChangedMovement()) {
+				let area = m.location.area().id;
+				if (!(area in updateTheseMobiles)) {
+					updateTheseMobiles[area] = [];
+				}
+				updateTheseMobiles[area].push(m);
+			}
+		}
+		// tous les mobiles qui modifie l'uniformité de leur mouvement doivent donner lieu
+		// a un message transmis aux joueurs de la zone
+		this.transmitMobileMovement(updateTheseMobiles);
+	}
+
 
 
 // #    #  #    #   #####    ##     #####  ######  #####    ####
@@ -204,6 +248,7 @@ class GameSystem {
         p.location.position().set(x, y);
         p.location.heading(angle);
         p.location.area(area);
+        p.blueprint = 'm_warlock_b';
 		return p;
     }
 
@@ -220,7 +265,6 @@ class GameSystem {
         m.location.assign(location);
         m.blueprint = ref;
         this._mobiles[id] = m;
-        //this.transmitToArea(location.area, 'G_CREATE_MOBILE', GameSystem.buildMobileCreationPacket(m));
         return m;
     }
 
@@ -240,30 +284,28 @@ class GameSystem {
 
 	/**
 	 * Rejoue les movement du client pour mise en conformité
+	 * {id, lt, a, sx, sy, c}
+	 * retransmet à tous les client de la zone la position de ce client
+	 * quand le serveur recois un ensemble de paquets il faut les jouer
 	 */
-	playClientMovement(idm, packets) {
+	playClientMovement(idm, {t, a, x, y, sx, sy, id, lt, c}) {
 		let mob = this._mobiles[idm];
-		let vSpeed = new Vector();
+		if (!mob) {
+			console.error('mob', idm, 'does not exist');
+		}
 		let loc = mob.location;
-		let lastId = packets.reduce((prev, {t, a, x, y, sx, sy, id, c}) => {
-			loc.heading(a);
-			if (c) {
-				this.playClientAction(id, c);
-			}
-			vSpeed.set(sx, sy);
-			for (let i = 0; i < t; ++i) {
-				mob.move(vSpeed);
-			}
-			return id;
-		}, 0);
-		// renvoyer au client les dernières informations validées
+		loc.heading(a);
+		if (c) {
+			this.playClientAction(id, c);
+		}
+		mob.thinker().setMovement({t, a, x, y, sx, sy, id, lt, c});
 		return {
 			a: loc.heading(),
 			x: loc.position().x,
 			y: loc.position().y,
 			sx: mob.speed.x,
 			sy: mob.speed.y,
-			id: lastId
+			id: id
 		};
 	}
 
@@ -316,8 +358,11 @@ class GameSystem {
         let mobiles = Object
             .values(this._mobiles)
             .filter(px => px.location.area() === area && px.id !== id)
-            .map(px => GameSystem.buildMobileCreationPacket(px.id));
+            .map(px => GameSystem.buildMobileCreationPacket(px));
         let subject = this.createMobile(id, p.blueprint, p.location);
+		subject.thinker(new MoverThinker());
+		subject.thinker().mobile(subject);
+
         // déterminer la liste des joueur présents dans la zone
 		let players = this.getAreaPlayers(area).filter(p => p.id !== id).map(p => p.id);
         return {

@@ -242,25 +242,44 @@ describe('model', function() {
         });
     });
 
+
 	describe('Mobile', function() {
 		const Mobile = require('../model/Mobile');
 		const o876 = require('../../o876');
 		const Vector = o876.geometry.Vector;
 
-
 		describe('wall collisions', function() {
 			function collisionNorth(x, y) {
-				return y < 5;
+				return y < 50;
 			}
 			function collisionSouth(x, y) {
-				return y >= 6;
+				return y >= 60;
 			}
 			function collisionWest(x, y) {
-				return x < 5;
+				return x < 50;
 			}
 			function collisionEast(x, y) {
-				return x >= 6;
+				return x >= 60;
 			}
+
+			it ('should not collide while immobile', function() {
+				let r = Mobile.computeWallCollisions(
+					new Vector(57, 53),
+					new Vector(0, -2),
+					2,
+					10,
+					false,
+					(x, y) => false
+				);
+
+				expect(r.pos.x).toBe(57);
+				expect(r.pos.y).toBe(51);
+				expect(r.speed.x).toBe(0);
+				expect(r.speed.y).toBe(-2);
+				expect(r.wcf.x).toBe(0);
+				expect(r.wcf.y).toBe(0);
+			});
+
 
             it ('should not collide while going north', function() {
                 let r = Mobile.computeWallCollisions(

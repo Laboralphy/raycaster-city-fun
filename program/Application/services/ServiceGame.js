@@ -79,13 +79,13 @@ class ServiceGame extends ServiceAbstract {
             }
         });
 
-        let lastCommands = 0;
-        socket.on('REQ_G_UPDATE_PLAYER', (packets, ack) => {
+
+        socket.on('REQ_G_UPDATE_PLAYER', (packet, ack) => {
 			// appliquer la modification du mobile
 			try {
 				let id = client.id;
 				// les packet doivent être joués.
-				let aCorrPacket = this._gs.playClientMovement(id, packets);
+				let aCorrPacket = this._gs.playClientMovement(id, packet);
 				// on renvoie un packet contenant les dernière données validées/corrigées
 				ack(aCorrPacket);
 			} catch (e) {

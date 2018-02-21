@@ -4,6 +4,11 @@ module.exports = class Thinker {
 		this._state = 'idle';
 		this._duration = 0;
 		this._nextState = 'idle';
+		this._mobile = null;
+	}
+
+	mobile(m) {
+		return o876.SpellBook.prop(this, '_mobile', m);
 	}
 
     /**
