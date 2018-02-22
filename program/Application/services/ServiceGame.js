@@ -2,12 +2,12 @@ const ServiceAbstract = require('./Abstract');
 const logger = require('../../Logger');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
-const GameSystem = require('../model/GameSystem');
+const Game = require('../Game');
 
 class ServiceGame extends ServiceAbstract {
     constructor() {
         super();
-        let gs = new GameSystem();
+        let gs = new Game();
 		this._gs = gs;
 
 		// Le game system va parfois transmettre de l'information
