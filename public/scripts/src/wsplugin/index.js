@@ -37,10 +37,12 @@ export default function createWebSocketPlugin (socket) {
 			 * Mettre à flou le canvas de jeu et afficher l'UI
 			 */
 			MAIN.pointerlock.on('exit', event => {
+				/*
 				game.showOverlay();
 				store.dispatch('ui/showSection', {id: 'chat'});
 				store.dispatch('ui/show');
 				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
+				*/
 			});
 
 			/**
@@ -48,9 +50,11 @@ export default function createWebSocketPlugin (socket) {
 			 * Cache l'interface et rétabli la netteté du canvas
 			 */
             MAIN.pointerlock.on('enter', event => {
-                store.dispatch('ui/hide');
+                /*
+            	store.dispatch('ui/hide');
                 game.hideOverlay();
                 document.querySelector('canvas#screen').style.filter = '';
+                */
             });
 
 			/**

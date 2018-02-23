@@ -54,6 +54,7 @@
         },
 
         mounted: function() {
+			this.inputLogin = 'test';
             this.$refs.connect.addEventListener('click', (function(event) {
             	this.error = false;
             	this.$store.dispatch('clients/submit', {login: this.inputLogin, pass: this.inputPass});

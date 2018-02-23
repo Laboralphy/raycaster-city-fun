@@ -56,6 +56,7 @@ module.exports = class Thinker {
         this.invoke('$' + this._state + '_exit');
         this._state = s;
         this.invoke('$' + this._state + '_enter');
+        return this;
     }
 
 	think() {

@@ -71,7 +71,8 @@ class ServiceGame extends ServiceAbstract {
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
 						this._emit(client.id, 'G_YOUR_ID', {id: client.id});
 						// transmettre à tous les autres clients la création du client
-						this._emit(data.players, 'G_CREATE_MOBILE', {mob: data.subject});
+						console.log(data.players);
+						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Game.buildMobileCreationPacket(data.subject) });
                         break;
                 }
             } catch (e) {

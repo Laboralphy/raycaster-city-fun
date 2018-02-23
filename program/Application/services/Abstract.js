@@ -45,7 +45,9 @@ class Abstract {
 				this._socket(idClient).emit(sEvent, data);
 			}
 		} catch (e) {
-			logger.logfmt(STRINGS.service.error.bad_client, idClient);
+			logger.errfmt(STRINGS.service.error.could_not_emit, sEvent, idClient);
+			console.error(data);
+			console.error(e.stack);
 		}
     }
 

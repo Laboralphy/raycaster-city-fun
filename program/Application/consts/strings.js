@@ -30,7 +30,8 @@ const STRINGS = {
 				invalid_channel: 'client send message to a wrong channel (client "%s" channel "%s")',
 				login_failed: 'client access denied (client "%s" nickname "%s")',
 				level_not_found: 'error when loading level (client "%s" level "%s")',
-				bad_client: 'client not found - possibly just disconnected (id "%s")'
+				bad_client: 'client not found - possibly just disconnected (id "%s")',
+				could_not_emit: 'error while sending packet (even %s client %s)'
 			}
 
 		},

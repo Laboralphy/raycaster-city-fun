@@ -15,7 +15,7 @@ const RC = require('../consts/raycaster');
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
  */
-class GameSystem {
+class Game {
     constructor() {
         this._areas = {};
         this._players = {};
@@ -115,7 +115,11 @@ class GameSystem {
 			let mobs = areas[idArea];
 			let a = this._areas[idArea];
 			let players = this.getAreaPlayers(a);
-			this.transmit(players, 'G_UPDATE_MOBILE', {m: mobs.map(mobile => mobile.thinker().getMovement())});
+			this.transmit(players, 'G_UPDATE_MOBILE', {
+				m: mobs.map(
+					mobile => mobile.thinker().getMovement()
+				)
+			});
 		}
 	}
 
@@ -157,7 +161,7 @@ class GameSystem {
      * @return {{id, x, y, a: number, sx: number, sy: number}}
      */
     static buildMobileUpdatePacket(m) {
-        let mloc = m.location();
+        let mloc = m.location;
         let mpos = mloc.position();
         let mspd = m.speed;
         return {
@@ -358,7 +362,7 @@ class GameSystem {
         let mobiles = Object
             .values(this._mobiles)
             .filter(px => px.location.area() === area && px.id !== id)
-            .map(px => GameSystem.buildMobileCreationPacket(px));
+            .map(px => Game.buildMobileCreationPacket(px));
         let subject = this.createMobile(id, p.blueprint, p.location);
 		subject.thinker(new MoverThinker());
 		subject.thinker().mobile(subject);
@@ -387,4 +391,4 @@ class GameSystem {
 	}
 }
 
-module.exports = GameSystem;
+module.exports = Game;

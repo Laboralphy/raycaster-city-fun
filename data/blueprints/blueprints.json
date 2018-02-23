@@ -4,7 +4,7 @@
 		"tile": "m_warlock_b",
 		"width": 16,
 		"height": 96,
-		"thinker": "O876_Raycaster.Command",
+		"thinker": null,
 		"fx": 0,
 		"data": null
 	},
@@ -14,7 +14,7 @@
 		"tile": "m_imp1",
 		"width": 16,
 		"height": 96,
-		"thinker": "O876_Raycaster.Command",
+		"thinker": null,
 		"fx": 0,
 		"data": null
 	},
@@ -24,7 +24,7 @@
 		"tile": "p_magbolt",
 		"width": 8,
 		"height": 96,
-		"thinker": "",
+		"thinker": null,
 		"fx": 2,
 		"data": null
 	},
@@ -34,7 +34,7 @@
 		"tile": "p_magbolt",
 		"width": 8,
 		"height": 96,
-		"thinker": "",
+		"thinker": null,
 		"fx": 2,
 		"data": null
 	}
