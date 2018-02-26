@@ -8,13 +8,9 @@ const ANIMATION_DEATH = 3;
 /**
  * Ce thinker permet de bouger un mobile en définissant un vecteur de vitesse.
  * Il ne dispose d'aucune intelligence artificielle Ce thinker a été conçu pour
- * être utilisé comme Thinker de base dans un environnement réseau. Le thinker
- * propose les fonction suivantes : - setSpeed(x, y) : définiiton de la vitesse
- * du mobile selon les axes X et Y - die() : le mobile passe à l'état DEAD (en
- * jouant l'animation correspondante - disable() : le mobile disparait -
- * restore() : le mobile réapparait dans la surface de jeux
+ * être utilisé comme Thinker de base dans un environnement réseau.
  */
-class NetThinker extends AbstractThinker {
+export default class NetThinker extends AbstractThinker {
 
 	constructor() {
 		super();
@@ -24,7 +20,16 @@ class NetThinker extends AbstractThinker {
 	}
 
 
+	/**
+	 * Modification du mouvement/position du mobile
+	 * @param a {number} nouvel angle de visée
+	 * @param x {number} coordonnée x
+	 * @param y {number} coordonnée y
+	 * @param sx {number} vitesse selon axe x
+	 * @param sy {number} vitesse selon axe y
+	 */
 	setMovement(a, x, y, sx, sy) {
+		console.log({a, x, y, sx, sy});
 		this.mobile().setXY(x, y);
 		let s =
 			sy === undefined ?
@@ -77,7 +82,7 @@ class NetThinker extends AbstractThinker {
 
 	$dying_enter() {
 		let m = this.mobile();
-		this.setMovement(this.fma, m.x, m.y, 0);
+		this.setMovement(this.fma, m.x, m.y, 0, 0);
 		m.oSprite.playAnimationType(ANIMATION_DEATH);
 		let nDeadTime = m.oSprite.oAnimation.nDuration * m.oSprite.oAnimation.nCount / this.game().TIME_FACTOR | 0;
 		this.duration(nDeadTime).next('dead');
@@ -97,3 +102,5 @@ class NetThinker extends AbstractThinker {
 		// quand c'est mort, c'est mort pour de bon
 	}
 }
+
+

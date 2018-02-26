@@ -1,4 +1,4 @@
-import PlayerThinker from './thinkers/PlayerThinker';
+import Thinkers from './thinkers';
 import ClientPrediction from './ClientPrediction';
 import PingMonitor from "./PingMonitor";
 import o876 from '../../../../program/o876';
@@ -31,6 +31,7 @@ class Game extends O876_Raycaster.GameAbstract {
 		this.on('key.down', event => this.gameEventKey(event));
 		this.on('enter', event => this.gameEventEnter(event));
 		this.on('load', event => this.gameEventLoad(event));
+		this.on('doomloop', event => this.gameEventDoomLoop(event));
 		this.on('frame', event => this.gameEventFrame(event));
 	}
 
@@ -112,7 +113,7 @@ class Game extends O876_Raycaster.GameAbstract {
 	gameEventEnter(oEvent) {
 		// player thinker configuration
 		let player = this.getPlayer();
-		let ct = new PlayerThinker();
+		let ct = new Thinkers.Player();
 		player.setThinker(ct.game(this).mobile(player));
         ct.on('use.down', () => this.activateWall(player));
     }
@@ -133,8 +134,23 @@ class Game extends O876_Raycaster.GameAbstract {
         }
     }
 
-
-
+	/**
+	 * Chaque recalcul de l'état du raycaster entraine l'activation decet évènement
+	 * @param oEvent
+	 */
+    gameEventDoomLoop(oEvent) {
+    	// procede au calcul des positions des mobiles
+		let aDeadMobiles = [];
+		let mobs = this._mobiles;
+		for (let i in mobs) {
+			let mob = mobs[i];
+			mob.think();
+			if (mob.bActive) {
+				aDeadMobiles.push(i);
+			}
+		}
+		aDeadMobiles.forEach(i => delete mobs[i]);
+	}
 
 
 
@@ -266,10 +282,12 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * @param bp {string} blueprints
 	 */
 	netSpawnMobile({id, x, y, s, a, bp}) {
-		console.log('spawning mobile', id, 'bp = ', bp);
+		console.log('spawning mobile', {id, x, y, s, a, bp});
 		if (id !== this.localId()) {
 			let m = this.spawnMobile(bp, x, y, a);
-			m.getThinker().setMovement(a, s);
+			let thinker = new Thinkers.Net();
+			m.setThinker(thinker.game(this).mobile(m));
+			m.getThinker().setMovement(a, x, y, sx, sy);
 			this._mobiles[id] = m;
 		}
 	}
@@ -287,9 +305,7 @@ class Game extends O876_Raycaster.GameAbstract {
 			return;
 		}
 		if (id in this._mobiles) {
-			let m = this._mobiles[id];
-			let th = m.getThinker();
-			th.setMovement(a, x, y, sx, sy);
+			this._mobiles[id].getThinker().setMovement(a, x, y, sx, sy);
 		}
 	}
 

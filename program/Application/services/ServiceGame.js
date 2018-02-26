@@ -67,11 +67,11 @@ class ServiceGame extends ServiceAbstract {
 
                     case STATUS.ENTERING_LEVEL: // Le client a chargé le niveau, il est prèt à recevoir les
 						data = this._gs.clientHasLoadedLevel(client);
+						console.log(data.mobiles);
 						// transmettre au client la liste de tous les mobiles
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
 						this._emit(client.id, 'G_YOUR_ID', {id: client.id});
 						// transmettre à tous les autres clients la création du client
-						console.log(data.players);
 						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Game.buildMobileCreationPacket(data.subject) });
                         break;
                 }

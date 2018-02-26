@@ -118,7 +118,7 @@ class Game {
 			this.transmit(players, 'G_UPDATE_MOBILE', {
 				m: mobs.map(
 					mobile => mobile.thinker().getMovement()
-				)
+				).filter(mov => !!mov)
 			});
 		}
 	}
@@ -150,7 +150,8 @@ class Game {
             x: mpos.x,
             y: mpos.y,
             a: mloc.heading(),
-            s: mspd,
+            sx: mspd.x,
+			sy: mspd.y,
             bp: m.blueprint
         };
     }
