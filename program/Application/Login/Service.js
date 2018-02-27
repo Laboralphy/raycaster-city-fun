@@ -1,5 +1,5 @@
-const ServiceAbstract = require('./Abstract');
-const logger = require('../../Logger');
+const ServiceAbstract = require('../ServiceManager/Abstract');
+const logger = require('../../Logger/index');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
 
@@ -30,11 +30,11 @@ class ServiceLogin extends ServiceAbstract {
             if (name.length > 2) {
                 client.name = name;
                 client.id = socket.client.id;
-                logger.logfmt(STRINGS.service.event.assign_name, client.id, client.name);
+                logger.logfmt(STRINGS.login.granted, client.id, client.name);
 				this._share('service-login', {client});
                 ack({id: client.id});
             } else {
-                logger.logfmt(STRINGS.service.error.login_failed, client.id, client.name);
+                logger.logfmt(STRINGS.login.denied, client.id, client.name);
                 client.id = null;
                 ack({id: null});
             }

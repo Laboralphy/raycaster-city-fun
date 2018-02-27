@@ -1,8 +1,9 @@
-const ServiceAbstract = require('./Abstract');
-const logger = require('../../Logger');
+const ServiceAbstract = require('../ServiceManager/Abstract');
+const logger = require('../../Logger/index');
+const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
-const Game = require('../Game');
+const Game = require('./System');
 
 class ServiceGame extends ServiceAbstract {
     constructor() {
@@ -16,7 +17,14 @@ class ServiceGame extends ServiceAbstract {
             logger.log('transmit', event, 'to', id);
             this._emit(id, event, data);
         });
+
+        setInterval(() => this.doomloop(), RC.time_factor);
     }
+
+    doomloop() {
+		let aMutations = this._gs.getStateMutations();
+		aMutations.mu.forEach(m => this._emit(m.players, 'G_UPDATE_MOBILE', m.m));
+	}
 
     error(client, e) {
         let msg = e.toString();

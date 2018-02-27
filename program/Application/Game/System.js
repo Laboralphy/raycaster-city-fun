@@ -24,8 +24,6 @@ class Game {
 
         this.emitter = new Emitter();
         this._dataManager = new DataManager();
-
-        setInterval(() => this.doomloop(), RC.time_factor);
     }
 
 //  ####   ######   #####   #####  ######  #####    ####
@@ -111,16 +109,19 @@ class Game {
 	 * @param mobile
 	 */
 	transmitMobileMovement(areas) {
+		let aTransmit = [];
 		for (let idArea in areas) {
 			let mobs = areas[idArea];
 			let a = this._areas[idArea];
 			let players = this.getAreaPlayers(a);
-			this.transmit(players, 'G_UPDATE_MOBILE', {
+			aTransmit.push({
+				players,
 				m: mobs.map(
 					mobile => mobile.thinker().getMovement()
 				).filter(mov => !!mov)
 			});
 		}
+		return aTransmit;
 	}
 
 
@@ -179,13 +180,13 @@ class Game {
 	 * @param id {string} identifiant de référence de la zone
 	 */
 	async buildArea(id) {
-		logger.logfmt(STRINGS.service.game_events.building_level, id);
+		logger.logfmt(STRINGS.game.building_level, id);
 		let area = new Area();
 		area.id = id;
 		area.name = id;
 		let level = await this._dataManager.loadLevel(id);
 		area.data(level);
-		logger.logfmt(STRINGS.service.game_events.level_built, id);
+		logger.logfmt(STRINGS.game.level_built, id);
 		return area;
 	}
 
@@ -201,9 +202,14 @@ class Game {
 
 
 	/**
-	 * Tous les mobiles sont déplacés en fonciton de la dernière vitesse calculée
+	 * renvoie la modification de l'état du jeu, afin de transmettre cela aux différents clients
+	 * - modification des clients (position, angle, vitesse)
+	 * - creation de mobiles
+	 * - suppression de mobile
+	 * - changement de l'état des portes
+	 * - ...
 	 */
-	doomloop() {
+	getStateMutations() {
 		let mobiles = this._mobiles;
 		let updateTheseMobiles = {};
 		for (let id in mobiles) {
@@ -219,7 +225,10 @@ class Game {
 		}
 		// tous les mobiles qui modifie l'uniformité de leur mouvement doivent donner lieu
 		// a un message transmis aux joueurs de la zone
-		this.transmitMobileMovement(updateTheseMobiles);
+		return {
+			// mobile update
+			mu: this.transmitMobileMovement(updateTheseMobiles)
+		}
 	}
 
 
@@ -338,11 +347,11 @@ class Game {
         if (!p) {
 			let playerData = await this._dataManager.loadClientData(client.name);
 			p = await this.createPlayer(id, playerData);
-			logger.logfmt(STRINGS.service.game_events.player_created, id);
+			logger.logfmt(STRINGS.game.player_created, id);
 			this._players[id] = p;
         }
         let area = p.location.area();
-        logger.logfmt(STRINGS.service.game_events.player_downloading_area, id, area.name);
+        logger.logfmt(STRINGS.game.player_downloading_area, id, area.name);
         let doors = null;
         return {area, doors};
 	}
@@ -374,9 +383,7 @@ class Game {
         	subject,
 			mobiles,
 			players
-		}
-        // this.transmit(id, 'G_CREATE_MOBILES', aPackets);
-        // transmettre aux clients la position du nouveau
+		};
     }
 
 

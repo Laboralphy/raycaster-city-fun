@@ -5,12 +5,20 @@ const io = require('socket.io')(http);
 const path = require('path');
 
 
-const Config = require('./Config');
+const config = require('./config');
 const logger = require('../Logger');
-const Service = require('./services');
+const ServiceManager = require('./ServiceManager');
 const STRINGS = require('./consts/strings');
 
+const ServiceLogin = require('./Login/Service');
+const ServiceTxat = require('./TinyTxat/Service');
+const ServiceGame = require('./Game/Service');
+
 class Application {
+
+	constructor() {
+		logger.log(STRINGS.service.hello);
+	}
 
 	/**
 	 * Lancement du serveur
@@ -18,9 +26,8 @@ class Application {
 	 */
 	async listen() {
 		return new Promise(function(resolve) {
-			let nPort = Config.server.port;
+			let nPort = config.server.port;
 			http.listen(nPort, function() {
-                logger.log(STRINGS.service.hello);
                 logger.log(STRINGS.service.listening, nPort);
 				resolve();
 			});
@@ -28,7 +35,12 @@ class Application {
 	}
 
 	runService() {
-        let service = new Service();
+        let service = new ServiceManager();
+        service
+			.plugin(new ServiceLogin())
+			.plugin(new ServiceTxat())
+			.plugin(new ServiceGame())
+		;
         io.on('connection', socket => service.run(socket));
 	}
 

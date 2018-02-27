@@ -1,4 +1,4 @@
-const o876 = require('../o876');
+const o876 = require('../../o876/index');
 const prop = o876.SpellBook.prop;
 const Events = require('events');
 

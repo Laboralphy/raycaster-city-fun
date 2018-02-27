@@ -1,6 +1,6 @@
-const ServiceAbstract = require('./Abstract');
-const TinyTxat = require('../../TinyTxat/index');
-const logger = require('../../Logger');
+const ServiceAbstract = require('../ServiceManager/Abstract');
+const TinyTxat = require('./index');
+const logger = require('../../Logger/index');
 const STRINGS = require('../consts/strings');
 
 class ServiceTxat extends ServiceAbstract {
@@ -110,7 +110,7 @@ class ServiceTxat extends ServiceAbstract {
                 let oUser = this.txat.findUser(client.id);
                 let oChannel = this.txat.findChannel(channel);
                 if (oChannel.userPresent(oUser)) {
-                    logger.logfmt(STRINGS.service.event.user_said,
+                    logger.logfmt(STRINGS.txat.user_said,
                         channel,
                         client.name,
                         client.id,
@@ -118,7 +118,7 @@ class ServiceTxat extends ServiceAbstract {
                     );
                     oChannel.transmitMessage(oUser, message);
                 } else {
-                    logger.errfmt(STRINGS.service.error.invalid_channel, client.id, channel);
+                    logger.errfmt(STRINGS.txat.invalid_channel, client.id, channel);
                 }
             } else {
                 socket.close();

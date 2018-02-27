@@ -22,7 +22,7 @@ class Abstract {
      * Renvoie la socket d'un client
      * @param idClient {string} id du client
      * @return {*}
-     * @private
+     * @protected
      */
     _socket(idClient) {
         return this.clientManager().client(idClient).socket;
@@ -33,7 +33,7 @@ class Abstract {
 	 * @param idClient {string|string[]} identifiant ou liste d'identifiants destinataire
 	 * @param sEvent {string} évènement
 	 * @param data {*}
-	 * @private
+	 * @protected
 	 */
     _emit(idClient, sEvent, data) {
     	try {
@@ -45,7 +45,7 @@ class Abstract {
 				this._socket(idClient).emit(sEvent, data);
 			}
 		} catch (e) {
-			logger.errfmt(STRINGS.service.error.could_not_emit, sEvent, idClient);
+			logger.errfmt(STRINGS.service.could_not_emit, sEvent, idClient);
 			console.error(data);
 			console.error(e.stack);
 		}

@@ -18,7 +18,7 @@ class Log {
 	 */
 	buildDateString(dNow) {
 		let sMonth = Log.padZero(1 + dNow.getMonth());
-		let sDay = Log.padZero(dNow.getDay());
+		let sDay = Log.padZero(dNow.getDate());
 		let sHours = Log.padZero(dNow.getHours());
 		let sMinutes = Log.padZero(dNow.getMinutes());
 		let sSeconds = Log.padZero(dNow.getSeconds());
@@ -36,7 +36,7 @@ class Log {
 	 * Imprime un message d'erreur
      */
     err() {
-        console.error(this.buildDateString(new Date()), '/!\\', ...arguments);
+        console.error(this.buildDateString(new Date()), String.fromCharCode(27) + '[4m/!\\' + String.fromCharCode(27) + '[0m', ...arguments);
     }
 
 
