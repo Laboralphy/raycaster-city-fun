@@ -17,6 +17,10 @@ const getters = {
 		return state.sections.login.visible;
 	},
 
+	isVisibleDisco: function(state) {
+		return state.sections.disconnect.visible;
+	},
+
 	getSections: function(state) {
     	return Object.keys(state.sections);
 	}

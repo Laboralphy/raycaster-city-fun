@@ -14,7 +14,8 @@ const STRINGS_DB = {
             },
             disconnect: {
                 title: 'Déconnexion',
-                message: 'Vous avez perdu la connexion avec le serveur. Essayez de vous reconnecter ultérieurement...'
+                message: 'La connexion avec le serveur a été interrompue...',
+				reload: 'Recharger',
             }
         }
     }

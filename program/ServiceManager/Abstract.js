@@ -42,7 +42,6 @@ class Abstract {
 					this._emit(id, sEvent, data);
 				});
 			} else {
-    			console.log('emit', idClient, sEvent);
 				this._socket(idClient).emit(sEvent, data);
 			}
 		} catch (e) {

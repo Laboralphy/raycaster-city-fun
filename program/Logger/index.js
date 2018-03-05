@@ -28,8 +28,8 @@ class Log {
 	/**
 	 * Log les arguments dans la sortie standard
 	 */
-	log() {
-		console.log(this.buildDateString(new Date()), ...arguments);
+	log(...args) {
+		console.log(this.buildDateString(new Date()), ...args);
 	}
 
     /**

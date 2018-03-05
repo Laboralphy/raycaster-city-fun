@@ -17,6 +17,7 @@ export default class NetThinker extends AbstractThinker {
 		this.fma = 0; // Moving angle
 		this.fms = 0; // Moving Speed
 		this.nDeadTime = 0;
+		this.state('alive');
 	}
 
 
@@ -30,17 +31,19 @@ export default class NetThinker extends AbstractThinker {
 	 */
 	setMovement(a, x, y, sx, sy) {
 		this.mobile().setXY(x, y);
-		let s =
+		let fMovSpeed =
 			sy === undefined ?
 				sx :
 				Math.sqrt(sx * sx + sy * sy);
+		let fMovAngle = Math.atan2(sy, sx);
 		let mobile = this.mobile();
-		if (this.fma !== a || this.fms !== s) {
-			this.fma = a;
-			this.fms = s;
+		if (this.fma !== a || this.fms !== fMovSpeed) {
+			this.fma = fMovAngle;
+			this.fms = fMovSpeed;
 			let oSprite = mobile.oSprite;
 			let nAnim = oSprite.nAnimationType;
-			let bStopped = s === 0;
+			let bStopped = fMovSpeed === 0;
+			mobile.fTheta = a;
 			switch (nAnim) {
 				case ANIMATION_ACTION:
 				case ANIMATION_STAND:

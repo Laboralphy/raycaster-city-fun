@@ -6,6 +6,9 @@ export default {
 		},
         chat: {
 			visible: false
+		},
+		disconnect: {
+        	visible: false
 		}
     }
 }

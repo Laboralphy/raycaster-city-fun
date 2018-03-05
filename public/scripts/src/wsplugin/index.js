@@ -88,6 +88,10 @@ export default function createWebSocketPlugin (socket) {
 		 */
         function endGame() {
 			game._halt();
+			MAIN.screen.style.display = 'none';
+			socket.close();
+			store.dispatch('ui/showSection', {id: 'disconnect'});
+			store.dispatch('ui/show');
             document.body.setAttribute('class', '');
         }
 
@@ -118,6 +122,7 @@ export default function createWebSocketPlugin (socket) {
 		 * Serveur : "Déconnexion du client"
 		 */
 		socket.on('disconnect', async () => {
+			endGame();
 		});
 
 		// MS : MESSAGE SYSTEM
