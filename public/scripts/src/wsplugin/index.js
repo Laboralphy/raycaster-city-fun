@@ -20,7 +20,6 @@ export default function createWebSocketPlugin (socket) {
 		let userCache = {};
 
 		let game;
-		let localId = '';
 
 		/**
 		 * Démarrage du jeu...
