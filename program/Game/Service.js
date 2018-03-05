@@ -1,5 +1,5 @@
 const ServiceAbstract = require('../ServiceManager/Abstract');
-const logger = require('../../Logger/index');
+const logger = require('../Logger/index');
 const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
@@ -23,7 +23,7 @@ class ServiceGame extends ServiceAbstract {
 
     doomloop() {
 		let aMutations = this._gs.getStateMutations();
-		aMutations.mu.forEach(m => this._emit(m.players, 'G_UPDATE_MOBILE', m.m));
+		aMutations.mu.forEach(m => this._emit(m.players.map(p => p.id), 'G_UPDATE_MOBILE', {m: m.m}));
 	}
 
     error(client, e) {
@@ -49,12 +49,6 @@ class ServiceGame extends ServiceAbstract {
 	connectClient(client) {
         super.connectClient(client);
         let socket = client.socket;
-        /**
-         * Le client à besoin d'une resources (blueprint)
-         */
-        socket.on('G_LOAD_BP', async ({id}) => {
-
-        });
 
         /**
          * Le client indique qu' "il est prêt"
@@ -75,7 +69,6 @@ class ServiceGame extends ServiceAbstract {
 
                     case STATUS.ENTERING_LEVEL: // Le client a chargé le niveau, il est prèt à recevoir les
 						data = this._gs.clientHasLoadedLevel(client);
-						console.log(data.mobiles);
 						// transmettre au client la liste de tous les mobiles
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
 						this._emit(client.id, 'G_YOUR_ID', {id: client.id});

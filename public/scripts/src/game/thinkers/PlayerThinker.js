@@ -2,7 +2,7 @@
  * Thinker du personnage controlé par le joueur
  */
 import FPSThinker from './FPSThinker';
-import * as COMMANDS from '../../../../../program/Application/consts/commands'
+import * as COMMANDS from '../../../../../program/consts/commands'
 
 class PlayerThinker extends FPSThinker {
 

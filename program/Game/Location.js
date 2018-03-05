@@ -2,7 +2,7 @@
  * Une localisation
  */
 const Area = require('./Area');
-const o876 = require('../../o876');
+const o876 = require('../o876/index');
 
 module.exports = class Location {
 	constructor(x = 0, y = 0, angle = 0, area = null) {

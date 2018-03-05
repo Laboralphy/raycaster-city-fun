@@ -1,6 +1,6 @@
 const ClientManager = require('../ClientManager/index');
 const TinyTxat = require('../TinyTxat/index');
-const logger = require('../../Logger/index');
+const logger = require('../Logger/index');
 
 const util = require('util');
 const STRINGS = require('../consts/strings');
@@ -25,9 +25,9 @@ class Service {
         if (typeof instance === 'string') {
             let pClass = require('./' + instance);
             let oInstance = new pClass();
-            oInstance.clientManager(this.clientManager);
 			return this.plugin(oInstance);
         }
+		instance.clientManager(this.clientManager);
         instance.events.on('plugin-message',
             (_event, data) => {
 				this._plugins.forEach(p => {
@@ -56,7 +56,7 @@ class Service {
 	 * @param socket
 	 */
 	run(socket) {
-        logger.logfmt(STRINGS.service.event.connected, socket.client.id);
+        logger.logfmt(STRINGS.service.connected, socket.client.id);
         let client = this.clientManager.register(socket.client.id);
         client.socket = socket;
 

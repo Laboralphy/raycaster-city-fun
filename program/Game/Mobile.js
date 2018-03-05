@@ -4,7 +4,7 @@
  * Décision
  */
 
-const o876 = require('../../o876');
+const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
 const RC_CONST = require('../consts/raycaster');
 const Location = require('./Location');

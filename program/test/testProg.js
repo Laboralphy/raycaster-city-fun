@@ -245,7 +245,7 @@ describe('model', function() {
 
 	describe('Mobile', function() {
 		const Mobile = require('../model/Mobile');
-		const o876 = require('../../o876');
+		const o876 = require('../o876/index');
 		const Vector = o876.geometry.Vector;
 
 		describe('wall collisions', function() {
@@ -370,7 +370,7 @@ describe('model', function() {
         });
 
 		describe('mobile collision', function() {
-			const o876 = require('../../o876');
+			const o876 = require('../o876/index');
 
 			// innstancier collider
 			const collider = new o876.collider.Collider();

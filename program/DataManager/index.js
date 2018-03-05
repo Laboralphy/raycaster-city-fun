@@ -1,6 +1,6 @@
 const DATA_PATH = 'data';
 const path = require('path');
-const asyncfs = require('../../asyncfs');
+const asyncfs = require('../asyncfs/index');
 
 class DataManager {
 

@@ -1,7 +1,7 @@
 import STRINGS from "../data/strings";
 import Game from "../game";
 import CONFIG from "../game/config";
-import STATUS from "../../../../program/Application/consts/status";
+import STATUS from "../../../../program/consts/status";
 
 /**
  * Plugin de Vuex
@@ -192,7 +192,6 @@ export default function createWebSocketPlugin (socket) {
 
 		function checkUndef(x, a) {
 			try {
-				console.log(x);
 				let missing = a.filter(m => !(m in x));
 				if (missing.length) {
 					console.log(missing);
@@ -208,13 +207,9 @@ export default function createWebSocketPlugin (socket) {
 		socket.on('G_CREATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
 				mob.forEach(m => {
-					checkUndef(m, 'id x y s a bp'.split(' '));
-					console.log(m);
 					game.netSpawnMobile(m);
 				});
 			} else {
-				checkUndef(mob, 'id x y s a bp'.split(' '));
-				console.log(mob);
 				game.netSpawnMobile(mob);
 			}
 		});
@@ -374,7 +369,6 @@ export default function createWebSocketPlugin (socket) {
 		 * @param message {string} contenu du message
 		 */
 		function send_ms_say(tab, message) {
-			console.log({channel:tab, message});
 			socket.emit('MS_SAY', {channel:tab, message});
 		}
 
@@ -429,7 +423,6 @@ export default function createWebSocketPlugin (socket) {
 					break;
 
 				case 'chat/message':
-					console.log('ms said', action.payload.message);
                     send_ms_say(action.payload.tab, action.payload.message);
 					break;
 			}

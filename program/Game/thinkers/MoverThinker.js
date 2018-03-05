@@ -1,5 +1,5 @@
 const Thinker = require('./Thinker');
-const o876 = require('../../../o876');
+const o876 = require('../../o876/index');
 const Vector = o876.geometry.Vector;
 
 module.exports = class  MoverThinker extends Thinker {

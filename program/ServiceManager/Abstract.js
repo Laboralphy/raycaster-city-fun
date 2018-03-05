@@ -1,6 +1,6 @@
-const o876 = require('../../o876');
+const o876 = require('../o876/index');
 const EventEmitter = require('events');
-const logger = require('../../Logger');
+const logger = require('../Logger/index');
 const STRINGS = require('../consts/strings');
 
 class Abstract {

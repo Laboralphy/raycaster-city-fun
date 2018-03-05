@@ -2,9 +2,9 @@ const Player = require('./Player');
 const Mobile = require('./Mobile');
 const Area = require('./Area');
 const Emitter = require('events');
-const DataManager = require('../DataManager');
-const logger = require('../../Logger');
-const o876 = require('../../o876');
+const DataManager = require('../DataManager/index');
+const logger = require('../Logger/index');
+const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
 const MoverThinker = require('./thinkers/MoverThinker');
 
@@ -106,12 +106,14 @@ class Game {
 
 	/**
 	 * Transmission du changement de mouvement d'un mobile
-	 * @param mobile
+	 * @param mobileRegistryArea {array} assoc map -> list of mobile
+	 * cet objet contient pour chaque area, la liste des mobile à updaté
+	 * (ceux dont le mouvement a changé).
 	 */
-	transmitMobileMovement(areas) {
+	transmitMobileMovement(mobileRegistryArea) {
 		let aTransmit = [];
-		for (let idArea in areas) {
-			let mobs = areas[idArea];
+		for (let idArea in mobileRegistryArea) {
+			let mobs = mobileRegistryArea[idArea];
 			let a = this._areas[idArea];
 			let players = this.getAreaPlayers(a);
 			aTransmit.push({

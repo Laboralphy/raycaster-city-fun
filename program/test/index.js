@@ -1,3 +1,3 @@
-require('../Application/TinyTxat/test');
-require('../Application/test');
+require('../TinyTxat/test');
+require('./testProg');
 require('../o876/test');

@@ -3,7 +3,7 @@
  * Ceci peut servir de base à un générateur aléatoire de niveau afin de produire le niveau final transmissible aux clients
  * et analysable par l'objet Area
  */
-const o876 = require('../../o876');
+const o876 = require('../o876/index');
 
 
 module.exports = class Level {

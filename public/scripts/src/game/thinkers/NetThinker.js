@@ -29,7 +29,6 @@ export default class NetThinker extends AbstractThinker {
 	 * @param sy {number} vitesse selon axe y
 	 */
 	setMovement(a, x, y, sx, sy) {
-		console.log({a, x, y, sx, sy});
 		this.mobile().setXY(x, y);
 		let s =
 			sy === undefined ?

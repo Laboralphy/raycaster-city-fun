@@ -1,4 +1,4 @@
-const o876 = require('../../../o876');
+const o876 = require('../../o876/index');
 module.exports = class Thinker {
 	constructor() {
 		this._state = 'idle';

@@ -5,9 +5,9 @@ const io = require('socket.io')(http);
 const path = require('path');
 
 
-const config = require('./config');
-const logger = require('../Logger');
-const ServiceManager = require('./ServiceManager');
+const config = require('./config/index');
+const logger = require('./Logger/index');
+const ServiceManager = require('./ServiceManager/index');
 const STRINGS = require('./consts/strings');
 
 const ServiceLogin = require('./Login/Service');
