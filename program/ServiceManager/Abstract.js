@@ -39,9 +39,10 @@ class Abstract {
     	try {
     		if (Array.isArray(idClient)) {
 				idClient.forEach(id => {
-					this._socket(id).emit(sEvent, data);
+					this._emit(id, sEvent, data);
 				});
 			} else {
+    			console.log('emit', idClient, sEvent);
 				this._socket(idClient).emit(sEvent, data);
 			}
 		} catch (e) {

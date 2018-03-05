@@ -115,9 +115,9 @@ class Game {
 		for (let idArea in mobileRegistryArea) {
 			let mobs = mobileRegistryArea[idArea];
 			let a = this._areas[idArea];
-			let players = this.getAreaPlayers(a);
+			let p = this.getAreaPlayers(a);
 			aTransmit.push({
-				players,
+				p,
 				m: mobs.map(
 					mobile => mobile.thinker().getMovement()
 				).filter(mov => !!mov)

@@ -23,7 +23,13 @@ class ServiceGame extends ServiceAbstract {
 
     doomloop() {
 		let aMutations = this._gs.getStateMutations();
-		aMutations.mu.forEach(m => this._emit(m.players.map(p => p.id), 'G_UPDATE_MOBILE', {m: m.m}));
+		aMutations.mu.forEach(
+			m => this._emit(
+				m.p.map(p => p.id),
+				'G_UPDATE_MOBILE',
+				{m: m.m}
+			)
+		);
 	}
 
     error(client, e) {

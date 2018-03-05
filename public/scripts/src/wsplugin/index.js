@@ -190,17 +190,6 @@ export default function createWebSocketPlugin (socket) {
 			game.loadLevel(level);
 		});
 
-		function checkUndef(x, a) {
-			try {
-				let missing = a.filter(m => !(m in x));
-				if (missing.length) {
-					console.log(missing);
-				}
-			} catch (e) {
-				console.error(x);
-			}
-		}
-
 		/**
 		 * Serveur : vous devez créer ce ou ces mobiles.
 		 */

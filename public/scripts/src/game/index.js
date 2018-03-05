@@ -145,7 +145,7 @@ class Game extends O876_Raycaster.GameAbstract {
 		for (let i in mobs) {
 			let mob = mobs[i];
 			mob.think();
-			if (mob.bActive) {
+			if (!mob.bActive) {
 				aDeadMobiles.push(i);
 			}
 		}
