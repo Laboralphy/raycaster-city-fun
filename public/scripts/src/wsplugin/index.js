@@ -14,8 +14,6 @@ import STATUS from "../../../../program/consts/status";
  * @returns {function(*=)}
  */
 
-const OVERLAY = false;
-
 export default function createWebSocketPlugin (socket) {
 	return store => {
 		let chanCache = {};
@@ -37,36 +35,36 @@ export default function createWebSocketPlugin (socket) {
 			 * Evenement de sortie du pointerlock
 			 * Mettre à flou le canvas de jeu et afficher l'UI
 			 */
-			if (OVERLAY) {
-				MAIN.pointerlock.on('exit', event => {
-					game.showOverlay();
-					store.dispatch('ui/showSection', {id: 'chat'});
-					store.dispatch('ui/show');
-					document.querySelector('canvas#screen').style.filter = 'blur(5px)';
-				});
+			MAIN.pointerlock.on('exit', event => {
+				game.showOverlay();
+				store.dispatch('ui/showSection', {id: 'chat'});
+				store.dispatch('ui/show');
+				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
+			});
 
-				/**
-				 * Evènement d'entrée dans le pointerlock
-				 * Cache l'interface et rétabli la netteté du canvas
-				 */
-				MAIN.pointerlock.on('enter', event => {
-					store.dispatch('ui/hide');
-					game.hideOverlay();
-					document.querySelector('canvas#screen').style.filter = '';
-				});
+			/**
+			 * Evènement d'entrée dans le pointerlock
+			 * Cache l'interface et rétabli la netteté du canvas
+			 */
+            MAIN.pointerlock.on('enter', event => {
+            	store.dispatch('ui/hide');
+                game.hideOverlay();
+                document.querySelector('canvas#screen').style.filter = '';
+            });
 
-			}
 			/**
 			 * Evènement : le client a fini de construire le niveau
 			 * Envoie un message "ready" pour indiquer qu'on est pret à jouer
 			 */
 			game.on('enter', async event => {
-        Application.$root.$emit('game:ready', game)
             	send_g_ready(STATUS.ENTERING_LEVEL);
 			});
 
-			game.on('vsync', event => {
-        Application.$root.$emit('game:vsync', game)
+			game.on('frame', event => {
+				let player = game.getPlayer();
+				let fAngle = player.fTheta;
+				let x = player.x;
+				let y = player.y;
 			});
 
 			/**
@@ -197,18 +195,13 @@ export default function createWebSocketPlugin (socket) {
 		/**
 		 * Serveur : vous devez créer ce ou ces mobiles.
 		 */
-		socket.on('G_CREATE_MOBILE', async ({mob}) => {
+		socket.on('G_CREATE_MOBILE', ({mob}) => {
 			if (Array.isArray(mob)) {
-				for (let i = 0, l = mob.length; i < l; ++i) {
-					let m = mob[i];
-					console.log('requesting', m.bp);
-					await req_g_load_bp(m.bp);
-					console.log('got', m.bp);
+				mob.forEach(m => {
 					game.netSpawnMobile(m);
-				}
+				});
 			} else {
 				// tester si le blueprint est chargé
-				await req_g_load_bp(mob.bp);
 				game.netSpawnMobile(mob);
 			}
 		});
@@ -220,11 +213,11 @@ export default function createWebSocketPlugin (socket) {
 		/**
 		 * Serveur : vous devez mettre à jour ce ou ces mobiles.
 		 */
-		socket.on('G_UPDATE_MOBILE', ({mob}) => {
-			if (Array.isArray(mob)) {
-				mob.forEach(mov => game.netUpdateMobile(mov));
+		socket.on('G_UPDATE_MOBILE', ({m}) => {
+			if (Array.isArray(m)) {
+				m.forEach(mov => game.netUpdateMobile(mov));
 			} else {
-				game.netUpdateMobile(mob);
+				game.netUpdateMobile(m);
 			}
 		});
 
@@ -235,7 +228,6 @@ export default function createWebSocketPlugin (socket) {
 			if (Array.isArray(mob)) {
 				mob.forEach(m => game.netDestroyMobile(m));
 			} else {
-				console.log(mob);
 				game.netDestroyMobile(mob);
 			}
 		});
@@ -348,64 +340,6 @@ export default function createWebSocketPlugin (socket) {
 		async function req_g_update_player(packet) {
 			return new Promise(resolve => {
 				socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data))
-			});
-		}
-
-
-		async function req_g_load_bp(sResRef) {
-			// télécharger le blueprint
-			// vérifier si la tile attachée au blueprint est chargée
-			// si non alors télécharger la tile
-			// shader la tile
-			// intégrer le blueprint
-			return new Promise(resolve => {
-
-				let rc = game.getRaycaster();
-				let oHorde = rc.oHorde;
-
-				if (sResRef in oHorde.oBlueprints) {
-					// le blueprint est déja en mémoire
-					resolve(oHorde.oBlueprints[sResRef]);
-				} else {
-					// envoyer une requète de chargement de ressource blueprint
-					socket.emit('REQ_G_LOAD_RSC', {type: 'b', ref: sResRef}, blueprint => {
-
-						/**
-						 * Résoudre la promise en définissant le blueprint complet dans le raycaster
-						 */
-						function commitBP() {
-							resolve(oHorde.defineBlueprint(sResRef, blueprint));
-						}
-
-						let sTileRef = blueprint.tile;
-						if (sTileRef in oHorde.oTiles) {
-							// la tile est déja définie
-							commitBP();
-						} else {
-							// la tile n'est pas déja définie : effectuer une autre requète de chargement de ressource tile
-							socket.emit('REQ_G_LOAD_RSC', {type: 't', ref: sTileRef}, tile => {
-								let oTile = oHorde.defineTile(sTileRef, tile);
-
-								/**
-								 * Ombrer la tile nouvellemnet chargée puis résoudre la promise
-								 */
-								function shadeAndCommitBP() {
-									commitBP();
-									oTile.oImage = rc.shadeImage(oTile.oImage, true);
-								}
-
-								// l'image de la tile ...
-								if (oTile.oImage.complete) {
-									// ... est déja chargée
-									shadeAndCommitBP()
-								} else {
-									// ... n'est pas déja chargée : on doit utiliser l'évènement load
-									oTile.oImage.addEventListener('load', shadeAndCommitBP);
-								}
-							});
-						}
-					});
-				}
 			});
 		}
 

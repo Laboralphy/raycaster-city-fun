@@ -53,6 +53,10 @@ class Game extends O876_Raycaster.GameAbstract {
 	 */
 	loadLevel(data) {
 		this.initRaycaster(data);
+		let rc = this.oRaycaster;
+		let mm = new Minimap();
+		rc.oMinimap = mm;
+		mm.reset(rc);
     }
 
 	/**
@@ -70,6 +74,10 @@ class Game extends O876_Raycaster.GameAbstract {
 	getPlayer() {
 		return this.oRaycaster.oCamera;
 	}
+
+
+
+
 
 	localId(id) {
 		return o876.SpellBook.prop(this, '_localId', id);
