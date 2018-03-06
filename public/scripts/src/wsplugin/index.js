@@ -38,23 +38,26 @@ export default function createWebSocketPlugin (socket) {
 			 * Evenement de sortie du pointerlock
 			 * Mettre à flou le canvas de jeu et afficher l'UI
 			 */
-			if (OVERLAY) {
-				MAIN.pointerlock.on('exit', event => {
-					game.showOverlay();
-					store.dispatch('ui/showSection', {id: 'chat'});
-					store.dispatch('ui/show');
-					document.querySelector('canvas#screen').style.filter = 'blur(5px)';
-				});
+			if (OVERLAY) {MAIN.pointerlock.on('exit', event => {
 
-				/**
-				 * Evènement d'entrée dans le pointerlock
-				 * Cache l'interface et rétabli la netteté du canvas
-				 */
-				MAIN.pointerlock.on('enter', event => {
-					store.dispatch('ui/hide');
-					game.hideOverlay();
-					document.querySelector('canvas#screen').style.filter = '';
-				});
+				game.showOverlay();
+				store.dispatch('ui/showSection', {id: 'chat'});
+				store.dispatch('ui/show');
+				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
+
+			});
+
+			/**
+			 * Evènement d'entrée dans le pointerlock
+			 * Cache l'interface et rétabli la netteté du canvas
+			 */
+            MAIN.pointerlock.on('enter', event => {
+
+            	store.dispatch('ui/hide');
+                game.hideOverlay();
+                document.querySelector('canvas#screen').style.filter = '';
+
+            });
 
 			}
 			/**
