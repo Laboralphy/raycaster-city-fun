@@ -4998,33 +4998,6 @@ O2.createClass('O876_Raycaster.Animation',  {
 	}
 });
 
-// Block fields manager
-O2.createClass('O876_Raycaster.BF',  {
-	getCode: function(n) {
-		return n & 0xFF;
-	},
-
-	modifyCode: function(n, v) {
-		return (n & 0xFFFFFF00) | v;
-	},
-	
-	getPhys: function(n) {
-		return (n >> 8) & 0xFF;
-	},
-
-	modifyPhys: function(n, v) {
-		return (n & 0xFFFF00FF) | (v << 8);
-	},
-	
-	getOffs: function(n) {
-		return (n >> 16) & 0xFF;
-	},
-
-	modifyOffs: function(n) {
-		return (n & 0xFF00FFFF) | (v << 16);
-	},
-});
-
 /** Un blueprint est un élément de la palette de propriétés
  * O876 Raycaster project
  * @date 2012-01-01
@@ -7002,6 +6975,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 	// flags
 	bActive: false,							// Flag d'activité
 	bEthereal: false,						// Flage de collision globale
+	bVisible: true,							// Visibilité au niveau du mobile (le sprite dispose de sont propre flag de visibilité prioritaire à celui du mobile)
 
 	fTheta: 0,								// Angle de rotation
 	fMovingAngle: 0,						// Angle de déplacement
@@ -7024,7 +6998,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 
 	nBlueprintType: null,					// type de mobile : une des valeurs de GEN_DATA.blueprintTypes
 	bSlideWall: true,						// True: corrige la trajectoire en cas de collision avec un mur
-	bVisible: true,							// Visibilité au niveau du mobile (le sprite dispose de sont propre flag de visibilité prioritaire à celui du mobile)
 	bWallCollision: false,
 
 	//oData: null,
