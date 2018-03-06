@@ -28,13 +28,28 @@ class DataManager {
 
 	async loadLevel(sLevel) {
 		let level = await this.loadJSON('levels', sLevel);
-		level.tiles = await this.loadJSON('tiles', 'tiles');
-		level.blueprints = await this.loadJSON('blueprints', 'blueprints');
+		//level.tiles = await this.loadJSON('tiles', 'tiles');
+		//level.blueprints = await this.loadJSON('blueprints', 'blueprints');
 		return level;
 	}
 
     async loadResources(type) {
-        return await this.loadJSON(type, type);
+		let fullType;
+
+		switch (type) {
+			case 'b':
+				fullType = 'blueprints';
+				break;
+
+			case 't':
+				fullType = 'tiles';
+				break;
+
+			default:
+				throw new Error('this resource type is unknown : "' + type + "'");
+		}
+
+        return await this.loadJSON(fullType, fullType);
     }
 
     async loadResource(type, id) {

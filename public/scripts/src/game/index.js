@@ -53,10 +53,6 @@ class Game extends O876_Raycaster.GameAbstract {
 	 */
 	loadLevel(data) {
 		this.initRaycaster(data);
-		let rc = this.oRaycaster;
-		let mm = new Minimap();
-		rc.oMinimap = mm;
-		mm.reset(rc);
     }
 
 	/**
@@ -74,10 +70,6 @@ class Game extends O876_Raycaster.GameAbstract {
 	getPlayer() {
 		return this.oRaycaster.oCamera;
 	}
-
-
-
-
 
 	localId(id) {
 		return o876.SpellBook.prop(this, '_localId', id);
@@ -327,20 +319,20 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * @param s {number} vitesse
 	 * @param a {number} angle
 	 */
-	netUpdateMobile({id = null, a = null, x = null, y = null, sx = null, sy = null}) {
+	netUpdateMobile({id, a, x, y, sx, sy}) {
 		if (id === this.localId()) {
 			return;
 		}
 		if (id in this._mobiles) {
 			this._mobiles[id].getThinker().setMovement(a, x, y, sx, sy);
-		}
+		} // else : not loaded yet
 	}
 
 	/**
 	 * destruction de mobile, suite à un ordre du serveur
 	 * @param id {string} identifiant
 	 */
-	netDestroyMobile({id}) {
+	netDestroyMobile(id) {
 		this._mobiles[id].getThinker().die();
 	}
 }
