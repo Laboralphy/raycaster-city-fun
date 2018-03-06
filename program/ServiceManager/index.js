@@ -65,7 +65,7 @@ class Service {
          */
         socket.on('disconnect', () => {
             let id = socket.client.id;
-            logger.logfmt(STRINGS.service.event.disconnected, id);
+            logger.logfmt(STRINGS.service.disconnected, id);
             this.destroyClient(client);
         });
 
