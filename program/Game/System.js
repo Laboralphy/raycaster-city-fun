@@ -36,6 +36,13 @@ class Game {
 
     // Les getters permettent d'interoger l'état du jeu
 
+	/**
+	 * Renvoie l'instance du datamanger
+	 * @returns {DataManager}
+	 */
+	getDataManager() {
+    	return this._dataManager;
+	}
 
     /**
      * Renvoie une instance d'Area
@@ -394,10 +401,14 @@ class Game {
     	let mob = this._mobiles[id];
     	// détruire ce mobile : mob
 		if (mob) {
+			let area = mob.location.area();
+			let others = this.getAreaPlayers(area);
+			this.transmit(others, 'G_DESTROY_MOBILE', {mob: id});
 			mob.finalize();
 		}
 		delete this._mobiles[id];
 		delete this._players[id];
+
 	}
 }
 
