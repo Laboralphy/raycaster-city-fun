@@ -36,12 +36,10 @@ export default function createWebSocketPlugin (socket) {
 			 * Mettre à flou le canvas de jeu et afficher l'UI
 			 */
 			MAIN.pointerlock.on('exit', event => {
-				/*
 				game.showOverlay();
 				store.dispatch('ui/showSection', {id: 'chat'});
 				store.dispatch('ui/show');
 				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
-				*/
 			});
 
 			/**
@@ -49,11 +47,9 @@ export default function createWebSocketPlugin (socket) {
 			 * Cache l'interface et rétabli la netteté du canvas
 			 */
             MAIN.pointerlock.on('enter', event => {
-                /*
             	store.dispatch('ui/hide');
                 game.hideOverlay();
                 document.querySelector('canvas#screen').style.filter = '';
-                */
             });
 
 			/**
@@ -65,8 +61,10 @@ export default function createWebSocketPlugin (socket) {
 			});
 
 			game.on('frame', event => {
-				// rendu du moniteur de ping
-				//game.renderPing();
+				let player = game.getPlayer();
+				let fAngle = player.fTheta;
+				let x = player.x;
+				let y = player.y;
 			});
 
 			/**
@@ -203,6 +201,7 @@ export default function createWebSocketPlugin (socket) {
 					game.netSpawnMobile(m);
 				});
 			} else {
+				// tester si le blueprint est chargé
 				game.netSpawnMobile(mob);
 			}
 		});

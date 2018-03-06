@@ -31,7 +31,7 @@
 
 	"p_magbolt_c2": {
 		"type": 4,
-		"tile": "p_magbolt",
+		"tile": "p_magbolt_c2",
 		"width": 8,
 		"height": 96,
 		"thinker": null,

@@ -1,6 +1,7 @@
 import Thinkers from './thinkers';
 import ClientPrediction from './ClientPrediction';
 import PingMonitor from "./PingMonitor";
+import Minimap from "./Minimap";
 import o876 from '../../../../program/o876';
 
 class Game extends O876_Raycaster.GameAbstract {
@@ -36,13 +37,34 @@ class Game extends O876_Raycaster.GameAbstract {
 	}
 
 
+
+
+ // #####    ####            #####   ####    ####   #        ####
+ // #    #  #    #             #    #    #  #    #  #       #
+ // #    #  #                  #    #    #  #    #  #        ####
+ // #####   #                  #    #    #  #    #  #            #
+ // #   #   #    #             #    #    #  #    #  #       #    #
+ // #    #   ####              #     ####    ####   ######   ####
+
+
 	/**
 	 * Ordonne le chargement d'un niveau par initialisation du Raycaster
 	 * @param data {*} donnée du niveau
 	 */
 	loadLevel(data) {
 		this.initRaycaster(data);
+		let rc = this.oRaycaster;
+		let mm = new Minimap();
+		rc.oMinimap = mm;
+		mm.reset(rc);
     }
+
+	/**
+	 * Renvoie l'instance du raycaster
+	 */
+    getRaycaster() {
+		return this.oRaycaster;
+	}
 
 
 	/**
@@ -52,6 +74,10 @@ class Game extends O876_Raycaster.GameAbstract {
 	getPlayer() {
 		return this.oRaycaster.oCamera;
 	}
+
+
+
+
 
 	localId(id) {
 		return o876.SpellBook.prop(this, '_localId', id);
