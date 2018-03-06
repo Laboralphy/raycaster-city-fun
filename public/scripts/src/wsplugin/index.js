@@ -62,9 +62,13 @@ export default function createWebSocketPlugin (socket) {
 			 * Envoie un message "ready" pour indiquer qu'on est pret à jouer
 			 */
 			game.on('enter', async event => {
+        Application.$root.$emit('game:ready', game)
             	send_g_ready(STATUS.ENTERING_LEVEL);
 			});
 
+			game.on('doomloop', () => {
+        Application.$root.$emit('game:doomloop', game)
+			})
 			game.on('frame', event => {
 				let player = game.getPlayer();
 				let fAngle = player.fTheta;
