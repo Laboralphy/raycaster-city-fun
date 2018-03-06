@@ -1,5 +1,6 @@
-const prop = require('../prop');
 const Events = require('events');
+const o876 = require('../o876/index');
+const prop = o876.SpellBook.prop;
 
 class Channel {
     constructor() {

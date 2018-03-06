@@ -1,4 +1,5 @@
-const prop = require('../prop');
+const o876 = require('../o876/index');
+const prop = o876.SpellBook.prop;
 const Events = require('events');
 
 class User {

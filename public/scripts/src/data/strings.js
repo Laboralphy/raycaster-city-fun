@@ -3,9 +3,7 @@ const STRINGS_DB = {
         ui: {
             chat: {
                 title: 'Discussion',
-                placeholder: 'Message...',
-				joined: '$user a rejoin le canal $chan',
-				left: '$user a quitté le canal $chan'
+                placeholder: 'Message...'
             },
             login: {
                 title: 'Connexion',
@@ -16,7 +14,8 @@ const STRINGS_DB = {
             },
             disconnect: {
                 title: 'Déconnexion',
-                message: 'Vous avez perdu la connexion avec le serveur. Essayez de vous reconnecter ultérieurement...'
+                message: 'La connexion avec le serveur a été interrompue...',
+				reload: 'Recharger',
             }
         }
     }

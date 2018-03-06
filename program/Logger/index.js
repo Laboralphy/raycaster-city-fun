@@ -1,3 +1,5 @@
+const util = require('util');
+
 class Log {
 
 	/**
@@ -16,7 +18,7 @@ class Log {
 	 */
 	buildDateString(dNow) {
 		let sMonth = Log.padZero(1 + dNow.getMonth());
-		let sDay = Log.padZero(dNow.getDay());
+		let sDay = Log.padZero(dNow.getDate());
 		let sHours = Log.padZero(dNow.getHours());
 		let sMinutes = Log.padZero(dNow.getMinutes());
 		let sSeconds = Log.padZero(dNow.getSeconds());
@@ -26,13 +28,32 @@ class Log {
 	/**
 	 * Log les arguments dans la sortie standard
 	 */
-	log() {
-		console.log(this.buildDateString(new Date()), ...arguments);
+	log(...args) {
+		console.log(this.buildDateString(new Date()), ...args);
 	}
 
-	err() {
-		console.error(this.buildDateString(new Date()), ...arguments);
+    /**
+	 * Imprime un message d'erreur
+     */
+    err() {
+        console.error(this.buildDateString(new Date()), String.fromCharCode(27) + '[4m/!\\' + String.fromCharCode(27) + '[0m', ...arguments);
+    }
+
+
+    /**
+	 * Même chose que log mais prend en premier argument la chaine formatable
+	 * et les argument suivant seront les arguments de cette chaine
+     */
+	logfmt(sString, ...values) {
+		this.log(util.format(sString, ...values));
 	}
+
+    /**
+     * Même chose que logfmt mais pour les erreur
+     */
+    errfmt(sString, ...values) {
+        this.err(util.format(sString, ...values));
+    }
 }
 
 module.exports = new Log();

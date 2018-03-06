@@ -2094,6 +2094,15 @@ O2.createObject('O876.CanvasFactory', {
 	defaultImageSmoothing: false,
 
 	/**
+	 * Return true if "c" is a canvas
+	 * @param c
+	 * @return {boolean}
+	 */
+	isCanvas: function(c) {
+		return c instanceof HTMLCanvasElement;
+	},
+
+	/**
 	 * Create a new canvas
      * @param w {int} width of the new canvas
      * @param h {int} height of the new canvas
@@ -2123,8 +2132,6 @@ O2.createObject('O876.CanvasFactory', {
 	 * @param b {boolean} on = smoothing on // false = smoothing off
 	 */
 	setImageSmoothing: function(oContext, b) {
-		oContext.mozImageSmoothingEnabled = b;
-		oContext.msImageSmoothingEnabled = b;
 		oContext.imageSmoothingEnabled = b;
 	},
 	
@@ -3336,10 +3343,10 @@ O2.createClass('O876.Philter', {
 					}
 				}
 			}
-			variance = max - min,
-			mean_r = accumulated_r / count;
-			mean_g = accumulated_g / count;
-			mean_b = accumulated_b / count;
+			var variance = max - min;
+			var mean_r = accumulated_r / count;
+			var mean_g = accumulated_g / count;
+			var mean_b = accumulated_b / count;
 			return {mean: {r: mean_r, g: mean_g, b: mean_b}, variance: variance};
 		}
 
@@ -4098,7 +4105,7 @@ O2.createClass('O876.Rasterize', {
 	_processImg: function(img, cb) {
 		var sSrc = img.getAttribute('src');
 		var sSign = 'data:image/';
-		if (sSrc.substr(0, sSign.length) == sSign) {
+		if (sSrc.substr(0, sSign.length) === sSign) {
 			setTimeout(cb, 0);
 			return;
 		}
@@ -4524,11 +4531,9 @@ O2.createClass('O876.SoundSystem', {
 		}
 		var iChan = this.aChans.indexOf(oChan);
 		if (iChan >= 0) {
-			console.log("remove chan", iChan);
 			oChan.remove();
             oChan = this._addChan(iChan);
 		} else if (oChan === this.oMusicChan) {
-            console.log("remove music chan");
             oChan = this._createMusicChannel();
 		}
 		oChan.src = this.sPath + '/' + this.sFormat + '/' + sSrc + '.' + this.sFormat;
@@ -4935,7 +4940,7 @@ O2.createClass('O876_Raycaster.Animation',  {
 		// Dépassement de duration (pour une seule fois)
 		if (this.nTime >= this.nDuration) {
 			this.nTime -= this.nDuration;
-			if (this.nLoop == 3) {
+			if (this.nLoop === 3) {
 				this.nIndex = Math.random() * this.nCount | 0;
 			} else {
 				this.nIndex += this.nDirLoop;
@@ -4993,33 +4998,6 @@ O2.createClass('O876_Raycaster.Animation',  {
 	}
 });
 
-// Block fields manager
-O2.createClass('O876_Raycaster.BF',  {
-	getCode: function(n) {
-		return n & 0xFF;
-	},
-
-	modifyCode: function(n, v) {
-		return (n & 0xFFFFFF00) | v;
-	},
-	
-	getPhys: function(n) {
-		return (n >> 8) & 0xFF;
-	},
-
-	modifyPhys: function(n, v) {
-		return (n & 0xFFFF00FF) | (v << 8);
-	},
-	
-	getOffs: function(n) {
-		return (n >> 16) & 0xFF;
-	},
-
-	modifyOffs: function(n) {
-		return (n & 0xFF00FFFF) | (v << 16);
-	},
-});
-
 /** Un blueprint est un élément de la palette de propriétés
  * O876 Raycaster project
  * @date 2012-01-01
@@ -5055,6 +5033,120 @@ O2.createClass('O876_Raycaster.Blueprint', {
 
 O2.mixin(O876_Raycaster.Blueprint, O876.Mixin.Data);
 
+/** Entrée sortie clavier - utilise les code ES6
+ * O876 Raycaster project
+ * @date 2018-02-12
+ * @author Raphaël Marandet 
+ * Memorise les touches clavier enfoncées
+ */
+O2.createClass('O876_Raycaster.ES6KeyboardDevice', {
+	oKeys: null,	// Index inversée Code->Action
+	aKeyBuffer: null,
+	nKeyBufferSize: 16,
+	bUseBuffer: true,
+	aAliases: null,
+	oHandlers: null,
+
+	__construct: function() {
+		this.oKeys = {};
+		this.oHandlers = {};
+		this.aAliases = {};
+		// Gros tableau pour capter plus rapidement les touches...
+		// peu élégant et peu économe mais efficace.
+		this.aKeyBuffer = [];
+	},
+
+    getKey: function(sCode) {
+		if (sCode in this.oKeys) {
+            return this.oKeys[sCode];
+		} else {
+			return 0;
+		}
+    },
+
+    setAliases: function(a) {
+		this.aAliases = a;
+	},
+
+	keyAction: function(sCode, nVal) {
+        this.oKeys[sCode] = nVal;
+	},
+
+	keyBufferPush: function(nKey) {
+		if (this.bUseBuffer && nKey && this.aKeyBuffer.length < this.nKeyBufferSize) {
+			this.aKeyBuffer.push(nKey);
+		}
+	},
+
+	eventKeyUp: function(oEvent) {
+		var sCode = oEvent.key;
+		if (sCode in this.aAliases) {
+			sCode = this.aAliases[sCode];
+		}
+		this.keyBufferPush('-' + sCode);
+		this.keyAction(sCode, 2);
+		return false;
+	},
+
+	eventKeyDown: function(oEvent) {
+		var sCode = oEvent.key;
+		if (sCode in this.aAliases) {
+			sCode = this.aAliases[sCode];
+		}
+		this.keyBufferPush(sCode);
+		this.keyAction(sCode, 1);
+		return false;
+	},
+
+	/** 
+	 * renvoie le code clavier de la première touche enfoncée du buffer FIFO
+	 * renvoie 0 si aucune touche n'a été enfoncée
+	 * @return int
+	 */
+	inputKey: function() {
+		if (this.aKeyBuffer.length) {
+			return this.aKeyBuffer.shift();
+		} else {
+			return 0;
+		}
+	},
+
+	/**
+	 * Will add event listener and keep track of it for future remove
+	 * @param sEvent DOM Event name
+	 * @param pHandler event handler function
+	 */
+	plugHandler: function(sEvent, pHandler) {
+		var p = pHandler.bind(this);
+		this.oHandlers[sEvent] = p;
+		document.addEventListener(sEvent, p, false);
+	},
+
+	/**
+	 * Will remove previously added event handler
+	 * Will do nothing if handler has not been previously added
+	 * @param sEvent DOM event name
+	 */
+	unplugHandler: function(sEvent) {
+		if (sEvent in this.oHandlers) {
+			var p = this.oHandlers[sEvent];
+			document.removeEventListener(sEvent, p);
+			delete this.oHandlers[sEvent];
+		}
+	},
+
+	plugHandlers: function() {
+		this.plugHandler('keyup', this.eventKeyUp);
+		this.plugHandler('keydown', this.eventKeyDown);
+	},
+	
+	unplugHandlers: function() {
+		this.unplugHandler('keyup');
+		this.unplugHandler('keydown');
+	}
+});
+
+
 /** Entrée sortie clavier
  * O876 Raycaster project
  * @date 2012-01-01
@@ -5079,6 +5171,10 @@ O2.createClass('O876_Raycaster.KeyboardDevice', {
 			this.aKeys.push(0);	 
 		}
 		this.aKeyBuffer = [];
+	},
+
+	getKey: function(n) {
+		return this.aKeys[n];
 	},
 	
 	setAliases: function(a) {
@@ -6108,10 +6204,12 @@ O2.extendClass('O876_Raycaster.GXSecret', O876_Raycaster.GXEffect, {
 	fSpeed : 0, // vitesse d'incrémentation/décrémentation de la
 				// porte
 	nLimit : 0, // Limite d'offset de la porte
+	oEasing: null,
 
 	__construct: function(r) {
 		__inherited(r);
 		this.nLimit = r.nPlaneSpacing;
+		this.oEasing = new O876.Easing();
 	},
 	
 	isOver : function() {
@@ -6120,7 +6218,7 @@ O2.extendClass('O876_Raycaster.GXSecret', O876_Raycaster.GXEffect, {
 
 	seekBlockSecret : function(dx, dy) {
 		if (this.oRaycaster.getMapPhys(this.x + dx,
-				this.y + dy) == this.oRaycaster.PHYS_SECRET_BLOCK) {
+				this.y + dy) === this.oRaycaster.PHYS_SECRET_BLOCK) {
 			this.oRaycaster.setMapPhys(this.x, this.y, 0);
 			Marker.clearXY(this.oRaycaster.oDoors, this.x,
 					this.y);
@@ -6153,36 +6251,38 @@ O2.extendClass('O876_Raycaster.GXSecret', O876_Raycaster.GXEffect, {
 			case 0: // init
 				Marker.markXY(this.oRaycaster.oDoors, this.x,
 						this.y, this);
-				this.fSpeed = this.oRaycaster.TIME_FACTOR * 40 / 1000;
+				this.fSpeed = RC.TIME_DOOR_SECRET / this.oRaycaster.TIME_FACTOR;
 				this.nPhase++; /** no break here */
+				this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('squareAccel');
+				/** @fallthrough */
+
 				// passage au case suivant
 			case 1: // le block se pousse jusqu'a : offset > limite
-				this.fOffset += this.fSpeed;
-				if (this.fOffset >= this.nLimit) {
+				if (this.oEasing.next().over()) {
 					this.fOffset = this.nLimit - 1;
 					// rechercher le block secret suivant
 					this.seekBlockSecret4Corners();
 					this.nPhase++;
 					this.fOffset = 0;
+					this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('squareDeccel');
+				} else {
+					this.fOffset = this.oEasing.val();
 				}
 				break;
 	
 			case 2: // le 2nd block se pousse jusqu'a : offset >
 					// limite
-				this.fOffset += this.fSpeed;
-				if (this.fOffset >= this.nLimit) {
-					this.fOffset = this.nLimit - 1;
-					this.oRaycaster.setMapPhys(this.x,
-							this.y, 0);
-					Marker.clearXY(this.oRaycaster.oDoors, this.x,
-							this.y);
+				if (this.oEasing.next().over()) {
+					this.oRaycaster.setMapPhys(this.x, this.y, 0);
+					Marker.clearXY(this.oRaycaster.oDoors, this.x, this.y);
 					this.nPhase++;
 					this.fOffset = 0;
+				} else {
+					this.fOffset = this.oEasing.val();
 				}
 				break;
 		}
-		this.oRaycaster.setMapOffs(this.x, this.y,
-				this.fOffset | 0);
+		this.oRaycaster.setMapOffs(this.x, this.y, this.fOffset | 0);
 	},
 
 	terminate : function() {
@@ -6468,16 +6568,17 @@ O2.createClass('O876_Raycaster.Horde',  {
 				nSectorLength = oSector.length;
 				for (iOther = 0; iOther < nSectorLength; ++iOther) {
 					oOther = oSector[iOther];
-					if (oOther != oMobile) {
+					if (oOther !== oMobile) {
 						if (oMobile.hits(oOther)) {
 							oMobile.oMobileCollision = oOther;
-							return;
+							return true;
 						}
 					}
 				}
 			}
 		}
 		oMobile.oMobileCollision = null;
+		return false;
 	},
 	
 	getAllocatedMemory: function() {
@@ -6594,34 +6695,65 @@ O2.createObject('MAIN', {
 	configure: function(c) {
 		MAIN.config = c;
 	},
-	
+
+
+	setupScreen: function() {
+		var screen = document.getElementById(MAIN.config.raycaster.canvas);
+		if (screen === null) {
+			throw new Error('the final canvas does not exist');
+		}
+		MAIN.screen = screen;
+		if (MAIN.config.raycaster.canvasAutoResize) {
+			MAIN.screenResize();
+			window.addEventListener('resize', MAIN.screenResize);
+		}
+	},
+
+	setupPointerlock: function() {
+		var PL = MAIN.pointerlock = new O876_Raycaster.PointerLock();
+		if (MAIN.config.game.fpsControl && PL.init()) {
+			MAIN.screen.addEventListener('click', function(oEvent) {
+				MAIN.lockPointer();
+			});
+		}
+	},
+
+	setupGameInstance: function(oGameInstance) {
+		MAIN.game = oGameInstance;
+	},
+
 	/**
 	 * Will start a game
 	 * requires a CONFIG object
 	 */
 	run: function(oGameInstance) {
-		var PL = MAIN.pointerlock = new O876_Raycaster.PointerLock();
+		MAIN.configure(oGameInstance.getConfig());
 		if (!(MAIN.config)) {
 			throw new Error('Where is my CONFIG object ? (use MAIN.configure)');
 		}
-		var oConfig = MAIN.config;
-		MAIN.screen = document.getElementById(oConfig.raycaster.canvas);
-		if (oConfig.raycaster.canvasAutoResize) {
-			MAIN.screenResize();
-			window.addEventListener('resize', MAIN.screenResize);
-		}
-		if (oGameInstance) {
-			MAIN.game = oGameInstance;
-		} else {
-			var sNamespace = oConfig.game.namespace;
-			MAIN.game = new window[sNamespace].Game();
-		}
-		MAIN.game.setConfig(oConfig);
-		if (oConfig.game.fpsControl && PL.init()) {
-			MAIN.screen.addEventListener('click', function(oEvent) {
-				MAIN.lockPointer();
-			});
-		}
+		MAIN.setupScreen();
+		MAIN.setupPointerlock();
+		MAIN.setupGameInstance(oGameInstance);
+	},
+
+	/**
+	 * Auto stats game using default config
+	 * @param config
+	 */
+	autorun: function(config) {
+		MAIN.configure(config);
+        window.addEventListener('load', function() {
+            MAIN.configure(MAIN.config);
+            if (!('namespace' in MAIN.config.game)) {
+            	throw new Error('"namespace" key is mandatory in CONFIG.game while using autorun feature');
+			}
+            var ns = MAIN.config.game.namespace;
+            var gcn = ns + '.Game';
+            var gc = O2.loadObject(gcn);
+            var data = LEVEL_DATA[Object.keys(LEVEL_DATA)[0]];
+            MAIN.run(new gc(MAIN.config));
+            MAIN.game.initRaycaster(data);
+        });
 	},
 	
 	/**
@@ -6677,7 +6809,7 @@ O2.createObject('MAIN', {
 		}
 		oCanvas.style.width = (wf | 0).toString() + 'px';
 		oCanvas.style.height = (hf | 0).toString() + 'px';
-		oCanvas.__ratio = wf / cw;
+		oCanvas.__aspect = wf / cw;
 		if (oCanvas.style.position === 'absolute' && oCanvas.style['margin-left'] === 'auto') {
 			oCanvas.style.left = ((w - wf) >> 1 | 0).toString() + 'px';
 		}
@@ -6843,6 +6975,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 	// flags
 	bActive: false,							// Flag d'activité
 	bEthereal: false,						// Flage de collision globale
+	bVisible: true,							// Visibilité au niveau du mobile (le sprite dispose de sont propre flag de visibilité prioritaire à celui du mobile)
 
 	fTheta: 0,								// Angle de rotation
 	fMovingAngle: 0,						// Angle de déplacement
@@ -6858,8 +6991,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 	nSectorRank: -1,						// Rang dans le secteur pour un repérage facile
 	nSize: 16,								// Taile du polygone de collision mobile-mur
 	oSprite: null,							// Référence du sprite
-	xCollisions: [0, 1, 0, -1],	// Tableau des collision
-	yCollisions: [-1, 0, 1, 0],	// ...
 	oThinker: null,
 	oWallCollision: null,					// x: bool : on bumpe un mur qui empeche la progression en X
 	oMobileCollision: null,
@@ -6867,7 +6998,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 
 	nBlueprintType: null,					// type de mobile : une des valeurs de GEN_DATA.blueprintTypes
 	bSlideWall: true,						// True: corrige la trajectoire en cas de collision avec un mur
-	bVisible: true,							// Visibilité au niveau du mobile (le sprite dispose de sont propre flag de visibilité prioritaire à celui du mobile)
 	bWallCollision: false,
 
 	//oData: null,
@@ -6895,6 +7025,10 @@ O2.createClass('O876_Raycaster.Mobile', {
 		} else {
 			return null;
 		}
+	},
+
+	isMoving: function() {
+		return this.x !== this.xSave || this.y !== this.ySave;
 	},
 
 	/**
@@ -6929,6 +7063,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 			this.oThinker.oMobile = this;
 		}
 		this.oWallCollision = {x: 0, y: 0};
+		this.bWallCollision = false;
 		this.gotoLimbo();
 	},
 
@@ -7029,7 +7164,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 		this.y = y;
 		var xs = x / ps | 0;
 		var ys = y / ps | 0;
-		if (xs != this.xSector || ys != this.ySector) {
+		if (xs !== this.xSector || ys !== this.ySector) {
 			rc.oMobileSectors.unregister(this);
 			this.xSector = xs;
 			this.ySector = ys;
@@ -7047,7 +7182,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 		this.ySpeed = 0;
 		var xs = this.x / ps | 0;
 		var ys = this.y / ps | 0;
-		if (xs != this.xSector || ys != this.ySector) {
+		if (xs !== this.xSector || ys !== this.ySector) {
 			this.oRaycaster.oMobileSectors.unregister(this);
 			this.xSector = xs;
 			this.ySector = ys;
@@ -7055,73 +7190,131 @@ O2.createClass('O876_Raycaster.Mobile', {
 		}
 	},
 
+	_vecScale: function(v, fScale) {
+		var v1 = MathTools.normalize(v.x, v.y);
+		return {
+			x: v1.x * fScale,
+			y: v1.y * fScale
+        };
+	},
+
 	/**
-	 * Fait glisser le mobile
-	 * détecte les collision avec le mur
-	 * @param dx {number}
-	 * @param dy {number}
+	 * Détermine la collision entre le mobile et les murs du labyrinthe
+	 * @typedef {Object} xy
+	 * @property {number} x
+	 * @property {number} y
+	 *
+	 * @param vPos {xy} position du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param vSpeed {xy} delta de déplacement du mobile. ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param nSize {number} demi-taille du mobile
+	 * @param nPlaneSpacing {number} taille de la grille
+	 * (pour savoir ou est ce qu'on s'est collisionné). ATTENTION ce vecteur est mis à jour par la fonction !
+	 * @param bCrashWall {boolean} si true alors il n'y a pas de correction de glissement
+	 * @param pSolidFunction {function} fonction permettant de déterminer si un point est dans une zone collisionnable
 	 */
-	slide: function(dx, dy) {
-		var xc = this.xCollisions;
-		var yc = this.yCollisions;
-		var x = this.x;
-		var y = this.y;
-		var ix, iy;
-		var ps = this.oRaycaster.nPlaneSpacing;
-		var nSize = this.nSize;
-		var wc = this.oWallCollision;
-		wc.x = 0;
-		wc.y = 0;
-		var nXYFormula = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx == dy && dx < 0) ? 2 : 0);
+	computeWallCollisions: function(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
+		// par defaut pas de colision détectée
+		var oWallCollision = {x: 0, y: 0};
+		var dx = vSpeed.x;
+		var dy = vSpeed.y;
+		var x = vPos.x;
+		var y = vPos.y;
+		// une formule magique permettant d'igorer l'oeil "à la traine", evitant de se faire coincer dans les portes
+		var iIgnoredEye = (Math.abs(dx) > Math.abs(dy) ? 1 : 0) | ((dx > dy) || (dx === dy && dx < 0) ? 2 : 0);
+		var xClip, yClip, ix, iy, xci, yci;
 		var bCorrection = false;
-		var xClip, yClip;
-		var bCrashWall = !this.bSlideWall;
-		this.bWallCollision = false;
+		// pour chaque direction...
 		for (var i = 0; i < 4; ++i) {
-			if (nXYFormula == i) {
+			// si la direction correspond à l'oeil à la traine...
+			if (iIgnoredEye === i) {
 				continue;
 			}
-			ix = nSize * xc[i] + x;
-			iy = nSize * yc[i] + y;
-			xClip = this.oRaycaster.clip(ix + dx, iy, 1);
-			yClip = this.oRaycaster.clip(ix, iy + dy, 1);
+			// xci et yci valent entre -1 et 1 et correspondent aux coeficients de direction
+			xci = (i & 1) * Math.sign(2 - i);
+			yci = ((3 - i) & 1) * Math.sign(i - 1);
+			ix = nSize * xci + x;
+			iy = nSize * yci + y;
+			// déterminer les collsion en x et y
+			// xClip = pSolidFunction(ix + dx, iy);
+			// yClip = pSolidFunction(ix, iy + dy);
+			xClip = pSolidFunction((ix + dx) / nPlaneSpacing | 0, iy / nPlaneSpacing | 0);
+			yClip = pSolidFunction(ix / nPlaneSpacing | 0, (iy + dy) / nPlaneSpacing | 0);
 			if (xClip) {
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
+					oWallCollision.y = yci;
 				}
-				wc.x = xc[i];
+				oWallCollision.x = xci;
 				bCorrection = true;
 			}
 			if (yClip) {
 				dy = 0;
 				if (bCrashWall) {
 					dx = 0;
+					oWallCollision.x = xci;
 				}
-				wc.y = yc[i];
+				oWallCollision.y = yci;
 				bCorrection = true;
 			}
 		}
-		this.bWallCollision = bCorrection;
+		x += dx;
+		y += dy;
 		if (bCorrection) {
-			if (wc.x > 0) {
-				x = (x / ps | 0) * ps + ps - 1 - nSize;
-			} else if (wc.x < 0) {
-				x = (x / ps | 0) * ps + nSize;
+			// il y a eu collsion
+			// corriger la coordonée impactée
+			if (oWallCollision.x > 0) {
+				x = (x / nPlaneSpacing | 0) * nPlaneSpacing + nPlaneSpacing - 1 - nSize;
+			} else if (oWallCollision.x < 0) {
+				x = (x / nPlaneSpacing | 0) * nPlaneSpacing + nSize;
 			}
-			if (wc.y > 0) {
-				y = (y / ps | 0) * ps + ps - 1 - nSize;
-			} else if (wc.y < 0) {
-				y = (y / ps | 0) * ps + nSize;
+			if (oWallCollision.y > 0) {
+				y = (y / nPlaneSpacing | 0) * nPlaneSpacing + nPlaneSpacing - 1 - nSize;
+			} else if (oWallCollision.y < 0) {
+				y = (y / nPlaneSpacing | 0) * nPlaneSpacing + nSize;
 			}
-			bCorrection = false;
 		}
-		this.setXY(x + dx, y + dy);
-		this.xSpeed = dx;
-		this.ySpeed = dy;
+		return {
+			pos: {x: x, y: y},
+			speed: {x: x - vPos.x, y: y - vPos.y},
+			wcf: oWallCollision
+		};
 	},
-	
-	
+
+
+    /**
+     * Fait glisser le mobile
+     * détecte les collision avec le mur
+     * @param dx {number}
+     * @param dy {number}
+     */
+    slide: function(dx, dy) {
+    	var vPos = {x: this.x, y: this.y};
+        var vSpeed = {x: dx, y: dy};
+        var rc = this.oRaycaster;
+
+		//var nDist = MathTools.distance(vSpeed.x, vSpeed.y);
+		var nSize = this.nSize;
+		var nPlaneSpacing = rc.nPlaneSpacing;
+		var bCrashWall = !this.bSlideWall;
+		var r;
+		var pSolidFunction = function(x, y) { return rc.getMapPhys(x, y); };
+		r = this.computeWallCollisions(
+			vPos,
+			vSpeed,
+			nSize,
+			nPlaneSpacing,
+			bCrashWall,
+			pSolidFunction
+		);
+		this.setXY(r.pos.x, r.pos.y);
+        this.xSpeed = r.speed.x;
+        this.ySpeed = r.speed.y;
+        var wcf = r.wcf;
+        this.oWallCollision = wcf;
+        this.bWallCollision = wcf.x !== 0 || wcf.y !== 0;
+    },
+
 
 	/**
 	 * Déplace la caméra d'un certain nombre d'unité vers l'avant
@@ -7129,7 +7322,7 @@ O2.createClass('O876_Raycaster.Mobile', {
      * @param fDist {number} Distance de déplacement
 	 */
 	move: function(fAngle, fDist) {
-		if (this.fMovingAngle != fAngle || this.fMovingSpeed != fDist) {
+		if (this.fMovingAngle !== fAngle || this.fMovingSpeed !== fDist) {
 			this.fMovingAngle = fAngle;
 			this.fMovingSpeed = fDist;
 			this.xInertie = Math.cos(fAngle) * fDist;
@@ -7596,19 +7789,14 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	oThinkerManager : null,
 	aVisibleMobiles: null,
 	aDiscardedMobiles: null,
-
-	// weapon Layer
-	oWeaponLayer: null,
-
 	oImages : null,
-
-	// Effects
 	oEffects : null,
-
-	// Data
 	aWorld : null,
 	oConfig : null,
-	
+	oWeaponLayer: null,
+	oArmory: null,
+
+	// upper level
 	oUpper: null,
 	/**
 	 * Set Raycaster Configuration
@@ -7684,16 +7872,6 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		}
 		this.oThinkerManager = new O876_Raycaster.ThinkerManager();
 		this.oContinueRay = { bContinue: false };
-		this.oWeaponLayer = {
-			canvas: null,
-			x: -1024,
-			y: 0,
-			width: 0,
-			height: 0,
-			index: 0,
-			alpha: 1,
-			zoom: 1
-		};
 		// économiser la RAM en diminuant le nombre de shading degrees
 		if (this.oConfig.shades) {
 			this.nShadingThreshold = this.oConfig.shades;
@@ -7733,17 +7911,41 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		if (this.nShadingThreshold === 0) {
 			return true;
 		}
-		var i = '';
-		var w = this.shadeImage(this.oWall.image, false);
+		var w, i = '';
+        if (!O876.CanvasFactory.isCanvas(this.oWall.image) && !this.oWall.image.complete) {
+			console.warn('shadeprocess : the wall image ' + this.oWall.image.src + ' is not loaded yet.');
+        }
+        try {
+            w = this.shadeImage(this.oWall.image, false);
+		} catch (e) {
+			throw new Error('could not shade the wall textures');
+		}
 		this.oWall.image = w;
 		if (this.bFloor) {
-			w = this.shadeImage(this.oFloor.image, false);
+			try {
+                if (!O876.CanvasFactory.isCanvas(this.oFloor.image) && !this.oFloor.image.complete) {
+                    console.warn('shadeprocess : the flat image ' + this.oFloor.image.src + ' is not loaded yet.');
+                }
+                w = this.shadeImage(this.oFloor.image, false);
+			} catch (e) {
+                console.log(this.oFloor.image);
+                console.error(e.message);
+                throw new Error('could not shade the flat textures');
+			}
 			this.oFloor.image = w;
 		}
 		
 		for (i in this.oHorde.oTiles) {
 			if (this.oHorde.oTiles[i].bShading) {
-				w = this.shadeImage(this.oHorde.oTiles[i].oImage, true);
+				try {
+                    if (!this.oHorde.oTiles[i].oImage.complete) {
+                        console.warn('shadeprocess : the sprite image of horde item "' + i + '" is not loaded yet.');
+                    }
+                    w = this.shadeImage(this.oHorde.oTiles[i].oImage, true);
+				} catch (e) {
+                    console.error(e.message);
+                    throw new Error('could not shade the horde item ' + i);
+				}
 				this.oHorde.oTiles[i].bShading = false;
 				this.oHorde.oTiles[i].oImage = w;
 				return false;
@@ -7766,6 +7968,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			return;
 		}
 		this.aDiscardedMobiles = this.updateHorde();
+		if (this.oWeaponLayer) {
+			this.oWeaponLayer.process(this.TIME_FACTOR, this.oCamera);
+		}
 		this.oEffects.process();
 	},
 
@@ -7819,7 +8024,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		if (sTile in t) {
 			return t[sTile];
 		} else {
-			throw new Error('this tile is not defined : "' + sTile + '"');
+			var warn = 'this tile is not defined : "' + sTile + '"';
+			console.warn(warn);
+			throw new Error(warn);
 		}
 	},
 	
@@ -7849,38 +8056,22 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		return g;
 	},
 
-	
-	/** Rendu graphique de l'arme
-	 * canvas : référence du canvas source
-	 * index : numero de la frame affiché
-	 * width : largeur en pixel d'une frame
-	 * height : hauteur d'une frame
-	 * x : position du sprite à l'écran
-	 * y : *        *         *
-	 * zoom : zoom appliqué au sprite 
-	 */
-	drawWeapon: function() {
-		var w = this.oWeaponLayer;
-		if (w.index >= 0 && w.canvas) {
-			var fAlpha = 1;
-			if (w.alpha != 1) {
-				fAlpha = this._oRenderContext.globalAlpha;
-				this._oRenderContext.globalAlpha = w.alpha;
-			}
-			this._oRenderContext.drawImage(
-				w.canvas,    // canvas des tiles d'arme 
-				w.index * w.width,   
-				0, 
-				w.width, 
-				w.height, 
-				w.x, 
-				w.y, 
-				w.width * w.zoom | 0, 
-				w.height * w.zoom | 0
-			);
-			if (w.alpha != 1) {
-				this._oRenderContext.globalAlpha = fAlpha;
-			}
+    /**
+	 * Selectionne une nouvelle arme
+     * @param w
+     */
+	weapon: function(w) {
+		var unsheat = (w) => {
+            var wl = this.oArmory[w];
+            this.oWeaponLayer = wl;
+            wl.unsheat();
+		};
+		if (this.oWeaponLayer) {
+            this.oWeaponLayer.sheat(() => {
+            	unsheat(w);
+            });
+        } else {
+            unsheat(w);
 		}
 	},
 
@@ -7891,6 +8082,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		this.oMobileSectors = null;
 		this.buildMap();
 		this.buildHorde();
+		this.buildWeapons();
 	},
 
 	updateHorde : function() {
@@ -7898,9 +8090,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	},
 
 	initCanvas : function() {
-		if (typeof this.oConfig.canvas == 'string') {
+		if (typeof this.oConfig.canvas === 'string') {
 			this._oCanvas = document.getElementById(this.oConfig.canvas);
-		} else if (typeof this.oConfig.canvas == 'object' && this.oConfig.canvas !== null) {
+		} else if (typeof this.oConfig.canvas === 'object' && this.oConfig.canvas !== null) {
 			this._oCanvas = this.oConfig.canvas;
 		} else {
 			throw new Error('initCanvas failed: configuration object needs a valid canvas entry (dom or string id)');
@@ -8289,7 +8481,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	backgroundRedim: function() {
 		var oBackground = this.oBackground;
 		var dh = this.yScrSize << 1;
-		if (oBackground && oBackground.height != dh) {
+		if (oBackground && oBackground.height !== dh) {
 			var sw = oBackground.width;
 			var sh = oBackground.height;
 			var dw = sw * dh / sh | 0;
@@ -8354,6 +8546,22 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		for (i = 0; i < oMobs.length; i++) {
 			this.oHorde.defineMobile(oMobs[i]);
 		}
+	},
+
+	buildWeapons: function() {
+        this.oArmory = {};
+        var oData = this.aWorld;
+        if ('weapons' in oData && !!oData.weapons) {
+            var wl, wd;
+            for (var iw in oData.weapons) {
+                wd = oData.weapons[iw];
+                wl = new O876_Raycaster.WeaponLayer();
+                wl.tile = this.getTile(wd.tile);
+                wl.base(wd.x, wd.y, this.yScrSize << 1);
+                wl.playAnimation(0);
+                this.oArmory[iw] = wl;
+            }
+        }
 	},
 
 	/** Création des gradient
@@ -8471,7 +8679,6 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var xint = 0, yint = 0;
 		
 		var sameOffsetWall = this.sameOffsetWall;
-		var BF = O876_Raycaster.BF;
 		
 		while (done === 0) {
 			if (xt < yt) {
@@ -8543,7 +8750,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 					if (nPhys >= nPHYS_FIRST_DOOR && nPhys <= nPHYS_LAST_DOOR) {
 						// entre PHYS_FIRST_DOOR et PHYS_LAST_DOOR
 						nOfs = nScale >> 1;
-					} else if (nPhys == nPHYS_SECRET_BLOCK || nPhys == nPHYS_TRANSPARENT_BLOCK || nPhys == nPHYS_OFFSET_BLOCK) {
+					} else if (nPhys === nPHYS_SECRET_BLOCK || nPhys === nPHYS_TRANSPARENT_BLOCK || nPhys === nPHYS_OFFSET_BLOCK) {
 						// PHYS_SECRET ou PHYS_TRANSPARENT
 						nOfs = (nText >> 16) & 0xFF; // **Code12** offs
 					} else {
@@ -8556,7 +8763,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 						if (sameOffsetWall(nOfs, xint, yint, xi, yi, dx, dy, nScale)) { // Même mur -> porte
 							nTOfs = (dyt / nScale) * nOfs;
 							xint = x + xScale * (yt + nTOfs);
-							if (((xint / nScale | 0)) != xi) {
+							if (((xint / nScale | 0)) !== xi) {
 								nPhys = nText = 0;
 							}
 							if (nText !== 0	&& Marker_getMarkXY(aExcludes, xi, yi)) {
@@ -8663,7 +8870,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 					Marker.markXY(aExcludes, oData.xWall, oData.yWall);
 				}
 			}
-			nMaxIterations--;
+			--nMaxIterations;
 		} while (oData.oContinueRay.bContinue && nMaxIterations > 0);
 		return aVisibles;
 	},
@@ -8811,7 +9018,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var yCam = this.oCamera.y;
 		var xCam8 = xCam / this.nPlaneSpacing | 0;
 		var yCam8 = yCam / this.nPlaneSpacing | 0;
-		var i = 0;
+		var i;
 		this.aZBuffer = [];
 		this.aScanSectors = Marker.create();
 		if (this.oBackground) { // Calculer l'offset camera en cas de background
@@ -8938,6 +9145,10 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		zbl = zb.length;
 		for (i = 0; i < zbl; ++i) {
 			this.drawImage(zb[i]);
+		}
+		// weapon
+		if (this.oWeaponLayer) {
+			this.oWeaponLayer.render(this._oRenderContext);
 		}
 		if (this.oConfig.drawMap) {
 			this.drawMap();
@@ -9522,6 +9733,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			case this.PHYS_CURT_SLIDING_DOWN: // rideau coulissant vers le bas
 				aData[2] += nOffset; // no break here 
 				// suite au case 4...
+				/** @fallthrough */
 
 			case this.PHYS_DOOR_SLIDING_DOWN: // Porte coulissant vers le bas
 				if (nOffset > 0) {
@@ -9678,8 +9890,6 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 				return this.getMapPhys(xm, ym);
 			case 2:
 				return this.getMapOffs(xm, ym);
-			case 3:
-				return this.getMapXYTag(xm, ym);
 			default:
 				return this.aMap[ym][xm];
 		}
@@ -10393,11 +10603,25 @@ var MathTools = {
 
 	/** Calcul de la distance entre deux point séparés par dx, dy
 	 * @param dx delta x
-	 * @param dx delta y
+	 * @param dy delta y
 	 * @return float
 	 */
 	distance : function(dx, dy) {
 		return Math.sqrt((dx * dx) + (dy * dy));
+	},
+
+	/**
+	 * Normalize le vecteur donnée
+	 * @param dx  {number}
+	 * @param dy  {number}
+	 * @return {number}
+	 */
+	normalize: function(dx, dy) {
+		var dist = MathTools.distance(dx, dy);
+		return {
+			x: dx / dist,
+			y: dy / dist
+		};
 	},
 
     /**
@@ -10621,24 +10845,17 @@ O2.createClass('O876_Raycaster.Transistate', {
 	oInterval : null,
 	oRafInterval: null,
 	pDoomloop : null,
-	sDoomloopType : 'interval',
 	sDefaultDoomloopType: 'interval',
 	bPause : false,
 	nTimeModulo : 0,
 	_sState : '',
 	bBound: false,
 
-	__construct : function(sFirst) {
-		this.setDoomloop(sFirst);
-	},
-
 
 	/** Definie la procédure à lancer à chaque doomloop
 	 * @param sProc nom de la méthode de l'objet à lancer
 	 */
-	setDoomloop : function(sProc, sType) {
-		console.log(sProc);
-		this.sDoomloopType = sType;
+	setDoomloop : function(sProc) {
 		if (!(sProc in this)) {
 			throw new Error('"' + sProc + '" is not a valid timer proc');
 		}
@@ -10696,12 +10913,141 @@ O2.createClass('O876_Raycaster.Transistate', {
 	 */
 	resume : function() {
 		if (this.bPause) {
-			this.setDoomloop(this.getDoomLoop(), this.sDoomloopType);
+			this.setDoomloop(this.getDoomLoop());
 			this.bPause = false;
 		}
 	}
 });
 
+O2.createClass('O876_Raycaster.WeaponLayer', {
+	// x, y
+	x: 0,
+	y: 0,
+	canvas: null,
+	context: null,
+	running: false,
+	xBase: 0,
+	yBase: 0,
+	xDown: 0,
+	yDown: 100, // position du layer lorsque l'arme est baissée
+	tile: null,
+	time: 0,
+	firetime: 0,
+	animation: 0,
+	easing: null,
+	changing: 0,  // 0 = up, 1 = going down, 2 = down, change, 3 = going up
+	onSheated: null,
+
+	RADIUS: 20,
+
+	base: function(x, y, yDown) {
+		this.x = x;
+		this.y = y;
+		this.xBase = x;
+		this.yBase = y;
+		this.xDown = x;
+		this.yDown = yDown;
+	},
+
+
+	/**
+	 * Baisse l'arme
+	 * Change le Tile, et remonte l'arme
+	 */
+	sheat: function(cb) {
+		this.changing = 1;
+		this.easing = new O876.Easing();
+		this.easing.from(this.yBase).to(this.yDown).during(10).use('squareAccel');
+		this.onSheated = cb;
+	},
+
+	unsheat: function() {
+		this.x = this.xDown;
+		this.y = this.yDown;
+		this.changing = 2;
+		this.easing = new O876.Easing();
+		this.easing.from(this.yDown).to(this.yBase).during(10).use('squareDeccel');
+	},
+
+	isReady: function() {
+		return this.changing === 0;
+	},
+
+	processChanging() {
+		switch (this.changing) {
+			case 1:
+				if (this.easing.next().over()) {
+					if (this.onSheated) {
+						this.onSheated();
+					}
+				}
+				break;
+
+			case 2:
+				if (this.easing.next().over()) {
+					this.changing = 0;
+					this.easing = null;
+				}
+				break;
+		}
+		return this.easing ? this.easing.val() : this.yBase;
+	},
+
+	fire: function() {
+		this.firetime = this.time + 700;
+		this.playAnimation(8);
+	},
+
+	playAnimation: function(n) {
+		if (this.tile.aAnimations[n]) {
+			this.animation = new O876_Raycaster.Animation();
+            this.animation.assign(this.tile.aAnimations[n]);
+		} else {
+			throw new Error('bad anim : ' + n);
+		}
+	},
+
+	process: function(nTime, oMobile) {
+        var x = 0, y = 0;
+		this.time += nTime;
+        var t = this.time;
+		this.running = oMobile.isMoving();
+		if (this.running && this.firetime < t) {
+            x = this.RADIUS * Math.sin(t / 170) | 0;
+            y = Math.abs(this.RADIUS * Math.cos(t / 170)) | 0;
+		}
+		if (this.animation) {
+			this.animation.animate(nTime);
+			if (this.animation.bOver) {
+				this.playAnimation(0);
+			}
+		}
+		this.x = x + this.xBase;
+		if (this.changing) {
+			this.y = this.processChanging();
+		} else {
+			this.y = y + this.yBase;
+		}
+	},
+
+	render: function(ctx) {
+		var t = this.tile;
+		var x = 0;
+		if (this.animation) {
+			x = this.animation.nFrame * this.tile.nWidth;
+		}
+		ctx.drawImage(t.oImage,
+			x,
+			0,
+			t.nWidth,
+			t.nHeight,
+			this.x,
+			this.y,
+        	t.nWidth,
+            t.nHeight,
+		);
+	}
+});
 /**
  * Classe de personnalisation des 4 face d'un block Cette classe permet de
  * personaliser l'apparence ou les fonctionnalité d'une face d'un mur
@@ -10929,6 +11275,38 @@ O2.createObject('RC', {
      * This array is internally used by the framework
      */
     FX_ALPHA: [1, 0.75, 0.50, 0.25, 0],
+
+
+	/**
+     * @property TIME_DOOR_DOUBLE
+     * Time (in milliseconds) during a double panel door opening
+	 */
+	TIME_DOOR_DOUBLE: 600,
+
+	/**
+	 * @property TIME_DOOR_DOUBLE
+	 * Time (in milliseconds) during a single panel door opening (horizontally)
+	 */
+	TIME_DOOR_SINGLE_HORIZ: 800,
+
+	/**
+	 * @property TIME_DOOR_DOUBLE
+	 * Time (in milliseconds) during a single panel door opening (vertically)
+	 */
+	TIME_DOOR_SINGLE_VERT: 800,
+
+	/**
+	 * @property TIME_DOOR_DOUBLE
+	 * Time (in milliseconds) during a secret passage opening
+	 */
+	TIME_DOOR_SECRET: 2000,
+
+	/**
+	 * @property TIME_DOOR_AUTOCLOSE
+	 * Time (in milliseconds) during an autoclose door stays open
+	 */
+	TIME_DOOR_AUTOCLOSE: 3000,
+
 
 });
 
@@ -11964,12 +12342,12 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	_nShadedTileCount : 0,
 	_oConfig: null,
 	
-	__construct : function() {
+	__construct : function(oConfig) {
 		if (!O876.Browser.checkHTML5('O876 Raycaster Engine')) {
 			throw new Error('browser is not full html 5');
 		}
-		__inherited('stateInitialize');
-		this.resume();
+		this.setConfig(oConfig);
+        this._callGameEvent('onInitialize');
 	},
 
 	/**
@@ -11979,30 +12357,28 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 		this._oConfig = c;
 	},
 
-	initRequestAnimationFrame : function() {
-		if ('requestAnimationFrame' in window) {
-			return true;
-		}
-		var RAF = null;
-		if ('requestAnimationFrame' in window) {
-			RAF = window.requestAnimationFrame;
-		} else if ('webkitRequestAnimationFrame' in window) {
-			RAF = window.webkitRequestAnimationFrame;
-		} else if ('mozRequestAnimationFrame' in window) {
-			RAF = window.mozRequestAnimationFrame;
-		}
-		if (RAF) {
-			window.requestAnimationFrame = RAF;
-			return true;
-		} else {
-			return false;
-		}
+	getConfig: function() {
+		return this._oConfig;
 	},
-	
-	initDoomLoop: function() {
-		__inherited();
-		this._nTimeStamp = null;
+
+	initRaycaster: function(oData) {
+        this.TIME_FACTOR = this.nInterval = this._oConfig.game.interval;
+        this._oConfig.game.doomloop = this._oConfig.game.doomloop || 'raf';
+        if (this.oRaycaster) {
+            this.oRaycaster.finalize();
+        } else {
+            this.oRaycaster = new O876_Raycaster.Raycaster();
+            this.oRaycaster.TIME_FACTOR = this.TIME_FACTOR;
+        }
+        this.oRaycaster.setConfig(this._oConfig.raycaster);
+        this.oRaycaster.initialize();
+        this.oThinkerManager = this.oRaycaster.oThinkerManager;
+        this.oThinkerManager.oGameInstance = this;
+        this._callGameEvent('onLoading', 'lvl', 0, 2);
+        this.oRaycaster.defineWorld(oData);
+        this.setDoomloop('stateBuildLevel');
 	},
+
 
 	/**
 	 * Déclenche un évènement
@@ -12053,8 +12429,26 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	 */
 	getKeyboardDevice : function() {
 		if (this.oKbdDevice === null) {
-			this.oKbdDevice = new O876_Raycaster.KeyboardDevice();
-			this.oKbdDevice.plugHandlers();
+			var kbd = null;
+			var cfgGame = this._oConfig.game;
+			if ('devices' in cfgGame) {
+				var cfgDev = cfgGame.devices;
+				if (typeof cfgDev !== 'object') {
+					throw new Error('config.game.devices must be an object');
+				}
+				if (!cfgDev) {
+                    throw new Error('config.game.devices must not be null');
+				}
+				if ('keyboard' in cfgDev) {
+                    var pClass = new O2.loadObject(cfgDev.keyboard);
+                    kbd = new pClass();
+				}
+			}
+			if (!kbd) {
+				kbd = new O876_Raycaster.KeyboardDevice();
+			}
+            kbd.plugHandlers();
+			this.oKbdDevice = kbd;
 		}
 		return this.oKbdDevice;
 	},
@@ -12097,18 +12491,6 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 
 	// ////////// METHODES PUBLIQUES API ////////////////
 
-	/**
-	 * Charge un nouveau niveau et ralnce la machine. Déclenche l'évènement
-	 * onExitLevel avant de changer de niveau. Utiliser cet évènement afin de
-	 * sauvegarder les données utiles entre les niveaux.
-	 * 
-	 * @param sLevel
-	 *            référence du niveau à charger
-	 */
-	enterLevel : function() {
-		this._callGameEvent('onExitLevel');
-		this.setDoomloop('stateStartRaycaster');
-	},
 
 	/**
 	 * Returns true if the block at the specified coordinates
@@ -12218,66 +12600,18 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 
 	// onEnterLevel: null,
 
-	// onMenuLoop: null,
-
 	// onDoomLoop: null,
 
 	// onFrameRendered: null,
 
 	// ////////////// ETATS ///////////////
 
-	/**
-	 * Initialisation du programme Ceci n'intervient qu'une fois
-	 */
-	stateInitialize : function() {
-		// Evènement initialization
-		this._callGameEvent('onInitialize');
-		this.TIME_FACTOR = this.nInterval = this._oConfig.game.interval;
-		this._oConfig.game.doomloop = this._oConfig.game.doomloop || 'raf';
-		this.setDoomloop('stateMenuLoop');
-		this.resume();
-	},
-
-	/**
-	 * Attend le choix d'une partie. Le programme doit afficher un menu ou un
-	 * écran d'accueil. Pour lancer la partie, l'évènement onMenuLoop doit
-	 * retourner la valeur 'true';
-	 */
-	stateMenuLoop : function() {
-		if (this._callGameEvent('onMenuLoop')) {
-			this.setDoomloop('stateStartRaycaster');
-		}
-	},
-
-	/**
-	 * Initialisation du Raycaster Ceci survient à chaque chargement de niveau
-	 */
-	stateStartRaycaster : function() {
-		if (this.oRaycaster) {
-			this.oRaycaster.finalize();
-		} else {
-			this.oRaycaster = new O876_Raycaster.Raycaster();
-			this.oRaycaster.TIME_FACTOR = this.TIME_FACTOR;
-		}
-		this.oRaycaster.setConfig(this._oConfig.raycaster);
-		this.oRaycaster.initialize();
-		this.oThinkerManager = this.oRaycaster.oThinkerManager;
-		this.oThinkerManager.oGameInstance = this;
-		this._callGameEvent('onLoading', 'lvl', 0, 2);
-		this.setDoomloop('stateBuildLevel');
-	},
 
 	/**
 	 * Prépare le chargement du niveau. RAZ de tous les objets.
 	 */
 	stateBuildLevel : function() {
 		// Evènement chargement de niveau
-		var oData = this._callGameEvent('onRequestLevelData');
-		if (typeof oData != 'object') {
-			this._halt('no world data : without world data I can\'t build the world. (onRequestLevelData did not return object)');
-			return;
-		}
-		this.oRaycaster.defineWorld(oData);
 		try {
 			this.oRaycaster.buildLevel();
 		} catch (e) {
@@ -12480,6 +12814,7 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
 	__construct: function(r) {
 		__inherited(r);
 		this.oEasing = new O876.Easing();
+		this.nMaxTime = this.nTime = RC.TIME_DOOR_AUTOCLOSE; // temps restant avant fermeture
 		this.setAutoClose(true);
 	},
 	
@@ -12495,25 +12830,26 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
 				this.nCode = r.getMapPhys(this.x, this.y);
 				switch (this.nCode) {
 					case r.PHYS_DOOR_SLIDING_DOUBLE:
-						this.fSpeed = 600 / r.TIME_FACTOR;
+						this.fSpeed = RC.TIME_DOOR_DOUBLE / r.TIME_FACTOR;
 						this.nLimit = r.nPlaneSpacing >> 1;
 						this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('smoothstep');
 						break;
 			
 					case r.PHYS_DOOR_SLIDING_LEFT:
 					case r.PHYS_DOOR_SLIDING_RIGHT:
-						this.fSpeed = 600 / r.TIME_FACTOR;
+						this.fSpeed = RC.TIME_DOOR_SINGLE_HORIZ / r.TIME_FACTOR;
 						this.nLimit = r.nPlaneSpacing;
 						this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('smoothstep');
 						break;
 			
 					default:
-						this.fSpeed = 800 / r.TIME_FACTOR;
+						this.fSpeed = RC.TIME_DOOR_SINGLE_VERT / r.TIME_FACTOR;
 						this.nLimit = r.yTexture;
 						this.oEasing.from(0).to(this.nLimit).during(this.fSpeed).use('smoothstep');
 						break;
 				}
 				this.nPhase++;	/** no break on the next line */
+				/** @fallthrough */
 
 			case 1: // la porte s'ouvre jusqu'a : offset > limite
 				if (this.oEasing.next().over()) {
@@ -12553,7 +12889,7 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
 	 */
 	close : function(bForce) {
 		this.nTime = 0;
-		if (bForce && this.nPhase == 2) {
+		if (bForce && this.nPhase === 2) {
 			this.nPhase++;
 		}
 	},
@@ -12604,8 +12940,6 @@ O2.extendClass('O876_Raycaster.GXDoor', O876_Raycaster.GXEffect, {
  Appelé dès qu'une exception non gérée est déclenchée
 
 
- menuloop
- - exit : boolean true par défaut, mettre à false pour rester dans le menu.
 
 
  leveldata
@@ -12682,19 +13016,7 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 			this.trigger('error', {message: sError, data: oError});
 		}
 	},
-	
-	/**
-	 * Cette évènement doit renvoyer TRUE pour pouvoir passer à l'étape suivante
-	 * @return bool
-	 */
-	onMenuLoop: function() {
-		var data = { exit: true };
-		this.trigger('menuloop', data);
-		return data.exit;
-		// Doit retourner TRUE pour indiquer la validation du menu et passer à l'étape suivante
-		// ici il n'y a pas de menu donc "true" pour passer directement à l'étape suivante
-	},
-	
+
 	
 	/**
 	 * Evènement appelé lors du chargement d'un niveau,
@@ -12706,6 +13028,8 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 		this.trigger('leveldata', wd);
 		return wd.data;
 	},
+
+
 	
 	/**
 	 * Evènement appelé quand une ressource et chargée
@@ -12881,7 +13205,7 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 		var x = rcc.xSector;
 		var y = rcc.ySector;
 		var sTag = this.getBlockTag(x, y);
-		if (sTag && sTag != this._sTag) {
+		if (sTag && sTag !== this._sTag) {
 			sTag = this.triggerTag(x, y, sTag);
 		}
 		this._sTag = sTag;
@@ -12912,7 +13236,7 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 
 		var oMsg = rc.addGXEffect(O876_Raycaster.GXMessage);
 		oMsg.setMessage(sMessage);
-		this._sLastPopupMessage == sMessage;
+		this._sLastPopupMessage = sMessage;
 		return oMsg;
 	},
 	
@@ -13109,8 +13433,15 @@ O2.extendClass('O876_Raycaster.CommandThinker', O876_Raycaster.Thinker, {
 	ANIMATION_ACTION : 2,
 	ANIMATION_DEATH : 3,
 
-	setMovement : function(a, s) {
-		if (this.fma != a || this.fms != s) {
+	setMovement : function(a, x, y, sx, sy) {
+		this.oMobile.setXY(x, y);
+		var s;
+		if (sy === undefined) {
+			s = sx;
+		} else {
+			s = Math.sqrt(sx * sx + sy * sy);
+		}
+		if (this.fma !== a || this.fms !== s) {
 			this.fma = a;
 			this.fms = s;
 			var oSprite = this.oMobile.oSprite;
@@ -13134,10 +13465,11 @@ O2.extendClass('O876_Raycaster.CommandThinker', O876_Raycaster.Thinker, {
 	},
 
 	die : function() {
-		this.setMovement(this.fma, 0);
-		this.oMobile.oSprite.playAnimationType(this.ANIMATION_DEATH);
-		this.oMobile.bEthereal = true;
-		this.nDeadTime = this.oMobile.oSprite.oAnimation.nDuration * this.oMobile.oSprite.oAnimation.nCount;
+		var m = this.oMobile;
+		this.setMovement(this.fma, m.x, m.y, 0);
+		m.oSprite.playAnimationType(this.ANIMATION_DEATH);
+		m.bEthereal = true;
+		this.nDeadTime = m.oSprite.oAnimation.nDuration * m.oSprite.oAnimation.nCount;
 		this.think = this.thinkDying;
 	},
 
@@ -13272,7 +13604,7 @@ O2.extendClass('O876_Raycaster.FirstPersonThinker', O876_Raycaster.Thinker,
             aKeyData = kb[nKey];
             sEvent = aKeyData[0];
             sProc = '';
-            switch (oKbd.aKeys[nKey]) {
+            switch (oKbd.getKey(nKey)) {
                 case 1: // down
                     if (aKeyData[1] === 0) {
                         sProc = sEvent + '.down';
@@ -13430,7 +13762,7 @@ O2.extendClass('O876_Raycaster.KeyboardThinker', O876_Raycaster.Thinker, {
 
 	updateKeys : function() {
 		var sKey = '', nKey, sProc, pProc, aButton;
-		var aKeys = this.aKeys;
+		var aKeys = this.oKeys;
 		var aCmds = this.aCommands;
 		var oKbd = this.oGame.getKeyboardDevice();
 		var aKeyData;
@@ -13442,7 +13774,7 @@ O2.extendClass('O876_Raycaster.KeyboardThinker', O876_Raycaster.Thinker, {
 			aKeyData = kb[nKey];
 			sEvent = aKeyData[0];
 			sProc = '';
-			switch (oKbd.aKeys[nKey]) {
+			switch (oKbd.getKey(nKey)) {
 				case 1: // down
 					if (aKeyData[1] === 0) {
 						sProc = sEvent + '.down';
@@ -13496,10 +13828,10 @@ O2.extendClass('O876_Raycaster.MissileThinker', O876_Raycaster.Thinker, {
   bExiting: true,			// Temoin de sortie du canon pour eviter les fausse collision avec le tireur
   oLastHitMobile: null,		// Dernier mobile touché
   nStepSpeed: 4,			// Nombre de déplacement par frame
-  
-  ANIMATION_EXPLOSION: 0,
-  ANIMATION_MOVING: 1,
-  
+
+  ANIMATION_MOVING: 0,
+  ANIMATION_EXPLOSION: 1,
+
   nLifeOut: 0,
   
   __construct: function() {
@@ -13512,10 +13844,10 @@ O2.extendClass('O876_Raycaster.MissileThinker', O876_Raycaster.Thinker, {
     var bWallCollision = this.oMobile.bWallCollision;  // collision murale
     var bMobileCollision = this.oMobile.oMobileCollision !== null;                        // collision avec un mobile
     var nTargetType = bMobileCollision ? this.oMobile.oMobileCollision.getType() : 0;
-    var bOwnerCollision = this.oMobile.oMobileCollision == this.oOwner;                   // collision avec le tireur
+    var bOwnerCollision = this.oMobile.oMobileCollision === this.oOwner;                   // collision avec le tireur
     var bSolidCollision = bMobileCollision &&                                             // collision avec un mobile solide (non missile, et non item)
-      nTargetType != RC.OBJECT_TYPE_MISSILE &&
-      nTargetType != RC.OBJECT_TYPE_ITEM;
+      nTargetType !== RC.OBJECT_TYPE_MISSILE &&
+      nTargetType !== RC.OBJECT_TYPE_ITEM;
 
     if (bWallCollision) {
       this.oMobile.oMobileCollision = null;
@@ -13573,13 +13905,13 @@ O2.extendClass('O876_Raycaster.MissileThinker', O876_Raycaster.Thinker, {
       this.extinct();
       return;
 	}
-    for (var i = 0; i < this.nStepSpeed; i++) {
+    //for (var i = 0; i < this.nStepSpeed; i++) {
       this.advance();
       if (this.isCollisioned()) {
         this.explode();
-        break;
+        //break;
       }
-    }
+    //}
   },
 
   thinkHit: function() {

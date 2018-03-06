@@ -1,6 +1,7 @@
 <template>
     <div v-show="isVisible">
         <login-window ref="login"></login-window>
+        <disconnect-window ref="disco"></disconnect-window>
         <chat-window ref="chat"></chat-window>
         <game-menu-wrapper ref="gameMenuWrapper"></game-menu-wrapper>
     </div>
@@ -15,7 +16,8 @@
      */
 
 
-    import LoginWindow from './login/LoginWindow.vue';
+	import LoginWindow from './login/LoginWindow.vue';
+	import DisconnectWindow from './login/DisconnectWindow.vue';
     import ChatWindow from './chat/ChatWindow.vue';
     import GameMenuWrapper from './gameMenu/GameMenuWrapper.vue'
 
@@ -25,6 +27,7 @@
         name: 'user-interface',
         components: {
             LoginWindow,
+            DisconnectWindow,
             ChatWindow,
             GameMenuWrapper
         },
@@ -32,44 +35,6 @@
             mapGetters({
                 isVisible: 'ui/isVisible'
             })
-        ),
-        methods: {
-            show: function(sWhat) {
-                switch (sWhat) {
-                    case 'ui':
-                        return this.$store.dispatch('ui/show');
-
-                    case 'login':
-                        return this.$store.dispatch('clients/show');
-
-                    case 'chat':
-                        return this.$store.dispatch('chat/show');
-
-                    case 'inventory':
-						return this.$store.dispatch('gameMenu/open');
-
-				}
-            },
-            hide: function(sWhat) {
-                switch (sWhat) {
-                    case 'ui':
-                        return this.$store.dispatch('ui/hide');
-
-                    case 'login':
-                        return this.$store.dispatch('clients/hide');
-
-                    case 'chat':
-                        return this.$store.dispatch('chat/hide');
-
-					case 'inventory':
-						return this.$store.dispatch('gameMenu/close');
-
-					case '*':
-                        return this.$store.dispatch('chat/hide')
-                            .then(() => this.$store.dispatch('clients/hide'))
-                            .then(() => this.$store.dispatch('gameMenu/close'));
-                }
-            }
-        }
+        )
     }
 </script>

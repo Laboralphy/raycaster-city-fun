@@ -1,27 +1,14 @@
 const getters = {
 
     /**
-     * Renvoie true si le composant est visible
-     * @param state
-     * @return {boolean|*}
-     */
-    isVisible: function(state) {
-        return state.visible;
-    },
-
-    /**
      * Renvoie ce qu'il faut afficher dans la fenetre de discussion actuellement sélectionnée
      */
     getContent: function(state) {
-        return function() {
-            return state.activeTab ? state.activeTab.lines : ['d'];
-        };
+		return state.activeTab ? state.activeTab.lines : ['d'];
     },
 
     getActiveTab: function(state) {
-        return function() {
-            return state.activeTab;
-        }
+        return state.activeTab;
     },
 
 	/**
@@ -34,6 +21,16 @@ const getters = {
             return state.tabs.find(t => t.id === id);
         };
     },
+
+    getLastLine: function(state, getters) {
+	    let lines = state.activeTab ? state.activeTab.lines : [];
+	    let n = lines.length - 1;
+	    if (n >= 0) {
+            return lines[n];
+        } else {
+	        return null;
+        }
+    }
 };
 
 export default getters;
