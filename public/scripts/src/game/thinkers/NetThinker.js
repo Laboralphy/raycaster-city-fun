@@ -61,6 +61,10 @@ export default class NetThinker extends AbstractThinker {
 		}
 	}
 
+	die() {
+		this.state('dying');
+	}
+
 	disable() {
 		this.state('disable');
 	}

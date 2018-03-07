@@ -5,6 +5,7 @@ const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
 const Game = require('./System');
 
+
 class ServiceGame extends ServiceAbstract {
     constructor() {
         super();
@@ -27,7 +28,7 @@ class ServiceGame extends ServiceAbstract {
 			m => this._emit(
 				m.p.map(p => p.id),
 				'G_UPDATE_MOBILE',
-				{m: m.m}
+				{mob: m.m}
 			)
 		);
 	}
@@ -100,6 +101,16 @@ class ServiceGame extends ServiceAbstract {
 				this.error(client, e);
 			}
 		});
+
+		socket.on('REQ_G_LOAD_RSC', async ({type, ref}, ack) => {
+			try {
+				logger.logfmt(STRINGS.game.player_downloading_resource, client.id, type, ref);
+				ack(await this._gs.getDataManager().loadResource(type, ref));
+			} catch (e) {
+				this.error(client, e);
+			}
+		});
+
     }
 }
 
