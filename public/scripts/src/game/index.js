@@ -1,6 +1,7 @@
 import Thinkers from './thinkers';
 import ClientPrediction from './ClientPrediction';
 import PingMonitor from "./PingMonitor";
+import Minimap from "./Minimap";
 import o876 from '../../../../program/o876';
 
 class Game extends O876_Raycaster.GameAbstract {
@@ -36,6 +37,16 @@ class Game extends O876_Raycaster.GameAbstract {
 	}
 
 
+
+
+ // #####    ####            #####   ####    ####   #        ####
+ // #    #  #    #             #    #    #  #    #  #       #
+ // #    #  #                  #    #    #  #    #  #        ####
+ // #####   #                  #    #    #  #    #  #            #
+ // #   #   #    #             #    #    #  #    #  #       #    #
+ // #    #   ####              #     ####    ####   ######   ####
+
+
 	/**
 	 * Ordonne le chargement d'un niveau par initialisation du Raycaster
 	 * @param data {*} donnée du niveau
@@ -43,6 +54,13 @@ class Game extends O876_Raycaster.GameAbstract {
 	loadLevel(data) {
 		this.initRaycaster(data);
     }
+
+	/**
+	 * Renvoie l'instance du raycaster
+	 */
+    getRaycaster() {
+		return this.oRaycaster;
+	}
 
 
 	/**
@@ -301,20 +319,20 @@ class Game extends O876_Raycaster.GameAbstract {
 	 * @param s {number} vitesse
 	 * @param a {number} angle
 	 */
-	netUpdateMobile({id = null, a = null, x = null, y = null, sx = null, sy = null}) {
+	netUpdateMobile({id, a, x, y, sx, sy}) {
 		if (id === this.localId()) {
 			return;
 		}
 		if (id in this._mobiles) {
 			this._mobiles[id].getThinker().setMovement(a, x, y, sx, sy);
-		}
+		} // else : not loaded yet
 	}
 
 	/**
 	 * destruction de mobile, suite à un ordre du serveur
 	 * @param id {string} identifiant
 	 */
-	netDestroyMobile({id}) {
+	netDestroyMobile(id) {
 		this._mobiles[id].getThinker().die();
 	}
 }

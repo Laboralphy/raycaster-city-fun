@@ -6444,6 +6444,7 @@ O2.createClass('O876_Raycaster.Horde',  {
 		oBP.sId = sId;
 		this.oBlueprints[sId] = oBP;
 		this.oMobileDispenser.registerBlueprint(sId);
+		return oBP;
 	},
 
 	// {blueprint}
@@ -6920,8 +6921,8 @@ O2.createClass('O876_Raycaster.Minimap',  {
 		}
 		return bPlaceable ? 8 : 7;
 	},
-	
-	render: function() {
+
+	updateSquares: function() {
 		var rc = this.oRaycaster;
 		var nMapSize = rc.nMapSize;
 		var x, y, nColor;
@@ -6941,8 +6942,17 @@ O2.createClass('O876_Raycaster.Minimap',  {
 				this.setSquare(x, y, nColor);
 			}
 		}
+	},
+
+	getModified: function() {
+		return this.aModified;
+	},
+
+	renderSurface: function() {
+		this.updateSquares();
+		var rc = this.oRaycaster;
 		var q, mc, m = this.aModified;
-		for (nColor = 0; nColor < m.length; nColor++) {
+		for (var nColor = 0; nColor < m.length; ++nColor) {
 			if (this.aColors[nColor]) {
 				mc = m[nColor];
 				this.oContext.fillStyle = this.aColors[nColor];
@@ -6954,8 +6964,13 @@ O2.createClass('O876_Raycaster.Minimap',  {
 			}
 		}
 		rc.getRenderContext().drawImage(this.oCanvas, 2, 2);
-	}
+	},
 	
+	render: function() {
+		this.updateSquares();
+		this.renderSurface();
+	}
+
 });
 
 /**
@@ -8388,8 +8403,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			'visual'
 		]);
 		this.nMapSize = oData.map.length;
-		this.oMobileSectors = new O876_Raycaster.MobileRegister(
-				this.nMapSize);
+		this.oMobileSectors = new O876_Raycaster.MobileRegister(this.nMapSize);
 		this.oDoors = Marker.create();
 		this.aMap = [];
 		var yMap, xMap;
