@@ -65,14 +65,8 @@ export default function createWebSocketPlugin (socket) {
             	send_g_ready(STATUS.ENTERING_LEVEL);
 			});
 
-			game.on('doomloop', () => {
-        Application.$root.$emit('game:doomloop', game)
-			})
-			game.on('frame', event => {
-				let player = game.getPlayer();
-				let fAngle = player.fTheta;
-				let x = player.x;
-				let y = player.y;
+			game.on('vsync', event => {
+        Application.$root.$emit('game:vsync', game)
 			});
 
 			/**
