@@ -11,7 +11,11 @@ import STATUS from "../../../../program/consts/status";
  *
  * @param socket
  * @returns {function(*=)}
+ *
+ * @var MAIN {*}
  */
+
+const OVERLAY = false;
 
 export default function createWebSocketPlugin (socket) {
 	return store => {
@@ -34,23 +38,25 @@ export default function createWebSocketPlugin (socket) {
 			 * Evenement de sortie du pointerlock
 			 * Mettre à flou le canvas de jeu et afficher l'UI
 			 */
-			MAIN.pointerlock.on('exit', event => {
-				game.showOverlay();
-				store.dispatch('ui/showSection', {id: 'chat'});
-				store.dispatch('ui/show');
-				document.querySelector('canvas#screen').style.filter = 'blur(5px)';
-			});
+			if (OVERLAY) {
+				MAIN.pointerlock.on('exit', event => {
+					game.showOverlay();
+					store.dispatch('ui/showSection', {id: 'chat'});
+					store.dispatch('ui/show');
+					document.querySelector('canvas#screen').style.filter = 'blur(5px)';
+				});
 
-			/**
-			 * Evènement d'entrée dans le pointerlock
-			 * Cache l'interface et rétabli la netteté du canvas
-			 */
-            MAIN.pointerlock.on('enter', event => {
-            	store.dispatch('ui/hide');
-                game.hideOverlay();
-                document.querySelector('canvas#screen').style.filter = '';
-            });
+				/**
+				 * Evènement d'entrée dans le pointerlock
+				 * Cache l'interface et rétabli la netteté du canvas
+				 */
+				MAIN.pointerlock.on('enter', event => {
+					store.dispatch('ui/hide');
+					game.hideOverlay();
+					document.querySelector('canvas#screen').style.filter = '';
+				});
 
+			}
 			/**
 			 * Evènement : le client a fini de construire le niveau
 			 * Envoie un message "ready" pour indiquer qu'on est pret à jouer
@@ -121,10 +127,65 @@ export default function createWebSocketPlugin (socket) {
 			endGame();
 		});
 
-		// MS : MESSAGE SYSTEM
-		// MS : MESSAGE SYSTEM
-		// MS : MESSAGE SYSTEM
 
+
+
+		/**
+		 * Envoi au serveur des données d'identification,
+		 * renvoie par Promise un identifiant client si l'identification a réussi, sinon, renvoie null.
+		 * @param name {string} nom
+		 * @param pass {string}		if (this.isFree()) {
+			this.oGame.gm_attack(0);
+		} else {
+			this.wtfHeld();
+		}
+		 this.nChargeStartTime = this.oGame.getTime();
+		 mot de passe
+		 */
+		async function req_login(name, pass) {
+			return new Promise(
+				resolve => {
+					socket.emit(
+						'REQ_LOGIN',
+						{name, pass},
+						({id}) => resolve(id)
+					)
+				}
+			);
+		}
+
+
+
+
+
+
+
+ // #    #  ######   ####    ####     ##     ####   ######
+ // ##  ##  #       #       #        #  #   #    #  #
+ // # ## #  #####    ####    ####   #    #  #       #####
+ // #    #  #            #       #  ######  #  ###  #
+ // #    #  #       #    #  #    #  #    #  #    #  #
+ // #    #  ######   ####    ####   #    #   ####   ######
+ //
+ //
+ //  ####    #   #   ####    #####  ######  #    #
+ // #         # #   #          #    #       ##  ##
+ //  ####      #     ####      #    #####   # ## #
+ //      #     #         #     #    #       #    #
+ // #    #     #    #    #     #    #       #    #
+ //  ####      #     ####      #    ######  #    #
+
+
+
+
+
+
+ // #    #   ####           #          #     ####    #####  ######  #    #
+ // ##  ##  #               #          #    #          #    #       ##   #
+ // # ## #   ####           #          #     ####      #    #####   # #  #
+ // #    #       #          #          #         #     #    #       #  # #
+ // #    #  #    #          #          #    #    #     #    #       #   ##
+ // #    #   ####           ######     #     ####      #    ######  #    #
 
 		/**
 		 * Serveur : "vous venez de rejoindre un canal"
@@ -177,97 +238,20 @@ export default function createWebSocketPlugin (socket) {
 		});
 
 
-        /**
-         * Serveur : vous recevez un message d'erreur suite à sa dernière requete
-         */
-        socket.on('G_ERROR', ({err}) => {
-            console.error(err);
-        });
-
-		/**
-		 * Serveur : vous recevez les données du niveau dans lequel vous devez évoluer
-		 */
-		socket.on('G_LOAD_LEVEL', ({level, doors}) => {
-			game.loadLevel(level);
-		});
-
-		/**
-		 * Serveur : vous devez créer ce ou ces mobiles.
-		 */
-		socket.on('G_CREATE_MOBILE', ({mob}) => {
-			if (Array.isArray(mob)) {
-				mob.forEach(m => {
-					game.netSpawnMobile(m);
-				});
-			} else {
-				// tester si le blueprint est chargé
-				game.netSpawnMobile(mob);
-			}
-		});
-
-		socket.on('G_YOUR_ID', ({id}) => {
-			game.localId(id);
-		});
-
-		/**
-		 * Serveur : vous devez mettre à jour ce ou ces mobiles.
-		 */
-		socket.on('G_UPDATE_MOBILE', ({m}) => {
-			if (Array.isArray(m)) {
-				m.forEach(mov => game.netUpdateMobile(mov));
-			} else {
-				game.netUpdateMobile(m);
-			}
-		});
-
-		/**
-		 * Serveur : vous devez détruire ce ou ces mobiles.
-		 */
-		socket.on('G_DESTROY_MOBILE', ({mob}) => {
-			if (Array.isArray(mob)) {
-				mob.forEach(m => game.netDestroyMobile(m));
-			} else {
-				game.netDestroyMobile(mob);
-			}
-		});
 
 
 
+ // #    #   ####           #####   ######   ####
+ // ##  ##  #               #    #  #       #    #
+ // # ## #   ####           #    #  #####   #    #
+ // #    #       #          #####   #       #  # #
+ // #    #  #    #          #   #   #       #   #
+ // #    #   ####           #    #  ######   ### #
 
-
-		// #####   ######   ####   #    #  ######   ####    #####
-		// #    #  #       #    #  #    #  #       #          #
-		// #    #  #####   #    #  #    #  #####    ####      #
-		// #####   #       #  # #  #    #  #            #     #
-		// #   #   #       #   #   #    #  #       #    #     #
-		// #    #  ######   ### #   ####   ######   ####      #
 
 		// Les REQUEST sont des messages envoyés au serveur, qui déclenche un réponse de la part du serveur.
 		// Les Request renvoient des promise.
 
-		/**
-		 * Envoi au serveur des données d'identification,
-		 * renvoie par Promise un identifiant client si l'identification a réussi, sinon, renvoie null.
-		 * @param name {string} nom
-		 * @param pass {string}		if (this.isFree()) {
-			this.oGame.gm_attack(0);
-		} else {
-			this.wtfHeld();
-		}
-		this.nChargeStartTime = this.oGame.getTime();
- mot de passe
-		 */
-		async function req_login(name, pass) {
-			return new Promise(
-				resolve => {
-					socket.emit(
-						'REQ_LOGIN',
-						{name, pass},
-						({id}) => resolve(id)
-					)
-				}
-			);
-		}
 
 		/**
 		 * Requète transmise au serveur : "Quelles sont les info relative à ce canal ?"
@@ -314,7 +298,7 @@ export default function createWebSocketPlugin (socket) {
 							{id},
 							async (data) => {
 								if (data) {
-                                    store.commit('clients/info', {id, name: data.name});
+									store.commit('clients/info', {id, name: data.name});
 								}
 								resolve(data);
 							}
@@ -325,6 +309,139 @@ export default function createWebSocketPlugin (socket) {
 		}
 
 
+
+
+
+ // #    #   ####            ####   ######  #    #  #####
+ // ##  ##  #               #       #       ##   #  #    #
+ // # ## #   ####            ####   #####   # #  #  #    #
+ // #    #       #               #  #       #  # #  #    #
+ // #    #  #    #          #    #  #       #   ##  #    #
+ // #    #   ####            ####   ######  #    #  #####
+
+		/**
+		 * Envoi un message de discussion sur un canal donné.
+		 * @param tab {String} identifiant du canal
+		 * @param message {string} contenu du message
+		 */
+		function send_ms_say(tab, message) {
+			socket.emit('MS_SAY', {channel:tab, message});
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  #####
+// #     #    ##    #    #  ######
+// #         #  #   ##  ##  #
+// #  ####  #    #  # ## #  #####
+// #     #  ######  #    #  #
+// #     #  #    #  #    #  #
+//  #####   #    #  #    #  ######
+
+
+
+
+
+
+ //  ####           #          #     ####    #####  ######  #    #
+ // #    #          #          #    #          #    #       ##   #
+ // #               #          #     ####      #    #####   # #  #
+ // #  ###          #          #         #     #    #       #  # #
+ // #    #          #          #    #    #     #    #       #   ##
+ //  ####           ######     #     ####      #    ######  #    #
+
+
+
+		/**
+		 * Serveur : vous recevez un message d'erreur suite à sa dernière requete
+		 */
+		socket.on('G_ERROR', ({err}) => {
+			console.error(err);
+		});
+
+		/**
+		 * Serveur : vous recevez les données du niveau dans lequel vous devez évoluer
+		 */
+		socket.on('G_LOAD_LEVEL', ({level, doors}) => {
+			game.loadLevel(level);
+		});
+
+		/**
+		 * Serveur : vous devez créer ce ou ces mobiles.
+		 */
+		socket.on('G_CREATE_MOBILE', async ({mob}) => {
+			if (Array.isArray(mob)) {
+				for (let i = 0, l = mob.length; i < l; ++i) {
+					let m = mob[i];
+					console.log('requesting', m.bp);
+					await req_g_load_bp(m.bp);
+					console.log('got', m.bp);
+					game.netSpawnMobile(m);
+				}
+			} else {
+				// tester si le blueprint est chargé
+				await req_g_load_bp(mob.bp);
+				game.netSpawnMobile(mob);
+			}
+		});
+
+		socket.on('G_YOUR_ID', ({id}) => {
+			game.localId(id);
+		});
+
+		/**
+		 * Serveur : vous devez mettre à jour ce ou ces mobiles.
+		 */
+		socket.on('G_UPDATE_MOBILE', ({mob}) => {
+			if (Array.isArray(mob)) {
+				mob.forEach(mov => game.netUpdateMobile(mov));
+			} else {
+				game.netUpdateMobile(mob);
+			}
+		});
+
+		/**
+		 * Serveur : vous devez détruire ce ou ces mobiles.
+		 */
+		socket.on('G_DESTROY_MOBILE', ({mob}) => {
+			if (Array.isArray(mob)) {
+				mob.forEach(m => game.netDestroyMobile(m));
+			} else {
+				console.log(mob);
+				game.netDestroyMobile(mob);
+			}
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+ //
+ //  ####           #####   ######   ####
+ // #    #          #    #  #       #    #
+ // #               #    #  #####   #    #
+ // #  ###          #####   #       #  # #
+ // #    #          #   #   #       #   #
+ //  ####           #    #  ######   ### #
 
 
 		/**
@@ -343,27 +460,74 @@ export default function createWebSocketPlugin (socket) {
 		}
 
 
+		async function req_g_load_bp(sResRef) {
+			// télécharger le blueprint
+			// vérifier si la tile attachée au blueprint est chargée
+			// si non alors télécharger la tile
+			// shader la tile
+			// intégrer le blueprint
+			return new Promise(resolve => {
 
-		//  ####   ######  #    #  #####      #    #    #   ####
-		// #       #       ##   #  #    #     #    ##   #  #    #
-		//  ####   #####   # #  #  #    #     #    # #  #  #
-		//      #  #       #  # #  #    #     #    #  # #  #  ###
-		// #    #  #       #   ##  #    #     #    #   ##  #    #
-		//  ####   ######  #    #  #####      #    #    #   ####
+				let rc = game.getRaycaster();
+				let oHorde = rc.oHorde;
 
-		// Méthodes d'envoi de données au serveur
+				if (sResRef in oHorde.oBlueprints) {
+					// le blueprint est déja en mémoire
+					resolve(oHorde.oBlueprints[sResRef]);
+				} else {
+					// envoyer une requète de chargement de ressource blueprint
+					socket.emit('REQ_G_LOAD_RSC', {type: 'b', ref: sResRef}, blueprint => {
 
+						/**
+						 * Résoudre la promise en définissant le blueprint complet dans le raycaster
+						 */
+						function commitBP() {
+							resolve(oHorde.defineBlueprint(sResRef, blueprint));
+						}
 
-		/**
-		 * Envoi un message de discussion sur un canal donné.
-		 * @param tab {String} identifiant du canal
-		 * @param message {string} contenu du message
-		 */
-		function send_ms_say(tab, message) {
-			socket.emit('MS_SAY', {channel:tab, message});
+						let sTileRef = blueprint.tile;
+						if (sTileRef in oHorde.oTiles) {
+							// la tile est déja définie
+							commitBP();
+						} else {
+							// la tile n'est pas déja définie : effectuer une autre requète de chargement de ressource tile
+							socket.emit('REQ_G_LOAD_RSC', {type: 't', ref: sTileRef}, tile => {
+								let oTile = oHorde.defineTile(sTileRef, tile);
+
+								/**
+								 * Ombrer la tile nouvellemnet chargée puis résoudre la promise
+								 */
+								function shadeAndCommitBP() {
+									commitBP();
+									oTile.oImage = rc.shadeImage(oTile.oImage, true);
+								}
+
+								// l'image de la tile ...
+								if (oTile.oImage.complete) {
+									// ... est déja chargée
+									shadeAndCommitBP()
+								} else {
+									// ... n'est pas déja chargée : on doit utiliser l'évènement load
+									oTile.oImage.addEventListener('load', shadeAndCommitBP);
+								}
+							});
+						}
+					});
+				}
+			});
 		}
 
-        /**
+
+ //
+ //  ####            ####   ######  #    #  #####
+ // #    #          #       #       ##   #  #    #
+ // #                ####   #####   # #  #  #    #
+ // #  ###               #  #       #  # #  #    #
+ // #    #          #    #  #       #   ##  #    #
+ //  ####            ####   ######  #    #  #####
+ //
+
+		/**
 		 * phase 0:
 		 * Lorsque le client a fini la phase d'identification et qu'il attend
 		 * des données du serveur il utilise ce message pour indiquer qu'il est près à les
@@ -375,10 +539,17 @@ export default function createWebSocketPlugin (socket) {
 		 *
 		 * phase 2:
 		 * Lorsque le client a fini de recevoir les données des entité dynamique et souhaite prendre le controle d'un mobile
-         */
+		 */
 		function send_g_ready(phase) {
-            socket.emit('G_READY', {phase});
+			socket.emit('G_READY', {phase});
 		}
+
+
+
+
+
+
+
 
 
 
