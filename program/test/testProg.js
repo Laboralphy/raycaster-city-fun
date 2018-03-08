@@ -1,7 +1,7 @@
 const RC_CONST = require('../consts/raycaster');
 describe('model', function() {
     describe('Door', function() {
-        const Door = require('../model/Door');
+        const Door = require('../Engine/Door');
         describe('initial state check', function() {
             let oDoor = new Door();
             it ('should be closed and solid', function() {
@@ -244,7 +244,7 @@ describe('model', function() {
 
 
 	describe('Mobile', function() {
-		const Mobile = require('../model/Mobile');
+		const Mobile = require('../Engine/Mobile');
 		const o876 = require('../o876/index');
 		const Vector = o876.geometry.Vector;
 
@@ -464,7 +464,7 @@ describe('model', function() {
   //   #    #    #     #    #    #  #    #  ######  #    #
 
 
-		const Thinker = require('../model/thinkers/Thinker');
+		const Thinker = require('../Engine/thinkers/Thinker');
 
 		describe('state succession', function() {
 			it('shoud log correctly', function() {
@@ -586,7 +586,7 @@ describe('model', function() {
 
 
 	describe('Area', function() {
-		const Area = require('../model/Area');
+		const Area = require('../Engine/Area');
 
 		describe('physicMapping', function() {
 			it ('should have solid zone around the map', function() {
@@ -689,7 +689,7 @@ describe('model', function() {
 
 
 	describe('Level', function() {
-		const Level = require('../model/Level');
+		const Level = require('../Engine/Level');
 
 		it('should build a valid level', function() {
 			let level = new Level();
@@ -764,10 +764,10 @@ describe('model', function() {
 
 
 	describe('GameSystem', function() {
-		const GameSystem = require('../model/GameSystem');
-		const Area = require('../model/Area');
-        const Level = require('../model/Level');
-        const Location = require('../model/Location');
+		const GameSystem = require('../Engine/System');
+		const Area = require('../Engine/Area');
+        const Level = require('../Engine/Level');
+        const Location = require('../Engine/Location');
 		describe('getting area', function() {
             let area = new Area();
             let level = new Level();

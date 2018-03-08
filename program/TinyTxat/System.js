@@ -24,20 +24,20 @@ class System {
 
     _eventUserJoins(event) {
         // transmettre l'évènement à tous les utilisateurs du canal
-        event.channel._users.forEach(u =>
+        event.channel.users().forEach(u => {
 			this._events.emit('user-joins', {
-			    to: u.id(),
+				to: u.id(),
 				user: event.user.id(),
 				channel: event.channel.id()
-			})
-        );
+			});
+		});
     }
 
     _eventUserLeaves(event) {
-		event.channel._users.forEach(u =>
+		event.channel.users().forEach(u =>
 			this._events.emit('user-leaves', {
 				to: u.id(),
-				user: event.user.id(),
+				user: event.user.idName(), // le user est sur le point de disparaitre
 				channel: event.channel.id()
 			})
 		);
@@ -69,6 +69,7 @@ class System {
             });
             let i = this._users.indexOf(u);
             this._users.splice(i, 1);
+            // if no more users, and channel is not persistant
         }
     }
 
@@ -82,23 +83,38 @@ class System {
 		});
     }
 
-    findUser(id) {
+    getUser(id) {
         return this._users.find(u => u.id() === id);
     }
 
     addChannel(c) {
-        if (!this.channelPresent(c)) {
-            this._channels.push(c);
-            c.on('user-added', event => this._eventUserJoins(event));
-            c.on('user-dropped', event => this._eventUserLeaves(event))
-        } else {
-            throw new Error('cannot register channel ' + c.display() + ' : already registered');
-        }
+		if (!c.id()) {
+			throw new Error('cannot register channel : it has no valid identifier');
+		}
+		if (!c.name()) {
+			throw new Error('cannot register channel : it has no valid name');
+		}
+		if (this.getChannel(c.id())) {
+			throw new Error('cannot register channel : id "' + c.id() + '" is already in use');
+		}
+		if (this.searchChannel(c.name())) {
+			throw new Error('cannot register channel : name "' + c.name() + '" is already in use');
+		}
+		if (this.channelPresent(c)) {
+			throw new Error('cannot register channel ' + c.display() + ' : already registered');
+		}
+		this._channels.push(c);
+		c.on('user-added', event => this._eventUserJoins(event));
+		c.on('user-dropped', event => this._eventUserLeaves(event))
     }
 
-    findChannel(id) {
+    getChannel(id) {
 	    return this._channels.find(c => c.id() === id);
     }
+
+    searchChannel(sName) {
+		return this._channels.find(c => c.name() === sName);
+	}
 
     dropChannel(c) {
         if (this.channelPresent(c)) {

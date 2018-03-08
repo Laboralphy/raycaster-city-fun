@@ -1,4 +1,3 @@
-import STRINGS from "../data/strings";
 import Game from "../game";
 import CONFIG from "../game/config";
 import STATUS from "../../../../program/consts/status";

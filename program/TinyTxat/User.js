@@ -23,6 +23,10 @@ class User {
         return prop(this, '_sName', s);
     }
 
+    idName() {
+        return {id: this.id(), name: this.name()};
+    }
+
     /**
      * Affiche une ligne de description pour les logs
      * @return {string}
