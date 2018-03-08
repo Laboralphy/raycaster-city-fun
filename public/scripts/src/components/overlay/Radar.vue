@@ -6,32 +6,55 @@
           <circle
               :cx="radius"
               :cy="radius"
-              :r="radius"/>
+              :r="radius">
+          </circle>
         </clipPath>
+        <radialGradient id="outerMaskGradient">
+          <stop offset="0%" stop-color="white" stop-opacity="1"></stop>
+          <stop offset="100%" stop-color="white" stop-opacity="0"></stop>
+        </radialGradient>
+        <mask id="outerMask">
+          <circle
+              :cx="radius"
+              :cy="radius"
+              :r="radius"
+              fill="url(#outerMaskGradient)"></circle>
+        </mask>
+        <radialGradient id="visionGradiant" cy="1" r="0.9">
+          <stop offset="0%" stop-color="rgb(227, 190, 88)"></stop>
+          <stop offset="25%" stop-color="rgb(227, 190, 88)"></stop>
+          <stop offset="100%" stop-color="rgba(227, 190, 88, 0)"></stop>
+        </radialGradient>
       </defs>
 
-      <g clip-path="url(#outerClip)">
-        <g v-bind="mapProps">
-          <template v-for="(row, iRow) in aMap">
-            <rect v-for="(cell, iCell) in row" :height="64 * ratio" :width="64 * ratio" :x="iCell * 64 * ratio" :y="iRow * 64 * ratio" :style="'fill:rgb(0,0,'+ (cell < 200 ? 0 : 255) +');'" />
-          </template>
-        </g>
+      <g clip-path="url(#outerClip)" mask="url(#outerMask)">
+        <rect :width="size" :height="size"></rect>
+        <ray-map v-bind="mapProps" :ratio="ratio"></ray-map>
+      </g>
+      <!-- Cursor NORD -->
+      <g v-if="mapRotation" :transform="'rotate('+ -orientation +' '+ radius +' '+ radius +')'">
+        <polygon points="0,-15 -5,0 0,-3 5,0" :transform="'translate('+ radius +' 16)'" style="fill: rgb(227, 190, 88)"></polygon>
+        <text :x="radius" y="23" style="text-anchor: middle; font-size: 0.5rem; fill: rgb(227, 190, 88);">N</text>
       </g>
 
-      <g v-if="mapRotation" :transform="'rotate('+ -orientation +' '+ radius +' '+ radius +')'">
-        <polygon points="0,-15 -5,0 0,-3 5,0" :transform="'translate('+ radius +' 16)'" style="fill: rgba(227, 190, 88, 0.7)" />
-      </g>
+      <!-- Croix de debug -->
       <!--<line x1="0" y1="0" :x2="radius * 2" :y2="radius * 2" style="stroke:rgb(255,0,0);stroke-width:2"/>-->
       <!--<line x1="0" :y1="radius * 2" :x2="radius * 2" y2="0" style="stroke:rgb(255,0,0);stroke-width:2"/>-->
-      <path d="m 0,0 -8,-8 q 8 -6 16 0 z" v-bind="visionProps" style="fill: rgba(227, 190, 88, 0.5)"/>
-      <circle :cx="radius" :cy="radius" r="5" style="fill: red"/>
+
+      <player :playerData="{}" v-bind="visionProps"></player>
     </svg>
   </div>
 </template>
 
 <script>
+import Player from './radar/Player.vue'
+import RayMap from './radar/RayMap.vue'
+
 export default {
-  components: {},
+  components: {
+    Player,
+    RayMap
+  },
   data () {
     return {
       size: 0,
@@ -42,15 +65,13 @@ export default {
         y: 0,
         fTheta: 0
       },
-      aMap: [],
       mapRotation: false
     }
   },
   mounted () {
     this.size = this.$el.offsetHeight
-    this.$root.$on('game:ready', (game) => {
-      this.show = true;
-      this.aMap = game.getRaycaster().aMap
+    this.$root.$on('game:ready', () => {
+      this.show = true
     })
     this.$root.$on('game:vsync', (game) => {
       const oPlayer = game.getPlayer()
@@ -74,25 +95,20 @@ export default {
       return 180 * fTheta / Math.PI
     },
     mapProps () {
-      const height = this.aMap.length * 64
-      const width = (this.aMap[0] || []).length * 64
       const x = this.player.x
       const y = this.player.y
-      const ratio = this.ratio
       const xRatio = this.ratio * x
       const yRatio = this.ratio * y
-      let transform = 'translate(' + (-xRatio + this.radius) + ',' + (-yRatio + this.radius) + ') rotate(-90 '+ xRatio  +' '+ yRatio +') ';
+      let transform = 'translate(' + (-xRatio + this.radius) + ',' + (-yRatio + this.radius) + ') rotate(-90 '+ xRatio  +' '+ yRatio +') '
       if (this.mapRotation) {
         transform += 'rotate('+ -this.orientation +' '+ xRatio  +' '+ yRatio +')'
       }
       return {
-        transform,
-        height,
-        width
+        transform
       }
     },
     visionProps () {
-      let transform = 'translate('+ this.radius +' '+ this.radius +') scale(5) '
+      let transform = 'translate('+ this.radius +' '+ this.radius +') '
       if (!this.mapRotation) {
         transform += 'rotate('+ this.orientation +')'
       }
