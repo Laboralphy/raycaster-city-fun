@@ -23,17 +23,19 @@ class ServiceTxat extends ServiceAbstract {
         c = new TinyTxat.Channel();
         c.id(2).name('public').type('public');
         this.txat.addChannel(c);
+
+
         this.events.on('service-login', ({client}) => {
 			// ajouter le client au canal public
 			let oTxatUser = new TinyTxat.User(client);
 			this.txat.addUser(oTxatUser);
-			let oChannel = this.txat.findChannel(2);
+			let oChannel = this.txat.getChannel(2);
 			oChannel.addUser(oTxatUser);
         });
     }
 
     disconnectClient(client) {
-        this.txat.dropUser(this.txat.findUser(client.id));
+        this.txat.dropUser(this.txat.getUser(client.id));
     }
 
     /**
@@ -52,9 +54,9 @@ class ServiceTxat extends ServiceAbstract {
          */
         socket.on('REQ_MS_CHAN_INFO', ({id}, ack) => {
             if (client.id) {
-                let oTxatUser = this.txat.findUser(client.id);
-                let oChannel = this.txat.findChannel(id);
-                if (oChannel.userPresent(oTxatUser)) {
+                let oChannel = this.txat.getChannel(id);
+                let oTxatUser = this.txat.getUser(client.id);
+                if (oChannel && oChannel.userPresent(oTxatUser)) {
                     ack({
                         id: oChannel.id(),
                         name: oChannel.name(),
@@ -72,6 +74,29 @@ class ServiceTxat extends ServiceAbstract {
             }
         });
 
+		/**
+		 * ### REQ_MS_FIND_CHAN
+		 * Un client recherche l'identifiant d'un canal dont il fournit le nom
+		 * un coupe circuit intervient pour toute connexion non identifiée
+		 * @param search {string} nom du canal recherché
+		 * @param ack {function}
+		 */
+        socket.on('REQ_MS_FIND_CHAN', ({search}, ack) => {
+			if (client.id) {
+				let oChannel = this.txat.searchChannel(id);
+				if (oChannel) {
+					ack({
+						id: oChannel.id(),
+						name: oChannel.name(),
+						type: oChannel.type()
+					});
+				} else {
+					ack(null);
+				}
+			} else {
+				socket.close();
+			}
+		});
 
 
         /**
@@ -84,7 +109,7 @@ class ServiceTxat extends ServiceAbstract {
          */
         socket.on('REQ_MS_USER_INFO', ({id}, ack) => {
             if (client.id) {
-                let oTxatUser = this.txat.findUser(id);
+                let oTxatUser = this.txat.getUser(id);
                 if (oTxatUser) {
                     ack({
                         id: oTxatUser.id(),
@@ -99,6 +124,34 @@ class ServiceTxat extends ServiceAbstract {
         });
 
 
+		/**
+		 * ### REQ_MS_JOIN_CHAN
+		 * Un client veut rejoindre un cannal, le client ne spécifie que le nom symbolique du canal
+		 * un coupe circuit intervient pour toute connexion non identifiée
+		 * @param id {string} id du canal recherché
+		 * @param ack {function}
+		 */
+		socket.on('REQ_MS_JOIN_CHAN', ({name}, ack) => {
+			if (client.id) {
+				let oChannel = this.txat.searchChannel(name);
+				if (!oChannel) {
+					oChannel = new TinyTxat.Channel();
+					oChannel.name(name);
+					this.txat.addChannel(oChannel);
+				}
+				let oTxatUser = this.txat.getUser(client.id);
+				oChannel.addUser(oTxatUser);
+				logger.logfmt(STRINGS.txat.join_channel, oTxatUser.name(), oChannel.name());
+				ack({
+					id: oChannel.id,
+					name: oChannel.name
+				});
+			} else {
+				socket.close();
+			}
+		});
+
+
         /**
          * ### MS_SAY
          * un utilisateur envoie un message de discussion
@@ -107,9 +160,11 @@ class ServiceTxat extends ServiceAbstract {
          */
         socket.on('MS_SAY', ({channel, message}) => {
             if (client.id) {
-                let oUser = this.txat.findUser(client.id);
-                let oChannel = this.txat.findChannel(channel);
-                if (oChannel.userPresent(oUser)) {
+                let oUser = this.txat.getUser(client.id);
+                let oChannel = this.txat.getChannel(channel);
+                if (!oChannel) {
+					logger.errfmt(STRINGS.txat.invalid_channel, channel);
+				} else if (oChannel.userPresent(oUser)) {
                     logger.logfmt(STRINGS.txat.user_said,
                         channel,
                         client.name,
@@ -118,13 +173,15 @@ class ServiceTxat extends ServiceAbstract {
                     );
                     oChannel.transmitMessage(oUser, message);
                 } else {
-                    logger.errfmt(STRINGS.txat.invalid_channel, client.id, channel);
+                    logger.errfmt(STRINGS.txat.sent_to_wrong_chan, client.id, channel);
                 }
             } else {
                 socket.close();
             }
         });
-    }
+
+
+	}
 
 
 
@@ -135,7 +192,7 @@ class ServiceTxat extends ServiceAbstract {
      * @param channel {string} information du canal concerné {id, name, type}
      */
     send_ms_you_join(client, channel) {
-        let oChannel = this.txat.findChannel(channel);
+        let oChannel = this.txat.getChannel(channel);
         this._emit(client, 'MS_YOU_JOIN', {
             id: oChannel.id(),
             name: oChannel.name(),
@@ -150,8 +207,8 @@ class ServiceTxat extends ServiceAbstract {
      * @param channel {string} identifiant du canal concerné
      */
     send_ms_user_joins(client, user, channel) {
-        let oChannel = this.txat.findChannel(channel);
-        let oClient = this.txat.findUser(client);
+        let oChannel = this.txat.getChannel(channel);
+        let oClient = this.txat.getUser(client);
         if (oChannel.userPresent(oClient)) {
             // le client appartient au canal
             this._emit(client, 'MS_USER_JOINS', {user, channel});

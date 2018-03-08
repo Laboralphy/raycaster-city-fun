@@ -3,13 +3,13 @@ const logger = require('../Logger/index');
 const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
-const Game = require('./System');
+const Engine = require('./System');
 
 
-class ServiceGame extends ServiceAbstract {
+class ServiceEngine extends ServiceAbstract {
     constructor() {
         super();
-        let gs = new Game();
+        let gs = new Engine();
 		this._gs = gs;
 
 		// Le game system va parfois transmettre de l'information
@@ -80,7 +80,7 @@ class ServiceGame extends ServiceAbstract {
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
 						this._emit(client.id, 'G_YOUR_ID', {id: client.id});
 						// transmettre à tous les autres clients la création du client
-						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Game.buildMobileCreationPacket(data.subject) });
+						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Engine.buildMobileCreationPacket(data.subject) });
                         break;
                 }
             } catch (e) {
@@ -114,4 +114,4 @@ class ServiceGame extends ServiceAbstract {
     }
 }
 
-module.exports = ServiceGame;
+module.exports = ServiceEngine;

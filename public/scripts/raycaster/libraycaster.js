@@ -12697,9 +12697,11 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
         }
         if (nFrames) {
             rc.frameRender();
+            var eng = this;
             this._callGameEvent('onFrameRendered');
             requestAnimationFrame(function() {
                 rc.flipBuffer();
+                eng._callGameEvent('onVsync');
             });
         }
 	},
@@ -13041,6 +13043,14 @@ O2.extendClass('O876_Raycaster.GameAbstract', O876_Raycaster.Engine, {
 		var wd = {data: {}};
 		this.trigger('leveldata', wd);
 		return wd.data;
+	},
+
+
+	/**
+	 * Appelé à l'interieur d'un requestAnimationFrame
+	 */
+	onVsync: function() {
+		this.trigger('vsync');
 	},
 
 
