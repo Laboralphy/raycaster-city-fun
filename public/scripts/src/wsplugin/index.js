@@ -11,6 +11,8 @@ import STATUS from "../../../../program/consts/status";
  *
  * @param socket
  * @returns {function(*=)}
+ *
+ * @var MAIN {*}
  */
 
 const OVERLAY = false;
@@ -125,10 +127,65 @@ export default function createWebSocketPlugin (socket) {
 			endGame();
 		});
 
-		// MS : MESSAGE SYSTEM
-		// MS : MESSAGE SYSTEM
-		// MS : MESSAGE SYSTEM
 
+
+
+		/**
+		 * Envoi au serveur des données d'identification,
+		 * renvoie par Promise un identifiant client si l'identification a réussi, sinon, renvoie null.
+		 * @param name {string} nom
+		 * @param pass {string}		if (this.isFree()) {
+			this.oGame.gm_attack(0);
+		} else {
+			this.wtfHeld();
+		}
+		 this.nChargeStartTime = this.oGame.getTime();
+		 mot de passe
+		 */
+		async function req_login(name, pass) {
+			return new Promise(
+				resolve => {
+					socket.emit(
+						'REQ_LOGIN',
+						{name, pass},
+						({id}) => resolve(id)
+					)
+				}
+			);
+		}
+
+
+
+
+
+
+
+ // #    #  ######   ####    ####     ##     ####   ######
+ // ##  ##  #       #       #        #  #   #    #  #
+ // # ## #  #####    ####    ####   #    #  #       #####
+ // #    #  #            #       #  ######  #  ###  #
+ // #    #  #       #    #  #    #  #    #  #    #  #
+ // #    #  ######   ####    ####   #    #   ####   ######
+ //
+ //
+ //  ####    #   #   ####    #####  ######  #    #
+ // #         # #   #          #    #       ##  ##
+ //  ####      #     ####      #    #####   # ## #
+ //      #     #         #     #    #       #    #
+ // #    #     #    #    #     #    #       #    #
+ //  ####      #     ####      #    ######  #    #
+
+
+
+
+
+
+ // #    #   ####           #          #     ####    #####  ######  #    #
+ // ##  ##  #               #          #    #          #    #       ##   #
+ // # ## #   ####           #          #     ####      #    #####   # #  #
+ // #    #       #          #          #         #     #    #       #  # #
+ // #    #  #    #          #          #    #    #     #    #       #   ##
+ // #    #   ####           ######     #     ####      #    ######  #    #
 
 		/**
 		 * Serveur : "vous venez de rejoindre un canal"
@@ -181,12 +238,138 @@ export default function createWebSocketPlugin (socket) {
 		});
 
 
-        /**
-         * Serveur : vous recevez un message d'erreur suite à sa dernière requete
-         */
-        socket.on('G_ERROR', ({err}) => {
-            console.error(err);
-        });
+
+
+
+ // #    #   ####           #####   ######   ####
+ // ##  ##  #               #    #  #       #    #
+ // # ## #   ####           #    #  #####   #    #
+ // #    #       #          #####   #       #  # #
+ // #    #  #    #          #   #   #       #   #
+ // #    #   ####           #    #  ######   ### #
+
+
+		// Les REQUEST sont des messages envoyés au serveur, qui déclenche un réponse de la part du serveur.
+		// Les Request renvoient des promise.
+
+
+		/**
+		 * Requète transmise au serveur : "Quelles sont les info relative à ce canal ?"
+		 * On transmet l'id du canal recherché
+		 * @param id {string} id du canal
+		 * @returns {Promise<any>}
+		 */
+		async function req_ms_chan_info(id) {
+			return new Promise(
+				resolve => {
+					if (id in chanCache) {
+						resolve(chanCache[id]);
+					} else {
+						socket.emit(
+							'REQ_MS_CHAN_INFO',
+							{id},
+							(data) => {
+								if (data) {
+									// il n'y a pas de registre de canaux dans le state
+									chanCache[id] = data;
+								}
+								resolve(data);
+							}
+						);
+					}
+				}
+			);
+		}
+
+		/**
+		 * Requète transmise au serveur : "Quelles sont les info relative à cet utilisateur ?"
+		 * On transmet l'id de l'utilisateur recherché
+		 * @param id {string} id de l'utilisateur
+		 * @returns {Promise<any>}
+		 */
+		async function req_ms_user_info(id) {
+			return new Promise(
+				resolve => {
+					if (id in store.state.clients) {
+						resolve(store.state.clients[id]);
+					} else {
+						socket.emit(
+							'REQ_MS_USER_INFO',
+							{id},
+							async (data) => {
+								if (data) {
+									store.commit('clients/info', {id, name: data.name});
+								}
+								resolve(data);
+							}
+						);
+					}
+				}
+			);
+		}
+
+
+
+
+
+ // #    #   ####            ####   ######  #    #  #####
+ // ##  ##  #               #       #       ##   #  #    #
+ // # ## #   ####            ####   #####   # #  #  #    #
+ // #    #       #               #  #       #  # #  #    #
+ // #    #  #    #          #    #  #       #   ##  #    #
+ // #    #   ####            ####   ######  #    #  #####
+
+		/**
+		 * Envoi un message de discussion sur un canal donné.
+		 * @param tab {String} identifiant du canal
+		 * @param message {string} contenu du message
+		 */
+		function send_ms_say(tab, message) {
+			socket.emit('MS_SAY', {channel:tab, message});
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  #####
+// #     #    ##    #    #  ######
+// #         #  #   ##  ##  #
+// #  ####  #    #  # ## #  #####
+// #     #  ######  #    #  #
+// #     #  #    #  #    #  #
+//  #####   #    #  #    #  ######
+
+
+
+
+
+
+ //  ####           #          #     ####    #####  ######  #    #
+ // #    #          #          #    #          #    #       ##   #
+ // #               #          #     ####      #    #####   # #  #
+ // #  ###          #          #         #     #    #       #  # #
+ // #    #          #          #    #    #     #    #       #   ##
+ //  ####           ######     #     ####      #    ######  #    #
+
+
+
+		/**
+		 * Serveur : vous recevez un message d'erreur suite à sa dernière requete
+		 */
+		socket.on('G_ERROR', ({err}) => {
+			console.error(err);
+		});
 
 		/**
 		 * Serveur : vous recevez les données du niveau dans lequel vous devez évoluer
@@ -245,96 +428,20 @@ export default function createWebSocketPlugin (socket) {
 
 
 
-		// #####   ######   ####   #    #  ######   ####    #####
-		// #    #  #       #    #  #    #  #       #          #
-		// #    #  #####   #    #  #    #  #####    ####      #
-		// #####   #       #  # #  #    #  #            #     #
-		// #   #   #       #   #   #    #  #       #    #     #
-		// #    #  ######   ### #   ####   ######   ####      #
-
-		// Les REQUEST sont des messages envoyés au serveur, qui déclenche un réponse de la part du serveur.
-		// Les Request renvoient des promise.
-
-		/**
-		 * Envoi au serveur des données d'identification,
-		 * renvoie par Promise un identifiant client si l'identification a réussi, sinon, renvoie null.
-		 * @param name {string} nom
-		 * @param pass {string}		if (this.isFree()) {
-			this.oGame.gm_attack(0);
-		} else {
-			this.wtfHeld();
-		}
-		this.nChargeStartTime = this.oGame.getTime();
- mot de passe
-		 */
-		async function req_login(name, pass) {
-			return new Promise(
-				resolve => {
-					socket.emit(
-						'REQ_LOGIN',
-						{name, pass},
-						({id}) => resolve(id)
-					)
-				}
-			);
-		}
-
-		/**
-		 * Requète transmise au serveur : "Quelles sont les info relative à ce canal ?"
-		 * On transmet l'id du canal recherché
-		 * @param id {string} id du canal
-		 * @returns {Promise<any>}
-		 */
-		async function req_ms_chan_info(id) {
-			return new Promise(
-				resolve => {
-					if (id in chanCache) {
-						resolve(chanCache[id]);
-					} else {
-						socket.emit(
-							'REQ_MS_CHAN_INFO',
-							{id},
-							(data) => {
-								if (data) {
-									// il n'y a pas de registre de canaux dans le state
-									chanCache[id] = data;
-								}
-								resolve(data);
-							}
-						);
-					}
-				}
-			);
-		}
-
-		/**
-		 * Requète transmise au serveur : "Quelles sont les info relative à cet utilisateur ?"
-		 * On transmet l'id de l'utilisateur recherché
-		 * @param id {string} id de l'utilisateur
-		 * @returns {Promise<any>}
-		 */
-		async function req_ms_user_info(id) {
-			return new Promise(
-				resolve => {
-					if (id in store.state.clients) {
-						resolve(store.state.clients[id]);
-					} else {
-						socket.emit(
-							'REQ_MS_USER_INFO',
-							{id},
-							async (data) => {
-								if (data) {
-                                    store.commit('clients/info', {id, name: data.name});
-								}
-								resolve(data);
-							}
-						);
-					}
-				}
-			);
-		}
 
 
+
+
+
+
+
+ //
+ //  ####           #####   ######   ####
+ // #    #          #    #  #       #    #
+ // #               #    #  #####   #    #
+ // #  ###          #####   #       #  # #
+ // #    #          #   #   #       #   #
+ //  ####           #    #  ######   ### #
 
 
 		/**
@@ -411,27 +518,16 @@ export default function createWebSocketPlugin (socket) {
 		}
 
 
-
-		//  ####   ######  #    #  #####      #    #    #   ####
-		// #       #       ##   #  #    #     #    ##   #  #    #
-		//  ####   #####   # #  #  #    #     #    # #  #  #
-		//      #  #       #  # #  #    #     #    #  # #  #  ###
-		// #    #  #       #   ##  #    #     #    #   ##  #    #
-		//  ####   ######  #    #  #####      #    #    #   ####
-
-		// Méthodes d'envoi de données au serveur
-
+ //
+ //  ####            ####   ######  #    #  #####
+ // #    #          #       #       ##   #  #    #
+ // #                ####   #####   # #  #  #    #
+ // #  ###               #  #       #  # #  #    #
+ // #    #          #    #  #       #   ##  #    #
+ //  ####            ####   ######  #    #  #####
+ //
 
 		/**
-		 * Envoi un message de discussion sur un canal donné.
-		 * @param tab {String} identifiant du canal
-		 * @param message {string} contenu du message
-		 */
-		function send_ms_say(tab, message) {
-			socket.emit('MS_SAY', {channel:tab, message});
-		}
-
-        /**
 		 * phase 0:
 		 * Lorsque le client a fini la phase d'identification et qu'il attend
 		 * des données du serveur il utilise ce message pour indiquer qu'il est près à les
@@ -443,10 +539,17 @@ export default function createWebSocketPlugin (socket) {
 		 *
 		 * phase 2:
 		 * Lorsque le client a fini de recevoir les données des entité dynamique et souhaite prendre le controle d'un mobile
-         */
+		 */
 		function send_g_ready(phase) {
-            socket.emit('G_READY', {phase});
+			socket.emit('G_READY', {phase});
 		}
+
+
+
+
+
+
+
 
 
 
