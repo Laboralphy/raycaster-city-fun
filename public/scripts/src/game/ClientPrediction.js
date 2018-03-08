@@ -76,7 +76,7 @@ class ClientPrediction {
 				a, x, y, 	// angle, position
 				sx, sy, 	// vitesse aux axes
 				id: ++this._id,  // identifiant seq
-				c, 				// commandes
+				c: 0, 				// commandes
 				s: false,		// a été envoyé ? oui/non
 				lt: !!last ? last.t : 0
 			};
