@@ -1,7 +1,6 @@
 import Thinkers from './thinkers';
 import ClientPrediction from './ClientPrediction';
 import PingMonitor from "./PingMonitor";
-import Minimap from "./Minimap";
 import o876 from '../../../../program/o876';
 
 class Game extends O876_Raycaster.GameAbstract {
