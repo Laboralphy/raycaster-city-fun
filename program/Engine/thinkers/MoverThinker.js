@@ -2,7 +2,7 @@ const Thinker = require('./Thinker');
 const o876 = require('../../o876/index');
 const Vector = o876.geometry.Vector;
 
-module.exports = class  MoverThinker extends Thinker {
+module.exports = class MoverThinker extends Thinker {
 	constructor() {
 		super();
 		this._speed = new Vector();
@@ -10,6 +10,9 @@ module.exports = class  MoverThinker extends Thinker {
 		this._prevMovement = null;
 		this.state('move');
 	}
+
+
+
 
 	$move() {
 		let m = this._mobile;

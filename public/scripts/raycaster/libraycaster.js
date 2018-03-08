@@ -6984,6 +6984,8 @@ O2.createClass('O876_Raycaster.Mobile', {
 	oRaycaster: null,						// Référence de retour au raycaster
 	x: 0,									// position du mobile
 	y: 0,									// ...
+	xOfs: 0,
+	yOfs: 0,								// ces offset permet de décaler la position visuelle de la position physique (celle qui sert à la collision)
 	xSave: 0,
 	ySave: 0,
 
@@ -9028,8 +9030,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var dy = (wy2 - wy1) / this.xScrSize;
 		var fBx = wx1;
 		var fBy = wy1;
-		var xCam = this.oCamera.x;
-		var yCam = this.oCamera.y;
+		var oCam = this.oCamera;
+		var xCam = oCam.x + oCam.xOfs;
+		var yCam = oCam.y + oCam.yOfs;
 		var xCam8 = xCam / this.nPlaneSpacing | 0;
 		var yCam8 = yCam / this.nPlaneSpacing | 0;
 		var i;
@@ -9251,8 +9254,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			return;
 		}
 		var oTile = oSprite.oBlueprint.oTile;
-		var dx = oMobile.x - this.oCamera.x;
-		var dy = oMobile.y - this.oCamera.y;
+		var oCam = this.oCam
+		var dx = oMobile.x + oMobile.xOfs - oCam.x - oCam.xOfs;
+		var dy = oMobile.y + oMobile.yOfs - oCam.y - oCam.yOfs;
 
 		// Gaffe fAlpha est un angle ici, et pour un sprite c'est une transparence
 		var fTarget = Math.atan2(dy, dx);
@@ -9442,8 +9446,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var ofsDstCeil; // offset de l'array pixel de destination (plancher)
 		var wyCeil;
 
-		var xCam = this.oCamera.x; // coord caméra x
-		var yCam = this.oCamera.y; // coord caméra y
+		var oCam = this.oCamera;
+		var xCam = oCam.x + oCam.xOfs; // coord caméra x
+		var yCam = oCam.y + oCam.yOfs; // coord caméra y
 		var nFloorWidth = oFloor.image.width; // taille pixel des tiles de flats
 		var ofsSrc; // offset de l'array pixel source
 		var xOfs = 0; // code du block flat à afficher
@@ -9586,8 +9591,9 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 		var ofsDstCeil; // offset de l'array pixel de destination (plafon) 
 		var wyCeil = 0;
 
-		var xCam = this.oCamera.x; // coord caméra x
-		var yCam = this.oCamera.y; // coord caméra y
+		var oCam = this.oCamera;
+		var xCam = oCam.x + oCam.xOfs; // coord caméra x
+		var yCam = oCam.y + oCam.yOfs; // coord caméra y
 		var nFloorWidth = oFloor.image.width; // taille pixel des tiles de flats
 		var ofsSrc; // offset de l'array pixel source
 		var xOfs = 0; // code du block flat à afficher

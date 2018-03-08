@@ -215,12 +215,11 @@ export default function createWebSocketPlugin (socket) {
 		 * Serveur : "un utilisateur a quitté l'un des canaux auxquels vous êtes connecté"
 		 */
 		socket.on('MS_USER_LEAVES', async ({user, channel}) => {
-			let oUser = await req_ms_user_info(user);
 			let oChannel = await req_ms_chan_info(channel);
 			await store.dispatch('chat/postLine', {
 				tab: oChannel.id,
 				client: null,
-				message: oUser.name + ' quitte le canal ' + oChannel.name
+				message: user.name + ' quitte le canal ' + oChannel.name
 			});
 		});
 
@@ -419,7 +418,6 @@ export default function createWebSocketPlugin (socket) {
 			if (Array.isArray(mob)) {
 				mob.forEach(m => game.netDestroyMobile(m));
 			} else {
-				console.log(mob);
 				game.netDestroyMobile(mob);
 			}
 		});
@@ -455,7 +453,7 @@ export default function createWebSocketPlugin (socket) {
 		 */
 		async function req_g_update_player(packet) {
 			return new Promise(resolve => {
-				socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data))
+				socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data));
 			});
 		}
 
