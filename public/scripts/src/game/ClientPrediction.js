@@ -78,7 +78,8 @@ class ClientPrediction {
 				id: ++this._id,  // identifiant seq
 				c: 0, 				// commandes
 				s: false,		// a été envoyé ? oui/non
-				lt: !!last ? last.t : 0
+				lt: !!last ? last.t : 0,
+				dt: 0     // delta de temps entre ce packet et le suivant, calculé dans getUnsentPackets
 			};
 			this._packets.push(packet);
 			return packet;
