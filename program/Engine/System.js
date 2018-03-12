@@ -311,7 +311,7 @@ class Game {
 	 * retransmet à tous les client de la zone la position de ce client
 	 * quand le serveur recois un ensemble de paquets il faut les jouer
 	 */
-	playClientMovement(idm, {t, a, x, y, sx, sy, id, lt, c}) {
+	playClientMovement(idm, {t, a, x, y, sx, sy, id, c}) {
 		let mob = this._mobiles[idm];
 		if (!mob) {
 			console.error('mob', idm, 'does not exist');
@@ -321,7 +321,7 @@ class Game {
 		if (c) {
 			this.playClientAction(id, c);
 		}
-		mob.thinker().setMovement({t, a, x, y, sx, sy, id, lt, c});
+		mob.thinker().setMovement({t, a, x, y, sx, sy, id, c});
 		return {
 			a: loc.heading(),
 			x: loc.position().x,

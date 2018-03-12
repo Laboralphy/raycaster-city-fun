@@ -26,7 +26,7 @@ module.exports = class Mobile {
 		this._size = 16;
 		this.wallCollisions = Vector.zero();
 		this._dummy = null;
-		this._thinker = null,
+		this._thinker = null;
 		// aspect
 		this.blueprint = '';
 		// flags

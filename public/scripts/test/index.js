@@ -1,8 +1,8 @@
 //
-import ClientPrediction from '../src/game/ClientPrediction';
-describe('ClientPrediction', function() {
+import Predictor from '../src/engine/Predictor';
+describe('Predictor', function() {
 	describe('pushing one packet', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		it ('should have on packet', function() {
 			expect(cp.packets().length).toBe(1);
@@ -13,7 +13,7 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('pushing N packets with same params', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
@@ -27,7 +27,7 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('pushing 20 packets with same params', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
@@ -57,7 +57,7 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('pushing 22 packets with same params', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
@@ -91,7 +91,7 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('pushing N different packets', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50});
 		cp.pushMovement({a: 11, x: 20, y: 30, sx: 41, sy: 50});
 		cp.pushMovement({a: 11, x: 20, y: 30, sx: 41, sy: 50});
@@ -108,7 +108,7 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('sending two packets, starting a movement', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		let push1 = cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50}); // {t: 1, a: 10, x: 20, y: 30, sx: 40, sy: 50}
 		let push2 = cp.pushMovement({a: 10, x: 20, y: 30, sx: 40, sy: 50}); // {t: 2, a: 10, x: 20, y: 30, sx: 40, sy: 50}
 		it ('should have 1 packet', function() {
@@ -124,7 +124,7 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('return value of pushMovement', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		let push_a0 = cp.pushMovement({a: 1, x: 100, y: 100, sx: 2, sy: 1, c: 0});
 		let push_a1 = cp.pushMovement({a: 1, x: 100, y: 100, sx: 2, sy: 1, c: 0});
 		let push_a2 = cp.pushMovement({a: 1, x: 100, y: 100, sx: 2, sy: 1, c: 0});
@@ -190,9 +190,9 @@ describe('ClientPrediction', function() {
 	});
 
 	describe('unset packets', function() {
-		let cp = new ClientPrediction();
+		let cp = new Predictor();
 		it ('should do the job', function() {
-			let cp = new ClientPrediction();
+			let cp = new Predictor();
 			let p;
 
 			let push_a0 = cp.pushMovement({a: 1, x: 100, y: 100, sx: 2, sy: 1, c: 0});

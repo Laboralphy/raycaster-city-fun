@@ -6749,7 +6749,7 @@ O2.createObject('MAIN', {
             	throw new Error('"namespace" key is mandatory in CONFIG.game while using autorun feature');
 			}
             var ns = MAIN.config.game.namespace;
-            var gcn = ns + '.Game';
+            var gcn = ns + '.Engine';
             var gc = O2.loadObject(gcn);
             var data = LEVEL_DATA[Object.keys(LEVEL_DATA)[0]];
             MAIN.run(new gc(MAIN.config));

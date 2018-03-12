@@ -1,13 +1,12 @@
 import STATUS from "../../../../program/consts/status";
-import CONFIG from "../game/config";
+import CONFIG from "../engine/config";
 import Game from "../game";
 
 const OVERLAY = true;
 
-function game(socket) {
+function client(socket) {
 	return store => {
 
-		let tLastUpdate = 0;
 		let game;
 
 
@@ -75,15 +74,11 @@ function game(socket) {
 			game.on('update.player', async packet => {
 				// empiler les packet tant que 1/10 s ne se sont pas écoulés entre l'envoie du précédent, et maintenant
 				let t1 = performance.now();
-				if (t1 - tLastUpdate >= 100) {
-					// on peut envoyer
-					let aCorrPacket = await req_g_update_player(packet);
-					let t2 = performance.now();
-					game.ping(t2 - t1);
-					game.applyMobileCorrection(aCorrPacket);
-				} else {
-					// trop tôt
-				}
+				// on peut envoyer
+				let aCorrPacket = await req_g_update_player(packet);
+				let t2 = performance.now();
+				game.ping(t2 - t1);
+				game.applyMobileCorrection(aCorrPacket);
 			});
 		}
 
@@ -306,4 +301,4 @@ function game(socket) {
 }
 
 
-export default game;
+export default client;

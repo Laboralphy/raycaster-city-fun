@@ -127,7 +127,7 @@ class FPSThinker extends AbstractThinker {
             sProc = '';
             switch (aButton[0]) {
                 case 1: // button down
-                    sProc = sEvent + '.down';
+                    sProc = sEvent + '.d';
                     oCmds[sEvent] = true;
                     break;
 

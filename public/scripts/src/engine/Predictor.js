@@ -7,12 +7,13 @@
 
 import o876 from '../../../../program/o876'
 
-const MAX_UPDATE_TIME = 20; // Délai au dela duquel il faut mettre à jour
+const MAX_UPDATE_TIME = 25; // Délai au dela duquel il faut mettre à jour
 
-class ClientPrediction {
+class Predictor {
 	constructor() {
 		this._id = 0;
 		this._packets = [];
+		this._nextPacket = null; // ce paquet sera envoyer dès que MIN_UPDATE_TIME sera périmé
 	}
 
 	/**
@@ -56,7 +57,9 @@ class ClientPrediction {
 		let bPush = false;
 		if (bNoPreviousPacket) {
 			bPush = true;
-		} else if (last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c !== last.c) {
+		}
+
+		else if (last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c !== last.c) {
 			// packet très différent du précédent ou ...
 			// précédent packet trop ancien ou ..
 			// commande "c" différente du précédent ou ...
@@ -68,18 +71,13 @@ class ClientPrediction {
 			++last.t;
 		}
 		if (bPush) {
-			if (last) {
-				last.s = true;
-			}
 			let packet = {
 				t: 1,		// iteration max
 				a, x, y, 	// angle, position
 				sx, sy, 	// vitesse aux axes
 				id: ++this._id,  // identifiant seq
-				c: 0, 				// commandes
+				c, 				// commandes
 				s: false,		// a été envoyé ? oui/non
-				lt: !!last ? last.t : 0,
-				dt: 0     // delta de temps entre ce packet et le suivant, calculé dans getUnsentPackets
 			};
 			this._packets.push(packet);
 			return packet;
@@ -128,4 +126,4 @@ class ClientPrediction {
 }
 
 
-export default ClientPrediction;
+export default Predictor;
