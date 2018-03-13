@@ -96,20 +96,20 @@ class Game {
 //    #    #   #   #    #  #   ##  #    #  #    #     #       #    #   #   #    #
 //    #    #    #  #    #  #    #   ####   #    #     #       #    #    #   ####
 
-    // les transmitters permettre de transmettres des packet a desticnation des clients
-	/**
-     * Transmission d'un packet à un joueur
-	 * @param player {Player} joueur a qui envoyer le packet
-	 * @param event {string} nom de l'évnèmenet
-	 * @param packet {*} contenu du packet
-	 */
-	transmit(player, event, packet) {
-	    if (Array.isArray(player)) {
-	        player.forEach(p => this.transmit(p, event, packet));
-        } else {
-            this.emitter.emit('transmit', player.id, event, packet);
-        }
-    }
+    // // les transmitters permettre de transmettres des packet a desticnation des clients
+	// /**
+    //  * Transmission d'un packet à un joueur
+	 // * @param player {Player} joueur a qui envoyer le packet
+	 // * @param event {string} nom de l'évnèmenet
+	 // * @param packet {*} contenu du packet
+	 // */
+	// transmit(player, event, packet) {
+	 //    if (Array.isArray(player)) {
+	 //        player.forEach(p => this.transmit(p, event, packet));
+    //     } else {
+    //         this.emitter.emit('transmit', player.id, event, packet);
+    //     }
+    // }
 
 	/**
 	 * Transmission du changement de mouvement d'un mobile
@@ -399,16 +399,20 @@ class Game {
 	clientHasLeft(client) {
     	let id = client.id;
     	let mob = this._mobiles[id];
+    	let oResult = {
+    		players: [],
+			mob: false
+		};
     	// détruire ce mobile : mob
 		if (mob) {
 			let area = mob.location.area();
-			let others = this.getAreaPlayers(area);
-			this.transmit(others, 'G_DESTROY_MOBILE', {mob: id});
+			oResult.players = this.getAreaPlayers(area);
+			oResult.mob = id;
 			mob.finalize();
 		}
 		delete this._mobiles[id];
 		delete this._players[id];
-
+		return oResult;
 	}
 }
 

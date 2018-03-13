@@ -1,6 +1,6 @@
-import login from '../wsplugins/login';
-import ms from '../wsplugins/ms';
-import engine from '../wsplugins/engine';
+import login from '../store-plugins/login';
+import ms from '../store-plugins/ms';
+import engine from '../store-plugins/engine';
 import Game from '../game';
 import CONFIG from '../config';
 

@@ -14,10 +14,10 @@ class ServiceEngine extends ServiceAbstract {
 
 		// Le game system va parfois transmettre de l'information
 		// ces info sont transférées au réseau
-        gs.emitter.on('transmit', (id, event, data) => {
-            logger.log('transmit', event, 'to', id);
-            this._emit(id, event, data);
-        });
+		// gs.emitter.on('transmit', (id, event, data) => {
+         //    logger.log('transmit', event, 'to', id);
+         //    this._emit(id, event, data);
+		// });
 
         setInterval(() => this.doomloop(), RC.time_factor);
     }
@@ -46,7 +46,10 @@ class ServiceEngine extends ServiceAbstract {
     	super.disconnectClient(client);
     	// supprimer l'entité du client
 		let id = client.id;
-		this._gs.clientHasLeft(client);
+		let oResult = this._gs.clientHasLeft(client);
+		if (oResult.mob) {
+			this._emit(oResult.players, {mob: oResult.mob});
+		}
 	}
 
 	/**
