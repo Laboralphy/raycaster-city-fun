@@ -70,7 +70,7 @@ class ServiceEngine extends ServiceAbstract {
 						data = await this._gs.clientWantsToLoadLevel(client);
 						this._emit(client.id, 'G_LOAD_LEVEL', {
 							level: data.area.data(),
-							doors: data.doors
+							live: data.live
 						});
 						break;
 

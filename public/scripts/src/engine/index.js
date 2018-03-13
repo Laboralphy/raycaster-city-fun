@@ -12,6 +12,8 @@ class Engine extends O876_Raycaster.GameAbstract {
 		this._clientPrediction = new ClientPrediction();
 		this._pingMonitor = null;
 		this._localId = '';
+		this._levelLiveData = null; // ces données sont les données "vivantes" du niveau
+		// ... à exploiter après le chargement complet du niveau
 		this.setupPingMonitor();
 		this.setupListeners();
 	}
@@ -50,7 +52,8 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * Ordonne le chargement d'un niveau par initialisation du Raycaster
 	 * @param data {*} donnée du niveau
 	 */
-	loadLevel(data) {
+	loadLevel(data, liveData) {
+		this._levelLiveData = liveData;
 		this.initRaycaster(data);
     }
 
@@ -135,6 +138,10 @@ class Engine extends O876_Raycaster.GameAbstract {
 		let ct = new Thinkers.Player();
 		player.setThinker(ct.game(this).mobile(player));
         ct.on('use.down', () => this.activateWall(player));
+        let lld = this._levelLiveData;
+        // exploitation des level live data
+		// puis transmission
+        this.trigger('level.live.data', this._levelLiveData);
     }
 
 
@@ -148,7 +155,7 @@ class Engine extends O876_Raycaster.GameAbstract {
 				break;
 
 			case KEYS.ESCAPE:
-				this.showOverlay();
+				this.freeze();
 				break;
         }
     }
@@ -218,8 +225,10 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * Affichage d'un overlay
 	 * Freeze les contrôles du joueur
 	 */
-	showOverlay() {
-		MAIN.screen.style.opacity = 0.5;
+	freeze() {
+		let screen = MAIN.screen;
+		screen.style.opacity = '0.5';
+        screen.style.filter = 'blur(5px)';
 		this.getPlayer().getThinker().freeze();
 	}
 
@@ -227,8 +236,10 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * Supprime l'overlay
 	 * Réactive les contrôles du joueur
 	 */
-	hideOverlay() {
-		MAIN.screen.style.opacity = 1;
+	thaw() {
+        let screen = MAIN.screen;
+		screen.style.opacity = '1';
+        screen.style.filter = '';
 		this.getPlayer().getThinker().thaw();
 	}
 

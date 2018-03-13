@@ -1,14 +1,11 @@
 import STATUS from "../../../../program/consts/status";
-import CONFIG from "../engine/config";
+import CONFIG from "../config/index";
 import Game from "../game";
 
 const OVERLAY = true;
 
-function client(socket) {
+function client(socket, game) {
 	return store => {
-
-		let game;
-
 
 		//  #####
 		// #     #    ##    #    #  ######
@@ -24,8 +21,6 @@ function client(socket) {
 		 * plein de chose à initialiser
 		 */
 		function gameInit() {
-			MAIN.configure(CONFIG); 		// configurer le MAIN
-			game = new Game(CONFIG);		// créer une instance du jeu
 			MAIN.run(game);
 			document.body.setAttribute('class', 'playing');
 
@@ -35,10 +30,9 @@ function client(socket) {
 			 */
 			if (OVERLAY) {
 				MAIN.pointerlock.on('exit', event => {
-					game.showOverlay();
+					game.freeze();
 					store.dispatch('ui/showSection', {id: 'chat'});
 					store.dispatch('ui/show');
-					document.querySelector('canvas#screen').style.filter = 'blur(5px)';
 				});
 
 				/**
@@ -47,10 +41,8 @@ function client(socket) {
 				 */
 				MAIN.pointerlock.on('enter', event => {
 					store.dispatch('ui/hide');
-					game.hideOverlay();
-					document.querySelector('canvas#screen').style.filter = '';
+					game.thaw();
 				});
-
 			}
 			/**
 			 * Evènement : le client a fini de construire le niveau
@@ -61,10 +53,6 @@ function client(socket) {
 			});
 
 			game.on('frame', event => {
-				let player = game.getPlayer();
-				let fAngle = player.fTheta;
-				let x = player.x;
-				let y = player.y;
 			});
 
 			/**
@@ -72,23 +60,24 @@ function client(socket) {
 			 * transmetter au serveur la nouvelle situation geometrique
 			 */
 			game.on('update.player', async packet => {
-				// empiler les packet tant que 1/10 s ne se sont pas écoulés entre l'envoie du précédent, et maintenant
 				let t1 = performance.now();
-				// on peut envoyer
 				let aCorrPacket = await req_g_update_player(packet);
 				let t2 = performance.now();
 				game.ping(t2 - t1);
 				game.applyMobileCorrection(aCorrPacket);
 			});
+
+			game.trigger('socket', {socket});
 		}
 
 		/**
 		 * Fonction sensée terminer le jeu
 		 */
-		function endGame() {
+		function gameEnd() {
 			game._halt();
 			MAIN.screen.style.display = 'none';
 			socket.close();
+            store.dispatch('ui/hideSection', {id: 'chat'});
 			store.dispatch('ui/showSection', {id: 'disconnect'});
 			store.dispatch('ui/show');
 			document.body.setAttribute('class', '');
@@ -107,7 +96,7 @@ function client(socket) {
 		 * Serveur : "Déconnexion du client"
 		 */
 		socket.on('disconnect', async () => {
-			endGame();
+			gameEnd();
 		});
 
 		/**
@@ -120,8 +109,8 @@ function client(socket) {
 		/**
 		 * Serveur : vous recevez les données du niveau dans lequel vous devez évoluer
 		 */
-		socket.on('G_LOAD_LEVEL', ({level, doors}) => {
-			game.loadLevel(level);
+		socket.on('G_LOAD_LEVEL', ({level, live}) => {
+			game.loadLevel(level, live);
 		});
 
 		/**

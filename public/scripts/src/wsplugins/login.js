@@ -1,6 +1,6 @@
 import STATUS from "../../../../program/consts/status";
 
-function login(socket) {
+function login(socket, game) {
 	return store => {
 
 

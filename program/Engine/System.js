@@ -361,8 +361,8 @@ class Game {
         }
         let area = p.location.area();
         logger.logfmt(STRINGS.game.player_downloading_area, id, area.name);
-        let doors = null;
-        return {area, doors};
+        let live = null;
+        return {area, live};
 	}
 
     /**

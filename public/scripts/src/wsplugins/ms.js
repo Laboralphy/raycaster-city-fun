@@ -1,6 +1,6 @@
 import STATUS from "../../../../program/consts/status";
 
-function ms(socket) {
+function ms(socket, game) {
 	return store => {
 		// #    #  ######   ####    ####     ##     ####   ######
 		// ##  ##  #       #       #        #  #   #    #  #
