@@ -1,10 +1,8 @@
 import STATUS from "../../../../program/consts/status";
-import CONFIG from "../config/index";
-import Game from "../game";
 
 const OVERLAY = true;
 
-function client(socket, game) {
+function engine(socket, game) {
 	return store => {
 
 		//  #####
@@ -290,4 +288,4 @@ function client(socket, game) {
 }
 
 
-export default client;
+export default engine;
