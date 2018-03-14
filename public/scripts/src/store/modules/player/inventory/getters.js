@@ -1,4 +1,4 @@
-import {CONST} from '../../../data/const';
+import {CONST} from '../../../../data/const';
 
 const actions = {
     /**

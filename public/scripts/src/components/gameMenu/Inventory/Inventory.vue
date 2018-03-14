@@ -70,7 +70,7 @@
 
 <script>
     import { createNamespacedHelpers } from 'vuex';
-    import * as types from '../../../store/player/inventory/types';
+    import * as types from '../../../store/modules/player/inventory/types';
     import {BorderedCard} from '../../ui';
     import draggable from 'vuedraggable';
     import Item from './Item.vue';

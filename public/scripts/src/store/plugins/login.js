@@ -1,6 +1,6 @@
-import STATUS from "../../../../program/consts/status";
+import STATUS from "../../../../../program/consts/status";
 
-function login(socket, game) {
+function login(socket) {
 	return store => {
 
 

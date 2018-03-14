@@ -1,5 +1,4 @@
 const ClientManager = require('../ClientManager/index');
-const TinyTxat = require('../TinyTxat/index');
 const logger = require('../Logger/index');
 
 const util = require('util');
@@ -9,11 +8,6 @@ class Service {
     constructor() {
         this.clientManager = new ClientManager();
         this._plugins = [];
-        // this
-        //     .plugin('ServiceLogin')
-        //     .plugin('ServiceTxat')
-        //     .plugin('ServiceGame')
-        // ;
     }
 
 	/**

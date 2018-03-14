@@ -1,6 +1,8 @@
 const Client = require('./Client');
 
-
+/**
+ * Ce manager maintient une liste de clients et leurs données associées
+ */
 class Manager {
 	constructor() {
 		this.clients = {};

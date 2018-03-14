@@ -21,7 +21,7 @@
 
 <script>
     import { createNamespacedHelpers } from 'vuex';
-    import * as types from '../../store/gameMenu/mutation-types';
+    import * as types from '../../store/modules/gameMenu/mutation-types';
     import {BorderedCard, Tabs, Tab} from '../ui';
     import Inventory from './Inventory/Inventory.vue';
     import Personnage from './Personnage/Personnage.vue';

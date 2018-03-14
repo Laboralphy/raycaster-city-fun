@@ -1,6 +1,6 @@
-import STATUS from "../../../../program/consts/status";
+import STATUS from "../../../../../program/consts/status";
 
-function ms(socket, game) {
+function ms(socket) {
 	return store => {
 		// #    #  ######   ####    ####     ##     ####   ######
 		// ##  ##  #       #       #        #  #   #    #  #

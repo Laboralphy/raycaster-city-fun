@@ -1,8 +1,8 @@
 const DATA_PATH = 'data';
 const path = require('path');
-const asyncfs = require('../asyncfs/index');
+const asyncfs = require('../Asyncfs/index');
 
-class DataManager {
+class ResourceLoader {
 
 	constructor() {
 		this._resources = {};
@@ -64,4 +64,4 @@ class DataManager {
 	}
 }
 
-module.exports = DataManager;
+module.exports = ResourceLoader;
