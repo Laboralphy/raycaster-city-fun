@@ -2,7 +2,7 @@
  * Thinker d'un personnage controlé par le clavier et la souris.
  */
 import AbstractThinker from './AbstractThinker';
-import o876 from '../../../../../program/o876';
+import o876 from '../../../o876/index';
 
 class FPSThinker extends AbstractThinker {
 

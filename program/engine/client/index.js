@@ -1,7 +1,7 @@
 import Thinkers from './thinkers';
 import ClientPrediction from './Predictor';
 import PingMonitor from "./PingMonitor";
-import o876 from '../../../../program/o876';
+import o876 from '../../o876';
 
 class Engine extends O876_Raycaster.GameAbstract {
 

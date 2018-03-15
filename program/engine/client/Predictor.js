@@ -3,9 +3,7 @@
  * Les changement de mouvement son transmis
  * Mise en tampon
  */
-
-
-import o876 from '../../../../program/o876'
+import o876 from '../../o876';
 
 const MAX_UPDATE_TIME = 25; // Délai au dela duquel il faut mettre à jour
 

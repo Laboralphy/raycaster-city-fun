@@ -1,5 +1,5 @@
 //
-import Predictor from '../src/engine/Predictor';
+import Predictor from '../../../program/engine/client/Predictor';
 describe('Predictor', function() {
 	describe('pushing one packet', function() {
 		let cp = new Predictor();

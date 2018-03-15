@@ -1,5 +1,4 @@
 import AbstractThinker from './AbstractThinker';
-import o876 from '../../../../../program/o876';
 
 const ANIMATION_STAND = 0;
 const ANIMATION_WALK = 1;
@@ -10,7 +9,7 @@ const ANIMATION_DEATH = 3;
  * Il ne dispose d'aucune intelligence artificielle Ce thinker a été conçu pour
  * être utilisé comme Thinker de base dans un environnement réseau.
  */
-export default class NetThinker extends AbstractThinker {
+class NetThinker extends AbstractThinker {
 
 	constructor() {
 		super();
@@ -110,3 +109,4 @@ export default class NetThinker extends AbstractThinker {
 }
 
 
+export default NetThinker;

@@ -6,9 +6,9 @@
  * Le maximum des valeurs numériques peut varier dont le graphe doit s'adapter
  */
 
-import o876 from '../../../../program/o876';
+import o876 from '../../o876';
 
-export default class PingMonitor {
+class PingMonitor {
 
 	/**
 	 * Initialisation de l'objet
@@ -89,3 +89,5 @@ export default class PingMonitor {
 		return canvas;
 	}
 }
+
+export default PingMonitor;

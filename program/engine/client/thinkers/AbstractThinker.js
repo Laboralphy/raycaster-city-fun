@@ -1,5 +1,5 @@
-import o876 from    '../../../../../program/o876';
-import NodeThinker from '../../../../../program/engine/thinkers/Thinker';
+import o876 from '../../../o876/index';
+import NodeThinker from '../../thinkers/Thinker';
 
 class AbstractThinker extends NodeThinker {
 	constructor() {
