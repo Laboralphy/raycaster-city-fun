@@ -1,3 +1,9 @@
+/**
+ * Le Mover Thinker permet d'interpoler les movement des joueurs
+ * Chaque joueur envoie des données de modif de mouvement de temps à autres
+ * Ce Thinker permet à chaque frame de calculer la position exacte du mobile et
+ * d'effectuer des calcul de collision avec les murs.
+ */
 const Thinker = require('./Thinker');
 const o876 = require('../../o876/index');
 const Vector = o876.geometry.Vector;
@@ -10,9 +16,6 @@ module.exports = class MoverThinker extends Thinker {
 		this._prevMovement = null;
 		this.state('move');
 	}
-
-
-
 
 	$move() {
 		let m = this._mobile;

@@ -12,7 +12,9 @@ const STRINGS = require('./consts/strings');
 
 const ServiceLogin = require('./Login/Service');
 const ServiceTxat = require('./TinyTxat/Service');
-const ServiceEngine = require('./Engine/Service');
+const ServiceGame = require('./Engine/Service');
+
+const Game = require('./Game');
 
 class Application {
 
@@ -39,7 +41,7 @@ class Application {
         service
 			.plugin(new ServiceLogin())
 			.plugin(new ServiceTxat())
-			.plugin(new ServiceEngine())
+			.plugin(new ServiceGame(new Game()))
 		;
         io.on('connection', socket => service.run(socket));
 	}

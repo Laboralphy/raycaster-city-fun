@@ -3,22 +3,13 @@ const logger = require('../Logger/index');
 const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
-const Engine = require('./System');
+const Engine = require('./Core');
 
 
 class ServiceEngine extends ServiceAbstract {
-    constructor() {
+    constructor(gameInstance) {
         super();
-        let gs = new Engine();
-		this._gs = gs;
-
-		// Le game system va parfois transmettre de l'information
-		// ces info sont transférées au réseau
-		// gs.emitter.on('transmit', (id, event, data) => {
-         //    logger.log('transmit', event, 'to', id);
-         //    this._emit(id, event, data);
-		// });
-
+		this._gs = gameInstance;
         setInterval(() => this.doomloop(), RC.time_factor);
     }
 

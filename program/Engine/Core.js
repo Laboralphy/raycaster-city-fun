@@ -15,7 +15,7 @@ const RC = require('../consts/raycaster');
 /**
  * Cette classe gère les différent use cases issu du réseau ou de tout autre évènements
  */
-class Game {
+class Core {
     constructor() {
         this._areas = {};
         this._players = {};
@@ -381,7 +381,7 @@ class Game {
         let mobiles = Object
             .values(this._mobiles)
             .filter(px => px.location.area() === area && px.id !== id)
-            .map(px => Game.buildMobileCreationPacket(px));
+            .map(px => Core.buildMobileCreationPacket(px));
         let subject = this.createMobile(id, p.blueprint, p.location);
 		subject.thinker(new MoverThinker());
 		subject.thinker().mobile(subject);
@@ -416,4 +416,4 @@ class Game {
 	}
 }
 
-module.exports = Game;
+module.exports = Core;

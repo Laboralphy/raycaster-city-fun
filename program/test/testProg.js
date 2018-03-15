@@ -764,7 +764,7 @@ describe('model', function() {
 
 
 	describe('GameSystem', function() {
-		const GameSystem = require('../Engine/System');
+		const GameSystem = require('../Engine/Core');
 		const Area = require('../Engine/Area');
         const Level = require('../Engine/Level');
         const Location = require('../Engine/Location');

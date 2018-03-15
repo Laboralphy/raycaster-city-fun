@@ -1,5 +1,21 @@
-const System = require('../Engine/System');
+/**
+ * Ceci est la classe de jeu, basée sur Engine/Core
+ * @type {Core}
+ * @class Game
+ *
+ *
+ *
+ */
 
-class Game extends System {
+
+
+
+const Core = require('../Engine/Core');
+
+
+
+class Game extends Core {
 
 }
+
+module.exports = Game;
