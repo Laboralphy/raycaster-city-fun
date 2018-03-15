@@ -1,6 +1,6 @@
-const ServiceAbstract = require('../ServiceManager/Abstract');
+const ServiceAbstract = require('../service-manager/Abstract');
 const TinyTxat = require('./index');
-const logger = require('../Logger/index');
+const logger = require('../logger/index');
 const STRINGS = require('../consts/strings');
 
 class ServiceTxat extends ServiceAbstract {

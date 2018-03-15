@@ -1,4 +1,4 @@
-EngineService = require('../Engine/Service');
+EngineService = require('../engine/Service');
 
 class GameService extends EngineService {
 

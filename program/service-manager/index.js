@@ -1,5 +1,5 @@
-const ClientManager = require('../ClientManager/index');
-const logger = require('../Logger/index');
+const ClientManager = require('../client-manager/index');
+const logger = require('../logger/index');
 
 const util = require('util');
 const STRINGS = require('../consts/strings');

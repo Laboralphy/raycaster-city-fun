@@ -1,4 +1,4 @@
-import Engine from '../engine';
+import Engine from '../engine/index';
 
 class Game extends Engine {
     setupListeners() {

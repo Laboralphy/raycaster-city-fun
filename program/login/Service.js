@@ -1,5 +1,5 @@
-const ServiceAbstract = require('../ServiceManager/Abstract');
-const logger = require('../Logger/index');
+const ServiceAbstract = require('../service-manager/Abstract');
+const logger = require('../logger/index');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
 

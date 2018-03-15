@@ -6,15 +6,15 @@ const path = require('path');
 
 
 const config = require('./config/index');
-const logger = require('./Logger/index');
-const ServiceManager = require('./ServiceManager/index');
+const logger = require('./logger/index');
+const ServiceManager = require('./service-manager/index');
 const STRINGS = require('./consts/strings');
 
-const ServiceLogin = require('./Login/Service');
-const ServiceTxat = require('./TinyTxat/Service');
-const ServiceGame = require('./Engine/Service');
+const ServiceLogin = require('./login/Service');
+const ServiceTxat = require('./tiny-txat/Service');
+const ServiceGame = require('./engine/Service');
 
-const Game = require('./Game');
+const Game = require('./game/index');
 
 class Application {
 

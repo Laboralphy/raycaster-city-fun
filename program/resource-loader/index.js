@@ -1,6 +1,6 @@
 const DATA_PATH = 'data';
 const path = require('path');
-const asyncfs = require('../Asyncfs/index');
+const asyncfs = require('../asyncfs/index');
 
 class ResourceLoader {
 
