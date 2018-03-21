@@ -296,7 +296,7 @@ class Engine extends O876_Raycaster.GameAbstract {
 		let cp = this._clientPrediction;
 		let sendPacket = cp.pushMovement(packet);
 		if (sendPacket) {
-			this.trigger('update.player', sendPacket);
+			this.trigger('player.update', sendPacket);
 		}
 	}
 

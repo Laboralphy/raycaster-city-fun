@@ -3,6 +3,8 @@ import STATUS from "../../../../../program/consts/status";
 const OVERLAY = true;
 
 function engine(socket, game) {
+	// étant donné que c'est une couche architectural, on ne doit pas surchager de store.dispatch
+	// chaque appli à ses propres actions
 	return store => {
 
 		//  #####
@@ -28,9 +30,7 @@ function engine(socket, game) {
 			 */
 			if (OVERLAY) {
 				MAIN.pointerlock.on('exit', event => {
-					game.freeze();
-					store.dispatch('ui/showSection', {id: 'chat'});
-					store.dispatch('ui/show');
+					game.trigger('pointer.unlock');
 				});
 
 				/**
@@ -38,8 +38,7 @@ function engine(socket, game) {
 				 * Cache l'interface et rétabli la netteté du canvas
 				 */
 				MAIN.pointerlock.on('enter', event => {
-					store.dispatch('ui/hide');
-					game.thaw();
+					game.trigger('pointer.lock');
 				});
 			}
 			/**
@@ -57,7 +56,7 @@ function engine(socket, game) {
 			 * Evènement : le client a bougé son mobile
 			 * transmetter au serveur la nouvelle situation geometrique
 			 */
-			game.on('update.player', async packet => {
+			game.on('player.update', async packet => {
 				let t1 = performance.now();
 				let aCorrPacket = await req_g_update_player(packet);
 				let t2 = performance.now();
@@ -75,10 +74,8 @@ function engine(socket, game) {
 			game._halt();
 			MAIN.screen.style.display = 'none';
 			socket.close();
-            store.dispatch('ui/hideSection', {id: 'chat'});
-			store.dispatch('ui/showSection', {id: 'disconnect'});
-			store.dispatch('ui/show');
 			document.body.setAttribute('class', '');
+			game.trigger('halt');
 		}
 
 
@@ -266,7 +263,6 @@ function engine(socket, game) {
 			socket.emit('G_READY', {phase});
 		}
 
-
 		//  ####   #    #  #####    ####    ####   #####      #    #####   ######
 		// #       #    #  #    #  #       #    #  #    #     #    #    #  #
 		//  ####   #    #  #####    ####   #       #    #     #    #####   #####
@@ -274,10 +270,8 @@ function engine(socket, game) {
 		// #    #  #    #  #    #  #    #  #    #  #   #      #    #    #  #
 		//  ####    ####   #####    ####    ####   #    #     #    #####   ######
 
-
 		store.subscribeAction(async (action) => {
 			switch (action.type) {
-
 				case 'clients/setLocal':
 					gameInit();
 					send_g_ready(STATUS.GAME_INITIALIZED);
@@ -286,6 +280,5 @@ function engine(socket, game) {
 		});
 	};
 }
-
 
 export default engine;

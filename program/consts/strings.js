@@ -3,7 +3,7 @@ const config = require('../config-loader/index');
 const STRINGS = {
 	en: {
 		service: {
-			hello: 'CITY WARS - SERVER',
+			hello: 'SERVER',
 			listening: 'server port is : ',
 			connected: 'client connected (client "%s")',
 			disconnected: 'client disconnected (client "%s")',
