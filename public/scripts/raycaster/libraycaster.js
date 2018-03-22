@@ -6749,7 +6749,7 @@ O2.createObject('MAIN', {
             	throw new Error('"namespace" key is mandatory in CONFIG.game while using autorun feature');
 			}
             var ns = MAIN.config.game.namespace;
-            var gcn = ns + '.Engine';
+            var gcn = ns + '.Game';
             var gc = O2.loadObject(gcn);
             var data = LEVEL_DATA[Object.keys(LEVEL_DATA)[0]];
             MAIN.run(new gc(MAIN.config));
@@ -9254,7 +9254,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			return;
 		}
 		var oTile = oSprite.oBlueprint.oTile;
-		var oCam = this.oCam
+		var oCam = this.oCamera;
 		var dx = oMobile.x + oMobile.xOfs - oCam.x - oCam.xOfs;
 		var dy = oMobile.y + oMobile.yOfs - oCam.y - oCam.yOfs;
 
@@ -12358,6 +12358,7 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	// protected
 	_oFrameCounter: null,
 	_nTimeStamp : 0,
+	_nTicks: 0,
 	_nShadedTiles : 0,
 	_nShadedTileCount : 0,
 	_oConfig: null,
@@ -12498,6 +12499,14 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	 */
 	getTime: function() {
 		return this._nTimeStamp;
+	},
+
+	/**
+	 * Nombre de fois que la doomloop a calculé d'updates
+	 * @return {number}
+	 */
+	getTicks: function() {
+		return this._nTicks;
 	},
 
 	/**
@@ -12685,7 +12694,7 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 
     stateUpdate: function() {
 		var nTime = performance.now();
-        var nFrames = 0;
+        var nLoops = 0;
         var rc = this.oRaycaster;
         if (this._nTimeStamp === null) {
             this._nTimeStamp = nTime;
@@ -12694,14 +12703,15 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
             rc.frameProcess();
             this._callGameEvent('onDoomLoop');
             this._nTimeStamp += this.nInterval;
-            nFrames++;
-            if (nFrames > 10) {
+            nLoops++;
+            if (nLoops > 10) {
                 // too many frames, the window has been minimized for too long
                 // restore time stamp
                 this._nTimeStamp = nTime;
             }
         }
-        if (nFrames) {
+        if (nLoops) {
+        	this._nTicks += nLoops;
             rc.frameRender();
             var eng = this;
             this._callGameEvent('onFrameRendered');

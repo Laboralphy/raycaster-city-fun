@@ -1,6 +1,8 @@
-const DATA_PATH = 'data';
 const path = require('path');
 const asyncfs = require('../asyncfs/index');
+
+const DATA_PATH = 'data';
+
 
 class ResourceLoader {
 
@@ -21,6 +23,7 @@ class ResourceLoader {
 
 	async loadClientData(sPlayer) {
 		return {
+			...await this.loadJSON('vault/' + sPlayer, 'character'),
 			...await this.loadJSON('vault/' + sPlayer, 'location'),
 			...await this.loadJSON('vault/' + sPlayer, 'password')
 		};
@@ -33,7 +36,7 @@ class ResourceLoader {
 		return level;
 	}
 
-    async loadResources(type) {
+    getResourceFolder(type) {
 		let fullType;
 
 		switch (type) {
@@ -48,18 +51,21 @@ class ResourceLoader {
 			default:
 				throw new Error('this resource type is unknown : "' + type + "'");
 		}
-
-        return await this.loadJSON(fullType, fullType);
+        return fullType;
     }
 
     async loadResource(type, id) {
-		if (!(type in this._resources)) {
-			this._resources[type] = await this.loadResources(type);
-        }
-        if (id in this._resources[type]) {
+		try {
+			type = this.getResourceFolder(type);
+			if (!(type in this._resources)) {
+				this._resources[type] = {};
+			}
+			if (!(id in this._resources[type])) {
+				this._resources[type][id] = await this.loadJSON(type, id);
+			}
 			return this._resources[type][id];
-		} else {
-			throw new Error('resource not found (type ' + type + ' id ' + id + ')');
+		} catch (e) {
+			throw new Error('could not load resource (type "' + type + '" - id "' + id + '") - ' + e.toString());
 		}
 	}
 }

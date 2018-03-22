@@ -1,8 +1,12 @@
-import STATUS from "../../../../../program/consts/status";
+/**
+ * Ne gère que la partie "identification" du client
+ * Réagit à l'action client/submit.
+ * @param socket
+ * @returns {function(*)}
+ */
 
 function login(socket) {
 	return store => {
-
 
 		/**
 		 * Envoi au serveur des données d'identification,

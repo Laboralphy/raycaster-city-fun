@@ -141,7 +141,7 @@ class Engine extends O876_Raycaster.GameAbstract {
         let lld = this._levelLiveData;
         // exploitation des level live data
 		// puis transmission
-        this.trigger('level.live.data', this._levelLiveData);
+        this.trigger('level.live.data', lld);
     }
 
 

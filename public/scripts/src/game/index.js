@@ -1,9 +1,12 @@
 import Engine from '../../../../program/engine/client/index';
 
 class Game extends Engine {
-    setupListeners() {
+
+	/**
+     * Cette fonction est à surcharger lorsqu'on souhaite écouter certains évènement issus de l'Engine
+	 */
+	setupListeners() {
         super.setupListeners();
-//        this.on('enter', event => this.)
         this.on('level.live.data', data => this.gameEventLevelLiveData(data));
     }
 
