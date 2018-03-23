@@ -4,6 +4,21 @@ const RC_CONST = {
     plane_spacing: 64,      // taille d'un block en texels
     texture_height: 96,     // hauteur d'un block en texels
 
+	mobile_type_none: 0,
+	mobile_type_mob: 1,     // non player character, or enemy
+	mobile_type_player: 2,  // player character
+	mobile_type_placeable: 3, // plaçeable object (furniture, tree, pile of bones)
+	mobile_type_missile: 4, // missile of any sort (fire ball, plasma orb...)
+	mobile_type_item: 5,    // droppable item (visible on floor)
+
+	fx_none: 0,                // no effect
+	fx_light_add: 1,            // sprite is drawn with ADD filter (good for ghosts or some explosion)
+	fx_light_source: 2,			// le sprite ne devien pas plus sombre lorsqu'il s'éloigne de la camera
+	fx_alpha_75: 1 << 2,        // sprite opaque à 75% (transparent à 25%)
+	fx_alpha_50: 2 << 2,        // sprite opaque à 50%
+	fx_alpha_25: 3 << 2,        // sprite presque invisible (opquae à 25%)
+
+
     /**
      * Ces constantes sont exprimées en millisecondes
      */

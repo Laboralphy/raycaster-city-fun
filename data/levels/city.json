@@ -76,11 +76,11 @@
     "filter":false
   },
   "walls":{
-    "src":"\/tiles\/22de2d71091142a3e1c859aaaf0e1c72.png",
+    "src":"22de2d71091142a3e1c859aaaf0e1c72.png",
     "codes":[null,[0,0],null,null,null,[1,1],[1,1]]
   },
   "flats":{
-    "src":"\/tiles\/436b8d700264a6a6752360f5b2c3550b.png",
+    "src":"436b8d700264a6a6752360f5b2c3550b.png",
     "codes":[null,null,[2,0],[2,1],[2,-1],[-1,-1],null]
   },
   "startpoint":{

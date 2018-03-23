@@ -1,5 +1,5 @@
 const path = require('path');
-const Application = require('./program/index');
+const Application = require('./framework/index');
 
 const app = new Application();
 app.setRoutes(path.resolve(__dirname, 'public'));

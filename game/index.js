@@ -7,12 +7,7 @@
  *
  */
 
-
-
-
-const Core = require('../engine/Core');
-
-
+const Core = require('../framework/engine/Core');
 
 class Game extends Core {
 

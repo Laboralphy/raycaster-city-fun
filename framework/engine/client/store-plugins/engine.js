@@ -1,4 +1,4 @@
-import STATUS from "../../../../../program/consts/status";
+import STATUS from "../../../consts/status";
 
 const OVERLAY = true;
 

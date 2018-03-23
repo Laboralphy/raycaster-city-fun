@@ -1,4 +1,4 @@
-import Engine from '../../../../program/engine/client/index';
+import Engine from '../../../../framework/engine/client/index';
 
 class Game extends Engine {
 

@@ -14,7 +14,7 @@ const ServiceLogin = require('./login/Service');
 const ServiceTxat = require('./tiny-txat/Service');
 const ServiceGame = require('./engine/Service');
 
-const Game = require('./game/index');
+const Game = require('../game/index');
 
 class Application {
 
