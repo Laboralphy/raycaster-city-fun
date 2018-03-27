@@ -1,4 +1,4 @@
-export default function (socket, game) {
+export default function ({socket, game}) {
     return store => {
 
 		/**
