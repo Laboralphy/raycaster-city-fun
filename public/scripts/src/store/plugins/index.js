@@ -12,14 +12,14 @@ import gamePlugins from '../../game/store-plugins';
 import Game from '../../game/index';
 import CONFIG from '../../config/index';
 import STATUS from "../../../../../framework/consts/status";
-import SocketAdapter from "../../../../../framework/engine/client/sockets";
+import SocketAdapter from "../../../../../framework/engine/client-side/socket-adapters";
 
 const context = {
 	socket: io(window.location.protocol + '//' + window.location.host),
 	game: new Game(CONFIG)
 };
 
-const sa = new SocketAdapter(context);
+const oSocketAdapter = new SocketAdapter(context);
 
 // tambouille configurative
 MAIN.configure(CONFIG);
@@ -28,7 +28,9 @@ MAIN.configure(CONFIG);
 function storePlugin({socket, game}) {
 	return store => {
 
-		sa.getAdapter('chat').on('postline', event => {
+		const sock = oSocketAdapter.getAdapters();
+
+		sock.chat.emitter.on('postline', event => {
 			store.dispatch('chat/postline', {
 				tab: event.channel.id,
 				client: event.client ? event.client.name : null,
@@ -41,7 +43,7 @@ function storePlugin({socket, game}) {
 
 				case 'clients/submit':
 					// le client souhaite se connecter
-					let id = await sa.getAdapter('login').req_login(action.payload.login, action.payload.pass);
+					let id = await sock.login.req_login(action.payload.login, action.payload.pass);
 					if (id) {
 						await store.dispatch('clients/info', {id, name: action.payload.login});
 						await store.dispatch('clients/setLocal', {id});
@@ -54,11 +56,11 @@ function storePlugin({socket, game}) {
 					break;
 
 				case 'clients/setLocal':
-					sa.getAdapter('engine').send_g_ready(STATUS.GAME_INITIALIZED);
+					sock.engine.send_ready(STATUS.GAME_INITIALIZED);
 					break;
 
 				case 'chat/message':
-					sa.getAdapter('chat').send_ms_say(action.payload.tab, action.payload.message);
+					sock.chat.send_say(action.payload.tab, action.payload.message);
 					break;
 			}
 		});

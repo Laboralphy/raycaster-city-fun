@@ -1,5 +1,5 @@
 const ServiceAbstract = require('../service-manager/Abstract');
-const TinyTxat = require('./index');
+const TinyTxat = require('../tiny-txat/index');
 const logger = require('../logger/index');
 const STRINGS = require('../consts/strings');
 
@@ -25,7 +25,7 @@ class ServiceTxat extends ServiceAbstract {
         this.txat.addChannel(c);
 
 
-        this.events.on('service-login', ({client}) => {
+        this.events.on('client-login', ({client}) => {
 			// ajouter le client au canal public
 			let oTxatUser = new TinyTxat.User(client);
 			this.txat.addUser(oTxatUser);

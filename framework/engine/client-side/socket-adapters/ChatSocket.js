@@ -30,7 +30,7 @@ class ChatSocket {
 		 * Serveur : "vous venez de rejoindre un canal"
 		 */
 		socket.on('MS_YOU_JOIN', async ({id}) => {
-			let oChannel = await this.req_ms_chan_info(id);
+			let oChannel = await this.req_chan_info(id);
 			if (oChannel) {
 				this._emitter.trigger('postline', {
 					channel: {id: oChannel.id, name: oChannel.name},
@@ -43,8 +43,8 @@ class ChatSocket {
 		 * Serveur : "un utilisateur a rejoin l'un des canaux auxquels vous êtes connecté"
 		 */
 		socket.on('MS_USER_JOINS', async ({user, channel}) => {
-			let oUser = await this.req_ms_user_info(user);
-			let oChannel = await this.req_ms_chan_info(channel);
+			let oUser = await this.req_user_info(user);
+			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
 				channel: {id: oChannel.id, name: oChannel.name},
 				message: oUser.name + ' rejoint le canal ' + oChannel.name
@@ -55,7 +55,7 @@ class ChatSocket {
 		 * Serveur : "un utilisateur a quitté l'un des canaux auxquels vous êtes connecté"
 		 */
 		socket.on('MS_USER_LEAVES', async ({user, channel}) => {
-			let oChannel = await this.req_ms_chan_info(channel);
+			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
 				channel: {id: oChannel.id, name: oChannel.name},
 				message: user.name + ' quitte le canal ' + oChannel.name
@@ -66,14 +66,18 @@ class ChatSocket {
 		 * Serveur : "un utilisateur a envoyé un message de discussion sur un canal"
 		 */
 		socket.on('MS_USER_SAYS', async ({user, channel, message}) => {
-			let oUser = await this.req_ms_user_info(user);
-			let oChannel = await this.req_ms_chan_info(channel);
+			let oUser = await this.req_user_info(user);
+			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
 				channel: {id: oChannel.id, name: oChannel.name},
 				client: {id: oUser.id, name: oUser.name},
 				message
 			});
 		});
+	}
+
+	get emitter() {
+		return this._emitter;
 	}
 
 
@@ -84,7 +88,7 @@ class ChatSocket {
 	 * @param id {string} id du canal
 	 * @returns {Promise<any>}
 	 */
-	async req_ms_chan_info(id) {
+	async req_chan_info(id) {
 		return new Promise(
 			resolve => {
 				if (id in this._chanCache) {
@@ -112,7 +116,7 @@ class ChatSocket {
 	 * @param id {string} id de l'utilisateur
 	 * @returns {Promise<any>}
 	 */
-	async req_ms_user_info(id) {
+	async req_user_info(id) {
 		return new Promise(
 			resolve => {
 				if (id in this._userCache) {
@@ -139,7 +143,7 @@ class ChatSocket {
 	 * @param cid {String} identifiant du canal
 	 * @param message {string} contenu du message
 	 */
-	send_ms_say(cid, message) {
+	send_say(cid, message) {
 		this._socket.emit('MS_SAY', {channel: cid, message});
 	}
 }

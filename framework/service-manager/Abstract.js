@@ -8,9 +8,12 @@ class Abstract {
     constructor() {
         this._clientManager = null;
         this.events = new EventEmitter();
+        ('on one off trigger').split().forEach(m => {
+        	this[m] = (...args) => this.events[m](...args)
+		});
     }
 
-    clientManager(cm) {
+	clientManager(cm) {
         return o876.SpellBook.prop(this, '_clientManager', cm);
     }
 
@@ -56,7 +59,7 @@ class Abstract {
      * @param _event {string} nature de l'évènement
      * @param data {*} information supplémentaire
      */
-    _share(_event, data) {
+    _broadcast(_event, data) {
         this.events.emit('plugin-message', _event, data);
     }
 }

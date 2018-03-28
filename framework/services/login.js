@@ -31,7 +31,7 @@ class ServiceLogin extends ServiceAbstract {
                 client.name = name;
                 client.id = socket.client.id;
                 logger.logfmt(STRINGS.login.granted, client.id, client.name);
-				this._share('service-login', {client});
+				this._broadcast('client-login', {client});
                 ack({id: client.id});
             } else {
                 logger.logfmt(STRINGS.login.denied, client.id, client.name);

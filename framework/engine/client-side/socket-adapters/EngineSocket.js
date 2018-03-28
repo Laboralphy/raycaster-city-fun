@@ -6,7 +6,7 @@ import STATUS from "../../../consts/status";
  * Elle propose des ordre pour communiquer avec le serveur (service Engine)
  */
 
-
+const OVERLAY = true;
 class EngineSocket {
 	constructor({socket, game}) {
 
@@ -115,7 +115,7 @@ class EngineSocket {
 		 * Envoie un message "ready" pour indiquer qu'on est pret à jouer
 		 */
 		this._game.on('enter', async event => {
-			this.send_g_ready(STATUS.ENTERING_LEVEL);
+			this.send_ready(STATUS.ENTERING_LEVEL);
 		});
 
 		this._game.on('frame', event => {
@@ -127,7 +127,7 @@ class EngineSocket {
 		 */
 		this._game.on('player.update', async packet => {
 			let t1 = performance.now();
-			let aCorrPacket = await this.req_g_update_player(packet);
+			let aCorrPacket = await this.req_update_player(packet);
 			let t2 = performance.now();
 			this._game.ping(t2 - t1);
 			this._game.applyMobileCorrection(aCorrPacket);
@@ -141,7 +141,9 @@ class EngineSocket {
 	 */
 	gameEnd() {
 		this._game._halt();
-		MAIN.screen.style.display = 'none';
+		if (MAIN.screen) {
+			MAIN.screen.style.display = 'none';
+		}
 		this._socket.close();
 		document.body.setAttribute('class', '');
 		this._game.trigger('halt');
@@ -156,14 +158,14 @@ class EngineSocket {
 	 * @param packet.ms {number} vitesse déduite du mobile (avec ajustement collision murale etc...)
 	 * @param packet.c {number} commandes de tir, d'activation etc...
 	 */
-	async req_g_update_player(packet) {
+	async req_update_player(packet) {
 		return new Promise(resolve => {
 			this._socket.emit('REQ_G_UPDATE_PLAYER', packet, data => resolve(data));
 		});
 	}
 
 
-	async req_g_load_bp(sResRef) {
+	async req_load_bp(sResRef) {
 		// télécharger le blueprint
 		// vérifier si la tile attachée au blueprint est chargée
 		// si non alors télécharger la tile
@@ -234,7 +236,7 @@ class EngineSocket {
 	 * phase 2:
 	 * Lorsque le client a fini de recevoir les données des entité dynamique et souhaite prendre le controle d'un mobile
 	 */
-	send_g_ready(phase) {
+	send_ready(phase) {
 		if (phase === STATUS.GAME_INITIALIZED) {
 			this.gameInit();
 		}

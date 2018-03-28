@@ -3,7 +3,7 @@ const logger = require('../logger/index');
 const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
-const Engine = require('./Core');
+const Engine = require('../engine/Core');
 
 
 class ServiceEngine extends ServiceAbstract {

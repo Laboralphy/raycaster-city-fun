@@ -10,9 +10,9 @@ const logger = require('./logger/index');
 const ServiceManager = require('./service-manager/index');
 const STRINGS = require('./consts/strings');
 
-const ServiceLogin = require('./login/Service');
-const ServiceTxat = require('./tiny-txat/Service');
-const ServiceGame = require('./engine/Service');
+const ServiceLogin = require('./services/login');
+const ServiceTxat = require('./services/chat');
+const ServiceGame = require('./services/engine');
 
 const Game = require('../game/index');
 

@@ -16,14 +16,17 @@ class AdapterManager {
 		this.declareAdapter('engine', new EngineSocket({socket, game}));
 	}
 
-
 	declareAdapter(sName, oInstance) {
 		this._adapters[sName] = oInstance;
 	}
 
+	getAdapters() {
+		return this._adapters;
+	}
+
 	getAdapter(sAdapter) {
 		if (sAdapter in this._adapters) {
-			return this._adapters;
+			return this._adapters[sAdapter];
 		} else {
 			throw new Error('unknown socket adapter "' + sAdapter + '"');
 		}
