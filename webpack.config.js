@@ -13,6 +13,7 @@ module.exports = {
         filename: '[name].js',
         publicPath: "/public/scripts/dist/",
     },
+	devtool: 'source-map',
 	module: {
 		loaders: [			{
             test: /\.vue$/,

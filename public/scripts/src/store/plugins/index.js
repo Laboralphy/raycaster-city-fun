@@ -28,13 +28,38 @@ MAIN.configure(CONFIG);
 function storePlugin({socket, game}) {
 	return store => {
 
+		// adapteurs de socket
 		const sock = oSocketAdapter.getAdapters();
 
+		/**
+		 * Il y a plusieurs adapteurs de socket
+		 *
+		 * chat : ne gère que les messages réseaux concernant le chat
+		 * engine : ne gère que les messages réseaux concernant le moteur de jeu (synchro client, mobile, portes, chargement resources ou niveaux....)
+		 * login : ne gère que les messages réseaux concernant l'identification du client
+		 * ...
+		 */
+
+
+		/**
+		 * Ecouter les évènements issus des adapter de sockets
+		 */
+
 		sock.chat.emitter.on('postline', event => {
-			store.dispatch('chat/postline', {
-				tab: event.channel.id,
-				client: event.client ? event.client.name : null,
+			store.dispatch('chat/postLine', {
+				tab: event.id,
+				client: event.client ? event.client : null,
 				message: event.message
+			});
+		});
+
+		sock.chat.emitter.on('newchan', async event => {
+			await store.dispatch('chat/addTab', {
+				id: event.id,
+				caption: event.name
+			});
+			await store.dispatch('chat/selectTab', {
+				id: event.id
 			});
 		});
 

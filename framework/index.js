@@ -56,9 +56,12 @@ class Application {
 			res.sendFile(path.resolve(sRoot, 'index.html'));
 		});
 		// app.js
-        httpServer.get('/scripts', function(req, res) {
-            res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js'));
-        });
+		httpServer.get('/scripts', function(req, res) {
+			res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js'));
+		});
+		httpServer.get('/app.js.map', function(req, res) {
+			res.sendFile(path.resolve(sRoot, 'scripts/dist/app.js.map'));
+		});
         httpServer.get('/raycaster', function(req, res) {
             res.sendFile(path.resolve(sRoot, 'scripts/raycaster/libraycaster.js'));
         });

@@ -51,7 +51,7 @@ const mutations = {
         if (!oTab) {
             throw new Error('could not find tab #' + tab);
         }
-        oTab.lines.push({
+		oTab.lines.push({
             id: ++state.lastLineId,
             user: client,
             message: message,

@@ -41,14 +41,12 @@ class EngineSocket {
 			if (Array.isArray(mob)) {
 				for (let i = 0, l = mob.length; i < l; ++i) {
 					let m = mob[i];
-					console.log('requesting', m.bp);
-					await req_g_load_bp(m.bp);
-					console.log('got', m.bp);
+					await this.req_load_bp(m.bp);
 					game.netSpawnMobile(m);
 				}
 			} else {
 				// tester si le blueprint est chargé
-				await req_g_load_bp(mob.bp);
+				await this.req_load_bp(mob.bp);
 				game.netSpawnMobile(mob);
 			}
 		});
@@ -133,7 +131,8 @@ class EngineSocket {
 			this._game.applyMobileCorrection(aCorrPacket);
 		});
 
-		this._game.trigger('socket', {socket});
+		// est ce bien utile ?
+		this._game.trigger('socket', {socket: this._socket});
 	}
 
 	/**
@@ -210,7 +209,7 @@ class EngineSocket {
 							// l'image de la tile ...
 							if (oTile.oImage.complete) {
 								// ... est déja chargée
-								shadeAndCommitBP()
+								shadeAndCommitBP();
 							} else {
 								// ... n'est pas déja chargée : on doit utiliser l'évènement load
 								oTile.oImage.addEventListener('load', shadeAndCommitBP);

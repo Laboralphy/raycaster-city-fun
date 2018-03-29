@@ -32,10 +32,7 @@ class ChatSocket {
 		socket.on('MS_YOU_JOIN', async ({id}) => {
 			let oChannel = await this.req_chan_info(id);
 			if (oChannel) {
-				this._emitter.trigger('postline', {
-					channel: {id: oChannel.id, name: oChannel.name},
-					message: 'Bienvenue sur le ' + oChannel.name
-				});
+				this._emitter.trigger('newchan', oChannel);
 			}
 		});
 
@@ -46,7 +43,7 @@ class ChatSocket {
 			let oUser = await this.req_user_info(user);
 			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
-				channel: {id: oChannel.id, name: oChannel.name},
+				id: oChannel.id,
 				message: oUser.name + ' rejoint le canal ' + oChannel.name
 			});
 		});
@@ -57,7 +54,7 @@ class ChatSocket {
 		socket.on('MS_USER_LEAVES', async ({user, channel}) => {
 			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
-				channel: {id: oChannel.id, name: oChannel.name},
+				id: oChannel.id,
 				message: user.name + ' quitte le canal ' + oChannel.name
 			});
 		});
@@ -69,7 +66,7 @@ class ChatSocket {
 			let oUser = await this.req_user_info(user);
 			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
-				channel: {id: oChannel.id, name: oChannel.name},
+				id: oChannel.id,
 				client: {id: oUser.id, name: oUser.name},
 				message
 			});

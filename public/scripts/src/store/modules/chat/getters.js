@@ -12,7 +12,7 @@ const getters = {
     },
 
 	/**
-     * Renvoie l'onglet actuellement actif
+     * Renvoie l'onglet spécifié
 	 * @param state
 	 * @returns {Function}
 	 */
