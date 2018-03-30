@@ -19,6 +19,7 @@ import o876 from '../../../o876';
  *
  *
  */
+
 class ChatSocket {
 	constructor({socket}) {
 		this._socket = socket;
@@ -44,7 +45,7 @@ class ChatSocket {
 			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
 				id: oChannel.id,
-				message: oUser.name + ' rejoint le canal ' + oChannel.name
+				message: '[' + oChannel.name + ']: +' + oUser.name
 			});
 		});
 
@@ -55,7 +56,7 @@ class ChatSocket {
 			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
 				id: oChannel.id,
-				message: user.name + ' quitte le canal ' + oChannel.name
+				message: '[' + oChannel.name + ']: -' + oUser.name
 			});
 		});
 
