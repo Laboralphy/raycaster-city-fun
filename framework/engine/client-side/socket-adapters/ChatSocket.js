@@ -56,7 +56,7 @@ class ChatSocket {
 			let oChannel = await this.req_chan_info(channel);
 			this._emitter.trigger('postline', {
 				id: oChannel.id,
-				message: '[' + oChannel.name + ']: -' + oUser.name
+				message: '[' + oChannel.name + ']: -' + user.name
 			});
 		});
 

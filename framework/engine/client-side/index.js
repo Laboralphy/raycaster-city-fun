@@ -136,7 +136,10 @@ class Engine extends O876_Raycaster.GameAbstract {
 		// player thinker configuration
 		let player = this.getPlayer();
 		let ct = new Thinkers.Player();
-		player.setThinker(ct.game(this).mobile(player));
+		ct
+			.game(this)
+			.mobile(player);
+		player.setThinker(ct);
         ct.on('use.down', () => this.activateWall(player));
         let lld = this._levelLiveData;
         // exploitation des level live data

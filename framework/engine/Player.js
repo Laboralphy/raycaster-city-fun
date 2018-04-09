@@ -23,6 +23,8 @@ class Player {
         // cette instance à été créée suite à la connexionb d'un client
         // il va falloir renseigner à ce client la situation complete du joueur
 
+        this.character = {}; // données concernant le personnage controlé par le joueur
+
     }
 }
 

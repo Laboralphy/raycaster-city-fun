@@ -154,7 +154,7 @@ class Core {
     static buildMobileCreationPacket(m) {
         let mloc = m.location;
         let mpos = mloc.position();
-        let mspd = m.speed;
+        let mspd = m.speed; // vecteur de vitesse actuelle
         return {
             id: m.id,
             x: mpos.x,
@@ -255,6 +255,7 @@ class Core {
      * Création d'une instance Player et chargement des données initiale
      * @param id
 	 * @param playerData {object} données persistante du joueur
+	 *
      */
     async createPlayer(id, playerData) {
 		let location = playerData.location;
@@ -271,7 +272,8 @@ class Core {
         p.location.position().set(x, y);
         p.location.heading(angle);
         p.location.area(area);
-        p.blueprint = 'm_warlock_b';
+        // données du personnage
+        p.character = playerData.character;
 		return p;
     }
 
@@ -377,14 +379,21 @@ class Core {
         let p = this._players[id];
         let area = p.location.area();
 
+        // p.character contient des données spéciale gameplay
+
+
         // transmettre la position de tous les mobiles
         let mobiles = Object
             .values(this._mobiles)
             .filter(px => px.location.area() === area && px.id !== id)
             .map(px => Core.buildMobileCreationPacket(px));
-        let subject = this.createMobile(id, p.blueprint, p.location);
-		subject.thinker(new MoverThinker());
-		subject.thinker().mobile(subject);
+        let subject = this.createMobile(id, p.character.blueprint, p.location);
+        let oThinker = new MoverThinker();
+		subject.thinker(oThinker);
+		oThinker.mobile(subject);
+
+		// définir quelques variables
+
 
         // déterminer la liste des joueur présents dans la zone
 		let players = this.getAreaPlayers(area).filter(p => p.id !== id).map(p => p.id);

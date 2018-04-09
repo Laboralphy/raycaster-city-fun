@@ -39,7 +39,7 @@ class ServiceEngine extends ServiceAbstract {
 		let id = client.id;
 		let oResult = this._gs.clientHasLeft(client);
 		if (oResult.mob) {
-			this._emit(oResult.players, {mob: oResult.mob});
+			this._emit(oResult.players.map(p => p.id), 'G_DESTROY_MOBILE', {mob: oResult.mob});
 		}
 	}
 
@@ -68,11 +68,11 @@ class ServiceEngine extends ServiceAbstract {
 						});
 						break;
 
-                    case STATUS.ENTERING_LEVEL: // Le client a chargé le niveau, il est prèt à recevoir les
+                    case STATUS.ENTERING_LEVEL: // Le client a chargé le niveau, il est prèt à recevoir les entités
 						data = this._gs.clientHasLoadedLevel(client);
 						// transmettre au client la liste de tous les mobiles
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
-						this._emit(client.id, 'G_YOUR_ID', {id: client.id});
+						this._emit(client.id, 'G_CONTROL_MOBILE', {id: client.id});
 						// transmettre à tous les autres clients la création du client
 						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Engine.buildMobileCreationPacket(data.subject) });
                         break;
