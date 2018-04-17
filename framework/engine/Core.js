@@ -322,7 +322,12 @@ class Core {
 		mob.thinker().setMovement({t, a, x, y, sx, sy, id, c});
 		if (c) {
 			// les command sont envoyée en tant qu'évènement
-			this.emitter.trigger('player.command', {id: idm, c});
+			// décomposer...
+			for (let i = 0; i < COMMANDS.XF; i <<= 1) {
+				if (c & i) {
+                    this.emitter.trigger('player.command', {id: idm, i});
+				}
+			}
 		}
 		return {
 			a: loc.heading(),

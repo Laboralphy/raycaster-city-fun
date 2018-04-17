@@ -15,39 +15,47 @@ class Game extends Core {
 
 	constructor() {
 		super();
+		// déclaration de l'évènement player.command
+		// cet évènement est déclenché lorsqu'un joueur emet une commande (
 		this.emitter.on('player.command', ({id, c}) => this.playerCommand(id, c));
 	}
 
 
 	playerCommand(id, c) {
 		// identifier l'entité qui effectue la commande
-		if (c & COMMANDS.MOUSE_LEFT) {
-			// tir de l'arme principale
-			this.entityPrimaryFire(id);
+		switch (c) {
+			case COMMANDS.MOUSE_LEFT:
+                this.mobileActionPrimaryAttack(id);
+                break;
 		}
 	}
 
 
-
+    /**
+	 * Génère un missile
+     * @param ref
+     * @param location
+     * @param data
+     */
 	spawnMissile(ref, location, data) {
-
+        let idMissile = uniqid('m-');
+        let oMissile = this.createMobile(idMissile, ref, location, data);
 	}
 
 
 	/**
 	 * Effectue un tir d'arme principale
-	 * @param id {number} identifiant du joueur qui effectue l'action
+	 * @param id {number} identifiant du mobile qui effectue l'action
 	 */
-	entityPrimaryFire(id) {
+	mobileActionPrimaryAttack(id) {
 		let oMobile = this._mobiles[id];
 		// créer le projectile
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
-		let idMissile = uniqid('mis-');
 		let ref = 'p_magbolt';
 		let location = oMobile.location();
 		let data = {};
-		let oMissile = this.createMobile(idMissile, ref, location, data);
+		let oMissile = this.spawnMissile(ref, location, data);
 	}
 }
 
