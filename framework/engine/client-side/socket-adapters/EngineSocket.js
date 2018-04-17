@@ -55,21 +55,16 @@ class EngineSocket {
 		 * Serveur : voici l'identifiant qui vous a été attribué
 		 * Ainsi que les données nécessaire au controle de votre mobile
 		 */
-		socket.on('G_CONTROL_MOBILE', ({id}) => {
-			game.localId(id);
-		});
-
-		/**
-		 * Serveur : modification des paramètre de controle du mobile
-		 * Cela servira à signifier au cient des changement d'état genre :
-		 * - vitesse de déplacement
-		 */
-		socket.on('G_CONTROL_PARAMETERS', (params) => {
+		socket.on('G_CONTROL_MOBILE', (params) => {
+			if ('id' in params) {
+				game.localId(params.id);
+			}
 			let oMobile = game.getPlayer();
 			if ('speed' in params) {
 				oMobile.fSpeed = params.speed;
 			}
 		});
+
 
 		/**
 		 * Serveur : vous devez mettre à jour ce ou ces mobiles.

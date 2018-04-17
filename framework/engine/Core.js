@@ -10,6 +10,7 @@ const MoverThinker = require('./thinkers/MoverThinker');
 
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
+const COMMANDS = require('../consts/commands');
 const RC = require('../consts/raycaster');
 
 /**
@@ -282,13 +283,15 @@ class Core {
      * @param id {string} identifiant
      * @param ref {string} référence du blueprint
      * @param location {Location}
+	 * @param extra {*}
      * @return {Mobile}
 	 */
-	createMobile(id, ref, location) {
+	createMobile(id, ref, location, extra) {
         let m = new Mobile();
         m.id = id;
         m.location.assign(location);
         m.blueprint = ref;
+        m.data = extra;
         this._mobiles[id] = m;
         return m;
     }
@@ -303,10 +306,6 @@ class Core {
     }
 
 
-    playClientAction(id, action) {
-
-	}
-
 	/**
 	 * Rejoue les movement du client pour mise en conformité
 	 * {id, lt, a, sx, sy, c}
@@ -320,10 +319,11 @@ class Core {
 		}
 		let loc = mob.location;
 		loc.heading(a);
-		if (c) {
-			this.playClientAction(id, c);
-		}
 		mob.thinker().setMovement({t, a, x, y, sx, sy, id, c});
+		if (c) {
+			// les command sont envoyée en tant qu'évènement
+			this.emitter.trigger('player.command', {id: idm, c});
+		}
 		return {
 			a: loc.heading(),
 			x: loc.position().x,
@@ -387,7 +387,14 @@ class Core {
             .values(this._mobiles)
             .filter(px => px.location.area() === area && px.id !== id)
             .map(px => Core.buildMobileCreationPacket(px));
-        let subject = this.createMobile(id, p.character.blueprint, p.location);
+        let subject = this.createMobile(
+        	id,
+			p.character.blueprint,
+			p.location,
+			{ // données supplémentaires
+        		speed: p.character.speed
+			}
+		);
         let oThinker = new MoverThinker();
 		subject.thinker(oThinker);
 		oThinker.mobile(subject);

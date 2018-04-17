@@ -72,7 +72,10 @@ class ServiceEngine extends ServiceAbstract {
 						data = this._gs.clientHasLoadedLevel(client);
 						// transmettre au client la liste de tous les mobiles
 						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
-						this._emit(client.id, 'G_CONTROL_MOBILE', {id: client.id});
+						this._emit(client.id, 'G_CONTROL_MOBILE', {
+							id: client.id,
+							speed: data.subject.data.speed
+						});
 						// transmettre à tous les autres clients la création du client
 						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Engine.buildMobileCreationPacket(data.subject) });
                         break;

@@ -29,6 +29,7 @@ module.exports = class Mobile {
 		this._thinker = null;
 		// aspect
 		this.blueprint = '';
+		this.data = {};
 		// flags
 		this.flagCrash = false; // ne glisse pas sur les mur ; explose.
 	}

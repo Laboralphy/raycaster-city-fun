@@ -1,3 +1,6 @@
+/**
+ * Ces constantes sont utilisées lors de la transmission des commandes du joueur vers le serveur
+ */
 export const UP 				= 1 << 0;
 export const RIGHT 				= 1 << 1;
 export const DOWN 				= 1 << 2;
