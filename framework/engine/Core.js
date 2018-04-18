@@ -147,43 +147,6 @@ class Core {
     // les builder aident à fabriquer les paquet de données à partir d'entité
 
 
-    /**
-     * Fabrique un packet de creation de mobile
-     * @param m
-     * @return {{id, x, y, a: number, sx: number, sy: number, bp: module.Level.blueprint|string}}
-     */
-    static buildMobileCreationPacket(m) {
-        let mloc = m.location;
-        let mpos = mloc.position();
-        let mspd = m.speed; // vecteur de vitesse actuelle
-        return {
-            id: m.id,
-            x: mpos.x,
-            y: mpos.y,
-            a: mloc.heading(),
-            sx: mspd.x,
-			sy: mspd.y,
-            bp: m.blueprint
-        };
-    }
-
-    /**
-     * Fabrique un packet de mise à jour de mobile
-     * @param m
-     * @return {{id, x, y, a: number, sx: number, sy: number}}
-     */
-    static buildMobileUpdatePacket(m) {
-        let mloc = m.location;
-        let mpos = mloc.position();
-        let mspd = m.speed;
-        return {
-            id: m.id,
-            x: mpos.x,
-            y: mpos.y,
-            a: mloc.heading(),
-			s: mspd
-        };
-    }
 
 	/**
 	 * Construction d'une nouvelle zone
@@ -293,8 +256,22 @@ class Core {
         m.blueprint = ref;
         m.data = extra;
         this._mobiles[id] = m;
+        let area = m.location.area();
+        let players = this.getAreaPlayers(area).map(p => p.id);
+        this.emitter.emit('mobile.created', { players, mob: m });
         return m;
     }
+
+    destroyMobile(id) {
+		let mob = this._mobiles[id];
+		if (mob) {
+			let area = mob.location.area();
+			let players = this.getAreaPlayers(area).map(p => p.id);
+			mob.finalize();
+			this.emitter.emit('mobile.destroyed', { players, mob });
+		}
+		delete this._mobiles[id];
+	}
 
     /**
      * Ajoute un level à la liste des zones
@@ -323,9 +300,9 @@ class Core {
 		if (c) {
 			// les command sont envoyée en tant qu'évènement
 			// décomposer...
-			for (let i = 0; i < COMMANDS.XF; i <<= 1) {
+			for (let i = 0; i <= COMMANDS.LAST_COMMAND; i <<= 1) {
 				if (c & i) {
-                    this.emitter.trigger('player.command', {id: idm, i});
+                    this.emitter.emit('player.command', {id: idm, command: i});
 				}
 			}
 		}
@@ -390,8 +367,7 @@ class Core {
         // transmettre la position de tous les mobiles
         let mobiles = Object
             .values(this._mobiles)
-            .filter(px => px.location.area() === area && px.id !== id)
-            .map(px => Core.buildMobileCreationPacket(px));
+            .filter(px => px.location.area() === area && px.id !== id);
         let subject = this.createMobile(
         	id,
 			p.character.blueprint,
@@ -419,21 +395,8 @@ class Core {
 
 	clientHasLeft(client) {
     	let id = client.id;
-    	let mob = this._mobiles[id];
-    	let oResult = {
-    		players: [],
-			mob: false
-		};
-    	// détruire ce mobile : mob
-		if (mob) {
-			let area = mob.location.area();
-			oResult.players = this.getAreaPlayers(area);
-			oResult.mob = id;
-			mob.finalize();
-		}
-		delete this._mobiles[id];
+		this.destroyMobile(id);
 		delete this._players[id];
-		return oResult;
 	}
 }
 

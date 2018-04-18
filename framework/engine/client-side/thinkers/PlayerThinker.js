@@ -65,6 +65,7 @@ class PlayerThinker extends FPSThinker {
 					break;
 
 				case 'b0.d':
+					console.log('mouse button clicked');
 					c |= COMMANDS.MOUSE_LEFT;
 					break;
 

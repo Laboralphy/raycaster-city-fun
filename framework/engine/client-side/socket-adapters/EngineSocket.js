@@ -45,7 +45,6 @@ class EngineSocket {
 					game.netSpawnMobile(m);
 				}
 			} else {
-				// tester si le blueprint est chargé
 				await this.req_load_bp(mob.bp);
 				game.netSpawnMobile(mob);
 			}

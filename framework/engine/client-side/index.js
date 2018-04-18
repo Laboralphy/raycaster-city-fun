@@ -345,8 +345,9 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * destruction de mobile, suite à un ordre du serveur
 	 * @param id {string} identifiant
 	 */
-	netDestroyMobile(id) {
+	netDestroyMobile({id}) {
 		this._mobiles[id].getThinker().die();
+		delete this._mobiles[id];
 	}
 }
 

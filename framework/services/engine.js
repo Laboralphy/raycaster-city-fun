@@ -3,7 +3,7 @@ const logger = require('../logger/index');
 const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
-const Engine = require('../engine/Core');
+const Core = require('../engine/Core');
 
 
 class ServiceEngine extends ServiceAbstract {
@@ -11,7 +11,22 @@ class ServiceEngine extends ServiceAbstract {
         super();
 		this._gs = gameInstance;
         setInterval(() => this.doomloop(), RC.time_factor);
+
+		gameInstance.emitter.on('mobile.created', ({players, mob}) => this.transmitMobileCreationEvent(players, mob));
+		gameInstance.emitter.on('mobile.destroyed', ({players, mob}) => this.transmitMobileDestructionEvent(players, mob));
     }
+
+	transmitMobileCreationEvent(players, mob) {
+		this._emit(players, 'G_CREATE_MOBILE', {
+			mob: ServiceEngine.buildMobileCreationPacket(mob)
+		});
+	}
+
+	transmitMobileDestructionEvent(players, mob) {
+		this._emit(players, 'G_DESTROY_MOBILE', {
+			mob: ServiceEngine.buildMobileCreationPacket(mob)
+		});
+	}
 
     doomloop() {
 		let aMutations = this._gs.getStateMutations();
@@ -36,11 +51,46 @@ class ServiceEngine extends ServiceAbstract {
 	disconnectClient(client) {
     	super.disconnectClient(client);
     	// supprimer l'entité du client
-		let id = client.id;
-		let oResult = this._gs.clientHasLeft(client);
-		if (oResult.mob) {
-			this._emit(oResult.players.map(p => p.id), 'G_DESTROY_MOBILE', {mob: oResult.mob});
-		}
+		this._gs.clientHasLeft(client);
+	}
+
+
+	/**
+	 * Fabrique un packet de creation de mobile
+	 * @param m
+	 * @return {{id, x, y, a: number, sx: number, sy: number, bp: module.Level.blueprint|string}}
+	 */
+	static buildMobileCreationPacket(m) {
+		let mloc = m.location;
+		let mpos = mloc.position();
+		let mspd = m.speed; // vecteur de vitesse actuelle
+		return {
+			id: m.id,
+			x: mpos.x,
+			y: mpos.y,
+			a: mloc.heading(),
+			sx: mspd.x,
+			sy: mspd.y,
+			bp: m.blueprint
+		};
+	}
+
+	/**
+	 * Fabrique un packet de mise à jour de mobile
+	 * @param m
+	 * @return {{id, x, y, a: number, sx: number, sy: number}}
+	 */
+	static buildMobileUpdatePacket(m) {
+		let mloc = m.location;
+		let mpos = mloc.position();
+		let mspd = m.speed;
+		return {
+			id: m.id,
+			x: mpos.x,
+			y: mpos.y,
+			a: mloc.heading(),
+			s: mspd
+		};
 	}
 
 	/**
@@ -71,13 +121,13 @@ class ServiceEngine extends ServiceAbstract {
                     case STATUS.ENTERING_LEVEL: // Le client a chargé le niveau, il est prèt à recevoir les entités
 						data = this._gs.clientHasLoadedLevel(client);
 						// transmettre au client la liste de tous les mobiles
-						this._emit(client.id, 'G_CREATE_MOBILE', {mob: data.mobiles});
+						this._emit(client.id, 'G_CREATE_MOBILE', {
+							mob: data.mobiles.map(m => ServiceEngine.buildMobileCreationPacket(m))
+						});
 						this._emit(client.id, 'G_CONTROL_MOBILE', {
 							id: client.id,
 							speed: data.subject.data.speed
 						});
-						// transmettre à tous les autres clients la création du client
-						this._emit(data.players, 'G_CREATE_MOBILE', { mob: Engine.buildMobileCreationPacket(data.subject) });
                         break;
                 }
             } catch (e) {

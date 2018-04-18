@@ -40,6 +40,7 @@ class Game extends Core {
 	spawnMissile(ref, location, data) {
         let idMissile = uniqid('m-');
         let oMissile = this.createMobile(idMissile, ref, location, data);
+        return oMissile;
 	}
 
 
