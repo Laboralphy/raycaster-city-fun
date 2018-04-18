@@ -8,3 +8,6 @@ class MissileThinker extends MoverThinker {
 		super.$move();
 	}
 }
+
+
+module.exports = MissileThinker;

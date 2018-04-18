@@ -300,9 +300,9 @@ class Core {
 		if (c) {
 			// les command sont envoyée en tant qu'évènement
 			// décomposer...
-			for (let i = 0; i <= COMMANDS.LAST_COMMAND; i <<= 1) {
+			for (let i = 1; i <= COMMANDS.LAST_COMMAND; i <<= 1) {
 				if (c & i) {
-                    this.emitter.emit('player.command', {id: idm, command: i});
+                    this.emitter.emit('player.command', {mob, command: i});
 				}
 			}
 		}

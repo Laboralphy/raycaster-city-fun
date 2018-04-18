@@ -2,7 +2,7 @@
  * Thinker du personnage controlé par le joueur
  */
 import FPSThinker from './FPSThinker';
-import * as COMMANDS from '../../../consts/commands'
+import COMMANDS from '../../../consts/commands'
 
 class PlayerThinker extends FPSThinker {
 
@@ -65,7 +65,6 @@ class PlayerThinker extends FPSThinker {
 					break;
 
 				case 'b0.d':
-					console.log('mouse button clicked');
 					c |= COMMANDS.MOUSE_LEFT;
 					break;
 

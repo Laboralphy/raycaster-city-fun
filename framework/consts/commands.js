@@ -3,7 +3,7 @@
  */
 
 const UP 				= 1 << 0;
-const RIGHT 				= 1 << 1;
+const RIGHT 			= 1 << 1;
 const DOWN 				= 1 << 2;
 const LEFT 				= 1 << 3;
 const ACTIVATE 			= 1 << 4;
@@ -19,7 +19,7 @@ const COMMAND_5			= 1 << 13;
 const COMMAND_6			= 1 << 14;
 const LAST_COMMAND		= COMMAND_6;
 
-module.export = {
+module.exports = {
 	UP,
 	RIGHT,
 	LEFT,

@@ -10,6 +10,7 @@
 const Core = require('../framework/engine/Core');
 const COMMANDS = require('../framework/consts/commands');
 const uniqid = require('uniqid');
+const Thinkers = require('./thinkers');
 
 class Game extends Core {
 
@@ -17,15 +18,22 @@ class Game extends Core {
 		super();
 		// déclaration de l'évènement player.command
 		// cet évènement est déclenché lorsqu'un joueur emet une commande (
-		this.emitter.on('player.command', ({id, c}) => this.playerCommand(id, c));
+		this.emitter.on('player.command', ({mob, command}) => this.playerCommand(mob, command));
+
+		/*
+		mobile.created
+		mobile.destroyed
+		player.command
+		 */
 	}
 
 
-	playerCommand(id, c) {
+	playerCommand(mob, command) {
 		// identifier l'entité qui effectue la commande
-		switch (c) {
+		switch (command) {
 			case COMMANDS.MOUSE_LEFT:
-                this.mobileActionPrimaryAttack(id);
+				console.log("mouse left !");
+                this.mobileActionPrimaryAttack(mob);
                 break;
 		}
 	}
@@ -40,23 +48,22 @@ class Game extends Core {
 	spawnMissile(ref, location, data) {
         let idMissile = uniqid('m-');
         let oMissile = this.createMobile(idMissile, ref, location, data);
+        let th = new Thinkers.Missile();
+        th.mobile(oMissile);
+        oMissile.thinker(th);
         return oMissile;
 	}
 
 
 	/**
 	 * Effectue un tir d'arme principale
-	 * @param id {number} identifiant du mobile qui effectue l'action
+	 * @param oMobile {*} identifiant du mobile qui effectue l'action
 	 */
-	mobileActionPrimaryAttack(id) {
-		let oMobile = this._mobiles[id];
+	mobileActionPrimaryAttack(oMobile) {
 		// créer le projectile
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
-		let ref = 'p_magbolt';
-		let location = oMobile.location();
-		let data = {};
-		let oMissile = this.spawnMissile(ref, location, data);
+		let oMissile = this.spawnMissile('p_magbolt', oMobile.location, {});
 	}
 }
 

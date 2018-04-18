@@ -55,9 +55,7 @@ class Predictor {
 		let bPush = false;
 		if (bNoPreviousPacket) {
 			bPush = true;
-		}
-
-		else if (last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c !== last.c) {
+		} else if (last.t >= MAX_UPDATE_TIME || a !== last.a || sx !== last.sx || sy !== last.sy || c) {
 			// packet très différent du précédent ou ...
 			// précédent packet trop ancien ou ..
 			// commande "c" différente du précédent ou ...
