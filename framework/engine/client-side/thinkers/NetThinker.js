@@ -1,9 +1,6 @@
 import AbstractThinker from './AbstractThinker';
+import RC from '../../../consts/raycaster';
 
-const ANIMATION_STAND = 0;
-const ANIMATION_WALK = 1;
-const ANIMATION_ACTION = 2;
-const ANIMATION_DEATH = 3;
 /**
  * Ce thinker permet de bouger un mobile en définissant un vecteur de vitesse.
  * Il ne dispose d'aucune intelligence artificielle Ce thinker a été conçu pour
@@ -44,16 +41,16 @@ class NetThinker extends AbstractThinker {
 			let bStopped = fMovSpeed === 0;
 			mobile.fTheta = a;
 			switch (nAnim) {
-				case ANIMATION_ACTION:
-				case ANIMATION_STAND:
+				case RC.animation_action:
+				case RC.animation_stand:
 					if (!bStopped) {
-						oSprite.playAnimationType(ANIMATION_WALK);
+						oSprite.playAnimationType(RC.animation_walk);
 					}
 					break;
 
-				case ANIMATION_WALK:
+				case RC.animation_walk:
 					if (bStopped) {
-						oSprite.playAnimationType(ANIMATION_STAND);
+						oSprite.playAnimationType(RC.animation_stand);
 					}
 					break;
 			}
@@ -88,7 +85,7 @@ class NetThinker extends AbstractThinker {
 	$dying_enter() {
 		let m = this.mobile();
 		this.setMovement(this.fma, m.x, m.y, 0, 0);
-		m.oSprite.playAnimationType(ANIMATION_DEATH);
+		m.oSprite.playAnimationType(RC.animation_death);
 		let nDeadTime = m.oSprite.oAnimation.nDuration * m.oSprite.oAnimation.nCount / this.game().TIME_FACTOR | 0;
 		this.duration(nDeadTime).next('dead');
 		this.mobile().bEthereal = true;
@@ -101,6 +98,7 @@ class NetThinker extends AbstractThinker {
 		this.mobile().bEthereal = true;
 		this.mobile().gotoLimbo();
 		this.mobile().bActive = false;
+		console.debug('dead');
 	}
 
 	$dead() {

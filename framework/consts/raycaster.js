@@ -55,6 +55,13 @@ const RC_CONST = {
     phys_door_e : 0x0e,
     phys_door_f : 0x0f,
 
+
+	animation_death: 0,
+	animation_walk: 1,
+	animation_stand: 2,
+	animation_action: 3,
+
+
 };
 
 module.exports = RC_CONST;

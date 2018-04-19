@@ -35,6 +35,15 @@ module.exports = class Mobile {
 	}
 
 	/**
+	 * converti un couple angle + amplitiude, en vecteur
+	 * @param a
+	 * @param s
+	 */
+	static getVector(a, s) {
+
+	}
+
+	/**
 	 * Permet de supprimer le mobile du collisionner
 	 */
 	finalize() {

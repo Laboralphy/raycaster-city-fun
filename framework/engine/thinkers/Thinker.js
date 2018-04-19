@@ -31,7 +31,6 @@ module.exports = class Thinker {
     /**
 	 * Permet de définir la durée de l'état avant de repasser à un autre état
      * @param n {number}
-	 * @param sNextState {string}
      */
 	duration(n) {
 		return o876.SpellBook.prop(this, '_duration', n);

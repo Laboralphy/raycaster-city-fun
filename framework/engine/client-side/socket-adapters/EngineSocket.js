@@ -36,6 +36,7 @@ class EngineSocket {
 
 		/**
 		 * Serveur : vous devez créer ce ou ces mobiles.
+		 * Ce message est envoyé par ServiceEngine::transmitMobileCreationEvent
 		 */
 		socket.on('G_CREATE_MOBILE', async ({mob}) => {
 			if (Array.isArray(mob)) {

@@ -15,6 +15,13 @@ class ServiceEngine extends ServiceAbstract {
 		gameInstance.emitter.on('mobile.destroyed', ({players, mob}) => this.transmitMobileDestructionEvent(players, mob));
     }
 
+	/**
+	 * Un mobile vien d'etre créé dan sle moteur :
+	 * Il faut Transmettre aux clients un ordre de creation de mobile
+	 * Cet ordre contient les champs tels qu'ils sont généré par la fonction ServiceEngine::buildMobileCreationPacket
+	 * @param players {array|Player} liste des clients auquels envoyé l'ordre
+	 * @param mob {mobile} mobile a partir duquel on créé l'ordre
+	 */
 	transmitMobileCreationEvent(players, mob) {
 		this._emit(players, 'G_CREATE_MOBILE', {
 			mob: ServiceEngine.buildMobileCreationPacket(mob)
@@ -57,7 +64,7 @@ class ServiceEngine extends ServiceAbstract {
 	/**
 	 * Fabrique un packet de creation de mobile
 	 * @param m
-	 * @return {{id, x, y, a: number, sx: number, sy: number, bp: module.Level.blueprint|string}}
+	 * @return {{id, x, y, a: number, sx: number, sy: number, bp: module.Level.blueprint|string, an: number}}
 	 */
 	static buildMobileCreationPacket(m) {
 		let mloc = m.location;

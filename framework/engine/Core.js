@@ -247,6 +247,8 @@ class Core {
      * @param ref {string} référence du blueprint
      * @param location {Location}
 	 * @param extra {*}
+	 * - speed: vitesse lors d'un mouvement (un missile est toujour en mouvement...)
+	 * - type : 'missile' ; 'player' ; 'mob' ; 'vfx'
      * @return {Mobile}
 	 */
 	createMobile(id, ref, location, extra) {
@@ -258,6 +260,26 @@ class Core {
         this._mobiles[id] = m;
         let area = m.location.area();
         let players = this.getAreaPlayers(area).map(p => p.id);
+        // en général ca va etre un service de socket qui va exploiter cet évènement
+		switch (extra.type) {
+			case 'missile':
+				// pour les missiles, la vitesse spécifiée influence immédiatement le vecteur vitesse
+				// tandis que pour les autres entité, la vitesse spécifiée n'est qu'une indication de la vitesse max
+				m.speed.fromPolar(m.location.heading(), extra.speed);
+				break;
+
+			case 'player':
+				break;
+
+			case 'mobile':
+				break;
+
+			case 'vfx':
+				break;
+
+			default:
+				throw new Error('this type of mobile is unknown (allowed values are "player", "missile", "mobile", "vfx", "static")');
+		}
         this.emitter.emit('mobile.created', { players, mob: m });
         return m;
     }
@@ -373,6 +395,7 @@ class Core {
 			p.character.blueprint,
 			p.location,
 			{ // données supplémentaires
+				type: 'player',
         		speed: p.character.speed
 			}
 		);

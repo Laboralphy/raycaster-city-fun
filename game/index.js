@@ -11,6 +11,7 @@ const Core = require('../framework/engine/Core');
 const COMMANDS = require('../framework/consts/commands');
 const uniqid = require('uniqid');
 const Thinkers = require('./thinkers');
+const o876 = require('../framework/o876');
 
 class Game extends Core {
 
@@ -44,13 +45,19 @@ class Game extends Core {
      * @param ref
      * @param location
      * @param data
+	 * - speed : vitesse du missile
      */
 	spawnMissile(ref, location, data) {
-        let idMissile = uniqid('m-');
+        let idMissile = uniqid();
+        data.type = 'missile';
         let oMissile = this.createMobile(idMissile, ref, location, data);
+        // il faut donner de la vitesse au missile ; c'est important pour que le client anime correctement le missile
         let th = new Thinkers.Missile();
         th.mobile(oMissile);
         oMissile.thinker(th);
+        let angle = location.heading();
+        let v = o876.geometry.Helper.polar2rect(angle, data.speed);
+        th.setMovement({a: angle, sx: v.dx, sy: v.dy});
         return oMissile;
 	}
 
@@ -63,7 +70,9 @@ class Game extends Core {
 		// créer le projectile
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
-		let oMissile = this.spawnMissile('p_magbolt', oMobile.location, {});
+		let oMissile = this.spawnMissile('p_magbolt', oMobile.location, {
+			speed: 8
+		});
 	}
 }
 

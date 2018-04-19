@@ -32,4 +32,13 @@ module.exports = class Helper {
 	static angle(x1, y1, x2, y2) {
 		return Math.atan2(y2 - y1, x2 - x1);
 	}
+
+	/**
+	 * A partir d'un angle et d'une norme, calcule deux composant d'un référentiel rectangulaire
+	 * @param angle
+	 * @param norm
+	 */
+	static polar2rect(angle, norm) {
+		return {dx: norm * Math.cos(angle), dy: norm * Math.sin(angle)};
+	}
 };

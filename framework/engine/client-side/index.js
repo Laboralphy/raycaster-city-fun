@@ -2,6 +2,7 @@ import Thinkers from './thinkers';
 import ClientPrediction from './Predictor';
 import PingMonitor from "./PingMonitor";
 import o876 from '../../o876';
+import RC from '../../consts/raycaster';
 
 class Engine extends O876_Raycaster.GameAbstract {
 
@@ -307,10 +308,13 @@ class Engine extends O876_Raycaster.GameAbstract {
 	/**
 	 * Creation d'un mobile, suite à un ordre du serveur
 	 * Ne pas créer de mobile qui a le même id que le player
+	 * Le format recu découle directement du format renvoyé par
+	 * ServiceEngine::buildMobileCreationPacket
 	 * @param id {string} identifiant
 	 * @param x {number} position
 	 * @param y {number}
-	 * @param s {number} vitesse
+	 * @param sx {number} vitesse aux axes : x
+	 * @param sy {number} vitesse aux axes : y
 	 * @param a {number} angle
 	 * @param bp {string} blueprints
 	 */
@@ -319,6 +323,9 @@ class Engine extends O876_Raycaster.GameAbstract {
 			let m = this.spawnMobile(bp, x, y, a);
 			let thinker = new Thinkers.Net();
 			m.setThinker(thinker.game(this).mobile(m));
+			// peut etre faudra t il enrichir le message de creation recu
+			// afin d'incorporé une indication sur la nature du mobile (missile, mob...)
+			m.oSprite.playAnimationType(sx || sy ? RC.animation_walk : RC.animation_stand);
 			m.getThinker().setMovement(a, x, y, sx, sy);
 			this._mobiles[id] = m;
 		}
@@ -346,6 +353,7 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * @param id {string} identifiant
 	 */
 	netDestroyMobile({id}) {
+		console.debug('destroy mobile', id);
 		this._mobiles[id].getThinker().die();
 		delete this._mobiles[id];
 	}

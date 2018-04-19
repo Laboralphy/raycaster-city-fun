@@ -137,4 +137,10 @@ module.exports = class Vector {
 	toString() {
 		return [this.x, this.y].map(n => n.toString()).join(':');
 	}
+
+	fromPolar(a, s) {
+		let v = Helper.polar2rect(a, s);
+		this.set(v.dx, v.dy);
+		return this;
+	}
 };
