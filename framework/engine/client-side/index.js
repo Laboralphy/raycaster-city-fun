@@ -322,7 +322,8 @@ class Engine extends O876_Raycaster.GameAbstract {
 		if (id !== this.localId()) {
 			let m = this.spawnMobile(bp, x, y, a);
 			let thinker = new Thinkers.Net();
-			m.setThinker(thinker.game(this).mobile(m));
+			m.setThinker(thinker);
+			thinker.game(this).mobile(m);
 			// peut etre faudra t il enrichir le message de creation recu
 			// afin d'incorporé une indication sur la nature du mobile (missile, mob...)
 			m.oSprite.playAnimationType(sx || sy ? RC.animation_walk : RC.animation_stand);
@@ -336,7 +337,8 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * @param id {string} identifiant
 	 * @param x {number} position
 	 * @param y {number}
-	 * @param s {number} vitesse
+	 * @param sx {number} vitesse
+	 * @param sy {number} vitesse
 	 * @param a {number} angle
 	 */
 	netUpdateMobile({id, a, x, y, sx, sy}) {
@@ -345,17 +347,28 @@ class Engine extends O876_Raycaster.GameAbstract {
 		}
 		if (id in this._mobiles) {
 			this._mobiles[id].getThinker().setMovement(a, x, y, sx, sy);
-		} // else : not loaded yet
+		}
 	}
 
 	/**
 	 * destruction de mobile, suite à un ordre du serveur
 	 * @param id {string} identifiant
+	 * @param x {number} position
+	 * @param y {number}
+	 * @param sx {number} vitesse
+	 * @param sy {number} vitesse
+	 * @param a {number} angle
 	 */
-	netDestroyMobile({id}) {
-		console.debug('destroy mobile', id);
-		this._mobiles[id].getThinker().die();
-		delete this._mobiles[id];
+	netDestroyMobile({id, a, x, y, sx, sy}) {
+		if (id === this.localId()) {
+			return;
+		}
+		if (id in this._mobiles) {
+			let mth = this._mobiles[id].getThinker();
+			mth.setMovement(a, x, y, sx, sy);
+			mth.die();
+			delete this._mobiles[id];
+		}
 	}
 }
 

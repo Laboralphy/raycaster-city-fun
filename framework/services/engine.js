@@ -36,6 +36,7 @@ class ServiceEngine extends ServiceAbstract {
 
     doomloop() {
 		let aMutations = this._gs.getStateMutations();
+		// mobiles ayant besoin d'etre mis à jours chez les clients
 		aMutations.mu.forEach(
 			m => this._emit(
 				m.p.map(p => p.id),
@@ -43,6 +44,15 @@ class ServiceEngine extends ServiceAbstract {
 				{mob: m.m}
 			)
 		);
+		// mobiles ayant besoin d'etre détruit chez les clients
+		aMutations.md.forEach(
+			m => this._emit(
+				m.p.map(p => p.id),
+				'G_DESTROY_MOBILE',
+				{mob: m.m}
+			)
+		);
+		this._gs.removeDeadMobiles()
 	}
 
     error(client, e) {

@@ -33,7 +33,6 @@ class Game extends Core {
 		// identifier l'entité qui effectue la commande
 		switch (command) {
 			case COMMANDS.MOUSE_LEFT:
-				console.log("mouse left !");
                 this.mobileActionPrimaryAttack(mob);
                 break;
 		}
@@ -55,6 +54,7 @@ class Game extends Core {
         let th = new Thinkers.Missile();
         th.mobile(oMissile);
         oMissile.thinker(th);
+        oMissile.flagCrash = true;
         let angle = location.heading();
         let v = o876.geometry.Helper.polar2rect(angle, data.speed);
         th.setMovement({a: angle, sx: v.dx, sy: v.dy});
@@ -71,7 +71,7 @@ class Game extends Core {
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
 		let oMissile = this.spawnMissile('p_magbolt', oMobile.location, {
-			speed: 8
+			speed: 16
 		});
 	}
 }

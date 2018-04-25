@@ -5,13 +5,21 @@ module.exports = class Thinker {
 		this._duration = 0;
 		this._nextState = 'idle';
 		this._mobile = null;
+		this._game = null;
 	}
 
 	mobile(m) {
 		return o876.SpellBook.prop(this, '_mobile', m);
 	}
 
-    /**
+	game(m) {
+		return o876.SpellBook.prop(this, '_game', m);
+	}
+
+
+
+
+	/**
 	 * Invoke un methode si elle est présente dans l'instance
      * @param sMeth
      */
@@ -33,16 +41,19 @@ module.exports = class Thinker {
      * @param n {number}
      */
 	duration(n) {
+		if (n !== undefined) console.debug('state duration', n, 'previous was', this._duration);
 		return o876.SpellBook.prop(this, '_duration', n);
 	}
 
     /**
 	 * Le prochain ettat une fois que celui en cour sera terminé
-     * @param s
+     * @param s {string} state
+	 * @param d {number} duration
      * @return {*}
      */
-	next(s) {
-        return o876.SpellBook.prop(this, '_next', s);
+	next(s, d = Infinity) {
+        this._nextState = s;
+        this._duration = d;
 	}
 
     /**
@@ -50,9 +61,10 @@ module.exports = class Thinker {
      * @param s {string}
      */
     state(s) {
-        this._duration = Infinity;
-        this._nextState = 'idle';
+        this.next('idle');
         this.invoke('$' + this._state + '_exit');
+        console.debug('new state is', s);
+        console.trace();
         this._state = s;
         this.invoke('$' + this._state + '_enter');
         return this;
@@ -61,8 +73,9 @@ module.exports = class Thinker {
 	think() {
 		this.invoke('$' + this._state);
 		if (--this._duration <= 0) {
-			this.state(this.next());
-			this.next('idle');
+			this._duration = Infinity;
+			this.state(this._nextState);
+			this._nextState = 'idle';
 		}
 	}
 

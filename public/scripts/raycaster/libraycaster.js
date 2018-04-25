@@ -6465,17 +6465,30 @@ O2.createClass('O876_Raycaster.Horde',  {
 		return oMobile;
 	},
 
+	unlinkSprite: function(oSprite) {
+		var nSpriteRank = this.aSprites.indexOf(oSprite);
+		if (nSpriteRank >= 0) {
+			ArrayTools.removeItem(this.aSprites, nSpriteRank);
+		}
+	},
+
 	unlinkMobile : function(oMobile) {
+		console.log('unlink mobile', oMobile);
 		var nHordeRank = this.aMobiles.indexOf(oMobile);
 		if (nHordeRank < 0) {
 			this.unlinkStatic(oMobile);
 			return;
+		}
+		if (oMobile.oSprite) {
+			this.unlinkSprite(oMobile.oSprite);
+
 		}
 		ArrayTools.removeItem(this.aMobiles, nHordeRank);
 	},
 	
 
 	unlinkStatic : function(oMobile) {
+		console.log('unlink static', oMobile);
 		var nHordeRank = this.aStatics.indexOf(oMobile);
 		if (nHordeRank < 0) {
 			return;
@@ -7231,7 +7244,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 	 */
 	computeWallCollisions: function(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
 		// par defaut pas de colision détectée
-		var oWallCollision = {x: 0, y: 0};
+		var oWallCollision = {x: 0, y: 0, c: false};
 		var dx = vSpeed.x;
 		var dy = vSpeed.y;
 		var x = vPos.x;
@@ -7257,6 +7270,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 			xClip = pSolidFunction((ix + dx) / nPlaneSpacing | 0, iy / nPlaneSpacing | 0);
 			yClip = pSolidFunction(ix / nPlaneSpacing | 0, (iy + dy) / nPlaneSpacing | 0);
 			if (xClip) {
+				oWallCollision.c = true;
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
@@ -7266,6 +7280,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 				bCorrection = true;
 			}
 			if (yClip) {
+				oWallCollision.c = true;
 				dy = 0;
 				if (bCrashWall) {
 					dx = 0;
@@ -7329,7 +7344,7 @@ O2.createClass('O876_Raycaster.Mobile', {
         this.ySpeed = r.speed.y;
         var wcf = r.wcf;
         this.oWallCollision = wcf;
-        this.bWallCollision = wcf.x !== 0 || wcf.y !== 0;
+        this.bWallCollision = wcf.c;
     },
 
 

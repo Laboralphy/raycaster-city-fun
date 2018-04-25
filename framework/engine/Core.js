@@ -185,22 +185,32 @@ class Core {
 	getStateMutations() {
 		let mobiles = this._mobiles;
 		let updateTheseMobiles = {};
+		let destroyTheseMobiles = {};
 		for (let id in mobiles) {
 			let m = mobiles[id];
 			m.think();
+			let area = m.location.area().id;
 			if (m.thinker().hasChangedMovement()) {
-				let area = m.location.area().id;
-				if (!(area in updateTheseMobiles)) {
-					updateTheseMobiles[area] = [];
+				if (!m.isDead()) {
+					if (!(area in updateTheseMobiles)) {
+						updateTheseMobiles[area] = [];
+					}
+					updateTheseMobiles[area].push(m);
 				}
-				updateTheseMobiles[area].push(m);
+			}
+			if (m.isDead()) {
+				if (!(area in destroyTheseMobiles)) {
+					destroyTheseMobiles[area] = [];
+				}
+				destroyTheseMobiles[area].push(m);
 			}
 		}
 		// tous les mobiles qui modifie l'uniformité de leur mouvement doivent donner lieu
 		// a un message transmis aux joueurs de la zone
 		return {
 			// mobile update
-			mu: this.transmitMobileMovement(updateTheseMobiles)
+			mu: this.transmitMobileMovement(updateTheseMobiles),
+			md: this.transmitMobileMovement(destroyTheseMobiles)
 		}
 	}
 
@@ -212,6 +222,18 @@ class Core {
 // #    #  #    #     #    ######     #    #       #####        #
 // #    #  #    #     #    #    #     #    #       #   #   #    #
 // #    #   ####      #    #    #     #    ######  #    #   ####
+
+
+	/**
+	 * Supprime les mobiles qui ont l'état "dead"
+	 */
+	removeDeadMobiles() {
+		for (let id in this._mobiles) {
+			if (this._mobiles[id].isDead()) {
+				delete this._mobiles[id];
+			}
+		}
+	}
 
     // Les mutateurs permettent de modifier l'etat du jeu
 
@@ -313,9 +335,6 @@ class Core {
 	 */
 	playClientMovement(idm, {t, a, x, y, sx, sy, id, c}) {
 		let mob = this._mobiles[idm];
-		if (!mob) {
-			console.error('mob', idm, 'does not exist');
-		}
 		let loc = mob.location;
 		loc.heading(a);
 		mob.thinker().setMovement({t, a, x, y, sx, sy, id, c});
@@ -400,6 +419,7 @@ class Core {
 			}
 		);
         let oThinker = new MoverThinker();
+		oThinker.game(this);
 		subject.thinker(oThinker);
 		oThinker.mobile(subject);
 

@@ -12,7 +12,6 @@ class NetThinker extends AbstractThinker {
 		super();
 		this.fma = 0; // Moving angle
 		this.fms = 0; // Moving Speed
-		this.nDeadTime = 0;
 		this.state('alive');
 	}
 
@@ -40,15 +39,18 @@ class NetThinker extends AbstractThinker {
 			let nAnim = oSprite.nAnimationType;
 			let bStopped = fMovSpeed === 0;
 			mobile.fTheta = a;
+			// déterminer l'animation à jouer selon les changements de mouvement
 			switch (nAnim) {
 				case RC.animation_action:
 				case RC.animation_stand:
+					// le mobile était à l'arret, il faut qu'il bouge -> animation walk
 					if (!bStopped) {
 						oSprite.playAnimationType(RC.animation_walk);
 					}
 					break;
 
 				case RC.animation_walk:
+					// le mobile était en déplacement, il faut qu'il s'arrete -> animation stand
 					if (bStopped) {
 						oSprite.playAnimationType(RC.animation_stand);
 					}
@@ -87,18 +89,18 @@ class NetThinker extends AbstractThinker {
 		this.setMovement(this.fma, m.x, m.y, 0, 0);
 		m.oSprite.playAnimationType(RC.animation_death);
 		let nDeadTime = m.oSprite.oAnimation.nDuration * m.oSprite.oAnimation.nCount / this.game().TIME_FACTOR | 0;
-		this.duration(nDeadTime).next('dead');
+		this.next('dead', nDeadTime);
 		this.mobile().bEthereal = true;
 	}
 
 	$dying() {
+		console.debug('check duration', this._duration);
 	}
 
 	$dead_enter() {
 		this.mobile().bEthereal = true;
 		this.mobile().gotoLimbo();
 		this.mobile().bActive = false;
-		console.debug('dead');
 	}
 
 	$dead() {

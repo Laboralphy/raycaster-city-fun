@@ -16,6 +16,8 @@ module.exports = class Mobile {
 	constructor() {
         // identifiant
 		this.id = '';
+		// flag de death
+		this._dead = false;
 		// position & angle
 		this.location = new Location();
 		// vitesse de déplacement
@@ -24,7 +26,11 @@ module.exports = class Mobile {
 		this._forces = [];
 		this._collider = null;
 		this._size = 16;
-		this.wallCollisions = Vector.zero();
+		this.wallCollision = {
+			x: 0,
+			y: 0,
+			c: false
+		};
 		this._dummy = null;
 		this._thinker = null;
 		// aspect
@@ -34,13 +40,12 @@ module.exports = class Mobile {
 		this.flagCrash = false; // ne glisse pas sur les mur ; explose.
 	}
 
-	/**
-	 * converti un couple angle + amplitiude, en vecteur
-	 * @param a
-	 * @param s
-	 */
-	static getVector(a, s) {
+	die() {
+		this._dead = true;
+	}
 
+	isDead() {
+		return this._dead;
 	}
 
 	/**
@@ -53,11 +58,6 @@ module.exports = class Mobile {
 			this._dummy = null;
 			this._collider = null;
 		}
-	}
-
-	hasHitWall() {
-		let wc = this.wallCollisions;
-		return wc.x !== 0 || wc.y !== 0;
 	}
 
 	/**
@@ -117,6 +117,10 @@ module.exports = class Mobile {
 		this._thinker.think();
 	}
 
+	hasHitWall() {
+		return this.wallCollision.c;
+	}
+
 	/**
 	 * Détermine la collision entre le mobile et les murs du labyrinthe
 	 * @typedef {Object} xy
@@ -133,7 +137,7 @@ module.exports = class Mobile {
 	 */
 	static computeWallCollisions(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
 		// par defaut pas de colision détectée
-		let oWallCollision = {x: 0, y: 0};
+		let oWallCollision = {x: 0, y: 0, c: false};
 		let dx = vSpeed.x;
 		let dy = vSpeed.y;
 		let x = vPos.x;
@@ -157,6 +161,7 @@ module.exports = class Mobile {
 			xClip = pSolidFunction(ix + dx, iy);
 			yClip = pSolidFunction(ix, iy + dy);
 			if (xClip) {
+				oWallCollision.c = true;
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
@@ -166,6 +171,7 @@ module.exports = class Mobile {
 				bCorrection = true;
 			}
 			if (yClip) {
+				oWallCollision.c = true;
 				dy = 0;
 				if (bCrashWall) {
 					dx = 0;
@@ -253,6 +259,6 @@ module.exports = class Mobile {
         );
 		this.speed = r.speed;
 		vPos.set(r.pos);
-        this.wallCollisions = r.wcf;
+        this.wallCollision = r.wcf;
 	}
 };
