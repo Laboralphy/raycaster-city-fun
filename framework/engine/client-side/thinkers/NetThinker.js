@@ -94,13 +94,12 @@ class NetThinker extends AbstractThinker {
 	}
 
 	$dying() {
-		console.debug('check duration', this._duration);
 	}
 
 	$dead_enter() {
-		this.mobile().bEthereal = true;
-		this.mobile().gotoLimbo();
-		this.mobile().bActive = false;
+		let m = this.mobile();
+		m.gotoLimbo();
+		m.bActive = false;
 	}
 
 	$dead() {

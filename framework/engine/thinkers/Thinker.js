@@ -41,7 +41,6 @@ module.exports = class Thinker {
      * @param n {number}
      */
 	duration(n) {
-		if (n !== undefined) console.debug('state duration', n, 'previous was', this._duration);
 		return o876.SpellBook.prop(this, '_duration', n);
 	}
 
@@ -63,8 +62,6 @@ module.exports = class Thinker {
     state(s) {
         this.next('idle');
         this.invoke('$' + this._state + '_exit');
-        console.debug('new state is', s);
-        console.trace();
         this._state = s;
         this.invoke('$' + this._state + '_enter');
         return this;
@@ -75,7 +72,6 @@ module.exports = class Thinker {
 		if (--this._duration <= 0) {
 			this._duration = Infinity;
 			this.state(this._nextState);
-			this._nextState = 'idle';
 		}
 	}
 

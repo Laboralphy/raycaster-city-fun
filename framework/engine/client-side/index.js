@@ -179,7 +179,9 @@ class Engine extends O876_Raycaster.GameAbstract {
 				aDeadMobiles.push(i);
 			}
 		}
-		aDeadMobiles.forEach(i => delete mobs[i]);
+		aDeadMobiles.forEach(i => {
+			delete this._mobiles[i];
+		});
 	}
 
 
@@ -364,10 +366,10 @@ class Engine extends O876_Raycaster.GameAbstract {
 			return;
 		}
 		if (id in this._mobiles) {
+			window.TEST_MOBILE = this._mobiles[id];
 			let mth = this._mobiles[id].getThinker();
 			mth.setMovement(a, x, y, sx, sy);
 			mth.die();
-			delete this._mobiles[id];
 		}
 	}
 }
