@@ -1,0 +1,28 @@
+Thinkers coté serveur
+---------------------
+
+1) Tout part de la doomloop : ServiceEngine::doomloop qui va intéroger Core::getStateMutations()
+
+2) Core::getStateMutations() va lancer Mobile::think() pour tous les mobiles.
+
+3) Mobile::think() va lancer le thinker::think().
+Les thinkers contrôlent les mouvements des mobiles au niveau du serveur.
+Le Thinker MoverThinker est généralement celui qui est utilisé pour les objets en movement
+Pour les missiles on utilise MissileThinker (qui, de toutes façons, hérite de MoverThinker).
+Le thinker dispose de plusieurs methodes comme die() ou setMovement()
+C'est la méthode MoverThinker::setMovement() qui permet de changer à la fois l'angle, et les vitesses aux axes.
+
+4) De retour dans Core::getStateMutations(), chaque changement de mouvement est détecté par MoverThinker::hasChangedMovement()
+dans Core::getStateMutations() on fait le test du changement de mouvement pour chaque mobile
+si le mouvement change on met le mobile correspondant dans une liste des mobiles à mettre à jour chez les clients.
+
+5) Toujour dans Core::getStateMutations() ; Si le mobile devient inactif, on le met dans la liste des mobile qui doivent êter détruits chez les clients
+
+6) Core::getStateMutations() est directement exploitée dans la doomloop : ServiceEngine::doomloop()
+ServiceEngine::doomloop() s'occupe d'emmettre des message G_UPDATE_MOBILE ou G_DESTROY_MOBILE en fonction
+du contenu des listes d'update ou de destroy fournies par Core::getStateMutations()
+
+
+
+
+

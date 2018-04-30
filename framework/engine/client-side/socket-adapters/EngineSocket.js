@@ -194,7 +194,7 @@ class EngineSocket {
 					 * Résoudre la promise en définissant le blueprint complet dans le raycaster
 					 */
 					function commitBP() {
-						resolve(oHorde.defineBlueprint(sResRef, blueprint));
+						resolve(oHorde.defineBlueprint(sResRef, Object.assign({}, blueprint, {thinker: 'Net'})));
 					}
 
 					let sTileRef = blueprint.tile;

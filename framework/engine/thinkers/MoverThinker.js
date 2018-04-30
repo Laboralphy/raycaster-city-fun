@@ -25,6 +25,7 @@ module.exports = class MoverThinker extends Thinker {
 
 	/**
 	 * Renvoie true si le mobile à modifié son mouvement
+	 *  = si sa vitesse aux axes, ou son angle de cap ont changé de valeur
 	 */
 	hasChangedMovement() {
 		let m = this._mobile;

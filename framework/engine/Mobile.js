@@ -196,12 +196,18 @@ module.exports = class Mobile {
 			} else if (oWallCollision.y < 0) {
 				y = (y / nPlaneSpacing | 0) * nPlaneSpacing + nSize;
 			}
+			return {
+				pos: new Vector(x, y),
+				speed: new Vector(x - vPos.x, y - vPos.y),
+				wcf: oWallCollision
+			};
+		} else {
+			return {
+				pos: new Vector(x, y),
+				speed: new Vector(dx, dy),
+				wcf: oWallCollision
+			}
 		}
-		return {
-			pos: new Vector(x, y),
-			speed: new Vector(x - vPos.x, y - vPos.y),
-			wcf: oWallCollision
-		};
 	}
 
 	/**

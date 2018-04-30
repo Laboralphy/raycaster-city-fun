@@ -46,11 +46,13 @@ class ServiceEngine extends ServiceAbstract {
 		);
 		// mobiles ayant besoin d'etre détruit chez les clients
 		aMutations.md.forEach(
-			m => this._emit(
-				m.p.map(p => p.id),
-				'G_DESTROY_MOBILE',
-				{mob: m.m}
-			)
+			m => {
+				this._emit(
+					m.p.map(p => p.id),
+					'G_DESTROY_MOBILE',
+					{mob: m.m}
+				)
+			}
 		);
 		this._gs.removeDeadMobiles()
 	}

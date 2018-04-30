@@ -74,7 +74,7 @@ class NetThinker extends AbstractThinker {
 
 	$alive() {
 		let m = this.mobile();
-		m.move(this.fma,this.fms);
+		m.move(this.fma, this.fms);
 		if (this.game().oRaycaster.clip(m.x, m.y, 1)) {
 			m.rollbackXY();
 		}
@@ -90,7 +90,7 @@ class NetThinker extends AbstractThinker {
 		m.oSprite.playAnimationType(RC.animation_death);
 		let nDeadTime = m.oSprite.oAnimation.nDuration * m.oSprite.oAnimation.nCount / this.game().TIME_FACTOR | 0;
 		this.next('dead', nDeadTime);
-		this.mobile().bEthereal = true;
+		m.bEthereal = true;
 	}
 
 	$dying() {

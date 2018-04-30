@@ -56,6 +56,8 @@ class Engine extends O876_Raycaster.GameAbstract {
 	loadLevel(data, liveData) {
 		this._levelLiveData = liveData;
 		this.initRaycaster(data);
+		let tm = this.oRaycaster.oThinkerManager;
+		tm.defineAlias('Net', Thinkers.Net);
     }
 
 	/**
@@ -174,7 +176,7 @@ class Engine extends O876_Raycaster.GameAbstract {
 		let mobs = this._mobiles;
 		for (let i in mobs) {
 			let mob = mobs[i];
-			mob.think();
+			//mob.think();
 			if (!mob.bActive) {
 				aDeadMobiles.push(i);
 			}
@@ -323,14 +325,14 @@ class Engine extends O876_Raycaster.GameAbstract {
 	netSpawnMobile({id, a, x, y, sx, sy, bp}) {
 		if (id !== this.localId()) {
 			let m = this.spawnMobile(bp, x, y, a);
-			let thinker = new Thinkers.Net();
-			m.setThinker(thinker);
+			let thinker = m.getThinker();
 			thinker.game(this).mobile(m);
 			// peut etre faudra t il enrichir le message de creation recu
 			// afin d'incorporé une indication sur la nature du mobile (missile, mob...)
 			m.oSprite.playAnimationType(sx || sy ? RC.animation_walk : RC.animation_stand);
 			m.getThinker().setMovement(a, x, y, sx, sy);
 			this._mobiles[id] = m;
+			m.id = id;
 		}
 	}
 
@@ -366,7 +368,6 @@ class Engine extends O876_Raycaster.GameAbstract {
 			return;
 		}
 		if (id in this._mobiles) {
-			window.TEST_MOBILE = this._mobiles[id];
 			let mth = this._mobiles[id].getThinker();
 			mth.setMovement(a, x, y, sx, sy);
 			mth.die();
