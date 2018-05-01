@@ -7,6 +7,9 @@ const logger = require('../logger/index');
 const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
 const MoverThinker = require('./thinkers/MoverThinker');
+const MissileThinker = require('./thinkers/MissileThinker');
+const uniqid = require('uniqid');
+
 
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
@@ -21,11 +24,54 @@ class Core {
         this._areas = {};
         this._players = {};
         this._mobiles = {};
-        this._blueprints = {};
 
         this.emitter = new Emitter();
         this._dataManager = new DataManager();
     }
+
+// #####   #####    ####   #    #     #    ######   ####
+// #    #  #    #  #    #   #  #      #    #       #
+// #    #  #    #  #    #    ##       #    #####    ####
+// #####   #####   #    #    ##       #    #            #
+// #       #   #   #    #   #  #      #    #       #    #
+// #       #    #   ####   #    #     #    ######   ####
+
+	on(...args) {
+    	this.emitter.on(...args);
+	}
+
+
+    /**
+	 * Renvoie le type de mobile parmis ceux des constante MOBILE_TYPE_*
+     * @param mobile
+     * @return {*}
+     */
+	static getMobileType(mobile) {
+    	return mobile.data.type;
+	}
+
+    /**
+	 * Renvoie les coordonnées (sous forme de vecteur) d'un mobile
+     * @param mobile
+     * @return {module.Vector|*}
+     */
+	static getMobileLocation(mobile) {
+		return new mobile.location;
+	}
+
+    static getLocationPosition(location) {
+        return location.position();
+    }
+
+    static getLocationArea(location) {
+        return location.area();
+    }
+
+    static getAreaName(area) {
+		return area.name;
+	}
+
+
 
 //  ####   ######   #####   #####  ######  #####    ####
 // #    #  #          #       #    #       #    #  #
@@ -97,20 +143,6 @@ class Core {
 //    #    #   #   #    #  #   ##  #    #  #    #     #       #    #   #   #    #
 //    #    #    #  #    #  #    #   ####   #    #     #       #    #    #   ####
 
-    // // les transmitters permettre de transmettres des packet a desticnation des clients
-	// /**
-    //  * Transmission d'un packet à un joueur
-	 // * @param player {Player} joueur a qui envoyer le packet
-	 // * @param event {string} nom de l'évnèmenet
-	 // * @param packet {*} contenu du packet
-	 // */
-	// transmit(player, event, packet) {
-	 //    if (Array.isArray(player)) {
-	 //        player.forEach(p => this.transmit(p, event, packet));
-    //     } else {
-    //         this.emitter.emit('transmit', player.id, event, packet);
-    //     }
-    // }
 
 	/**
 	 * Transmission du changement de mouvement d'un mobile
@@ -160,6 +192,7 @@ class Core {
 		let level = await this._dataManager.loadLevel(id);
 		area.data(level);
 		logger.logfmt(STRINGS.game.level_built, id);
+		this.emitter.emit('area.built', {area});
 		return area;
 	}
 
@@ -230,7 +263,7 @@ class Core {
 	removeDeadMobiles() {
 		for (let id in this._mobiles) {
 			if (this._mobiles[id].isDead()) {
-				delete this._mobiles[id];
+				this.destroyMobile(id);
 			}
 		}
 	}
@@ -270,7 +303,7 @@ class Core {
      * @param location {Location}
 	 * @param extra {*}
 	 * - speed: vitesse lors d'un mouvement (un missile est toujour en mouvement...)
-	 * - type : 'missile' ; 'player' ; 'mob' ; 'vfx'
+	 * - type : 'missile' ; 'player' ; 'mobile' ; 'vfx'
      * @return {Mobile}
 	 */
 	createMobile(id, ref, location, extra) {
@@ -284,35 +317,61 @@ class Core {
         let players = this.getAreaPlayers(area).map(p => p.id);
         // en général ca va etre un service de socket qui va exploiter cet évènement
 		switch (extra.type) {
-			case 'missile':
+			case RC.mobile_type_missile:
 				// pour les missiles, la vitesse spécifiée influence immédiatement le vecteur vitesse
 				// tandis que pour les autres entité, la vitesse spécifiée n'est qu'une indication de la vitesse max
 				m.speed.fromPolar(m.location.heading(), extra.speed);
 				break;
 
-			case 'player':
+			case RC.mobile_type_player:
 				break;
 
-			case 'mobile':
+			case RC.mobile_type_mob:
 				break;
 
-			case 'vfx':
+			case RC.mobile_type_vfx:
 				break;
 
 			default:
 				throw new Error('this type of mobile is unknown (allowed values are "player", "missile", "mobile", "vfx", "static")');
 		}
-        this.emitter.emit('mobile.created', { players, mob: m });
+        this.emitter.emit('mobile.created', { players, mobile: m });
         return m;
     }
 
+
+    /**
+     * Génère un missile
+     * @param ref
+     * @param oOwner
+     * @param data
+     * - speed : vitesse du missile
+     */
+    spawnMissile(ref, oOwner, data) {
+        let location = oOwner.location;
+        let idMissile = uniqid();
+        data.type = RC.mobile_type_missile;
+        let oMissile = this.createMobile(idMissile, ref, location, data);
+        // il faut donner de la vitesse au missile ; c'est important pour que le client anime correctement le missile
+        let th = new MissileThinker();
+        th.mobile(oMissile);
+        th.owner = oOwner.id;
+        oMissile.thinker(th);
+        oMissile.flagCrash = true;
+        let angle = location.heading();
+        let v = o876.geometry.Helper.polar2rect(angle, data.speed);
+        th.setMovement({a: angle, sx: v.dx, sy: v.dy});
+        return oMissile;
+    }
+
+
     destroyMobile(id) {
-		let mob = this._mobiles[id];
-		if (mob) {
-			let area = mob.location.area();
+		let mobile = this._mobiles[id];
+		if (mobile) {
+			let area = mobile.location.area();
 			let players = this.getAreaPlayers(area).map(p => p.id);
-			mob.finalize();
-			this.emitter.emit('mobile.destroyed', { players, mob });
+			mobile.finalize();
+			this.emitter.emit('mobile.destroyed', { players, mobile });
 		}
 		delete this._mobiles[id];
 	}
@@ -334,16 +393,16 @@ class Core {
 	 * quand le serveur recois un ensemble de paquets il faut les jouer
 	 */
 	playClientMovement(idm, {t, a, x, y, sx, sy, id, c}) {
-		let mob = this._mobiles[idm];
-		let loc = mob.location;
+		let mobile = this._mobiles[idm];
+		let loc = mobile.location;
 		loc.heading(a);
-		mob.thinker().setMovement({t, a, x, y, sx, sy, id, c});
+		mobile.thinker().setMovement({t, a, x, y, sx, sy, id, c});
 		if (c) {
 			// les command sont envoyée en tant qu'évènement
 			// décomposer...
 			for (let i = 1; i <= COMMANDS.LAST_COMMAND; i <<= 1) {
 				if (c & i) {
-                    this.emitter.emit('player.command', {mob, command: i});
+                    this.emitter.emit('mobile.command', {mobile, command: i});
 				}
 			}
 		}
@@ -351,8 +410,8 @@ class Core {
 			a: loc.heading(),
 			x: loc.position().x,
 			y: loc.position().y,
-			sx: mob.speed.x,
-			sy: mob.speed.y,
+			sx: mobile.speed.x,
+			sy: mobile.speed.y,
 			id: id
 		};
 	}
@@ -414,7 +473,7 @@ class Core {
 			p.character.blueprint,
 			p.location,
 			{ // données supplémentaires
-				type: 'player',
+				type: RC.mobile_type_player,
         		speed: p.character.speed
 			}
 		);

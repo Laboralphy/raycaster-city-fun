@@ -175,9 +175,9 @@ class Engine extends O876_Raycaster.GameAbstract {
 		let aDeadMobiles = [];
 		let mobs = this._mobiles;
 		for (let i in mobs) {
-			let mob = mobs[i];
-			//mob.think();
-			if (!mob.bActive) {
+			let mobile = mobs[i];
+			//mobile.think();
+			if (!mobile.bActive) {
 				aDeadMobiles.push(i);
 			}
 		}
@@ -272,17 +272,17 @@ class Engine extends O876_Raycaster.GameAbstract {
 	applyMobileCorrection({a, x, y, sx, sy, id}) {
 		// retrouver le packet id
 		if (x === 0 || y === 0) throw new Error('Nope !');
-		let mob = this.getPlayer();
+		let mobile = this.getPlayer();
 		let cp = this._clientPrediction;
 		let packets = cp.getPacketsAfter(id);
 		cp.flush(id);
-		mob.fTheta = a;
-		mob.setXY(x, y);
+		mobile.fTheta = a;
+		mobile.setXY(x, y);
 		if (packets.length) {
 			packets.forEach(({t, a, x, y, sx, sy, id, c}) => {
 				for (let i = 0; i < t; ++i) {
-					mob.fTheta = a;
-					mob.slide(sx, sy);
+					mobile.fTheta = a;
+					mobile.slide(sx, sy);
 				}
 			});
 		}
@@ -328,7 +328,7 @@ class Engine extends O876_Raycaster.GameAbstract {
 			let thinker = m.getThinker();
 			thinker.game(this).mobile(m);
 			// peut etre faudra t il enrichir le message de creation recu
-			// afin d'incorporé une indication sur la nature du mobile (missile, mob...)
+			// afin d'incorporé une indication sur la nature du mobile (missile, mobile...)
 			m.oSprite.playAnimationType(sx || sy ? RC.animation_walk : RC.animation_stand);
 			m.getThinker().setMovement(a, x, y, sx, sy);
 			this._mobiles[id] = m;

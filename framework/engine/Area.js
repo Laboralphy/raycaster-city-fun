@@ -7,6 +7,7 @@ const RC_CONST = require('../consts/raycaster');
 
 const Door = require('./Door');
 const ActiveList = require('./ActiveList');
+const o876 = require('../o876');
 
 
 module.exports = class Area {
@@ -29,8 +30,13 @@ module.exports = class Area {
         this._activeDoorList = new ActiveList(); /** @todo ne gérer que les portes qui sont dans cette liste */
         // position de départ
         this._startpoint = null;
+        // collider
+        this._collider = new o876.collider.Collider();
     }
 
+    collider() {
+        return this._collider;
+    }
 
 	/**
      * Commande l'ouverture d'une porte en x, y
@@ -76,6 +82,11 @@ module.exports = class Area {
             return this._data;
         } else {
             this._data = d;
+            this._collider
+                .width(d.map.length)
+                .height(d.map.length)
+                .cellWidth(RC_CONST.plane_spacing)
+                .cellHeight(RC_CONST.plane_spacing);
             this._physicMap = d.map.map(row => row.map(cell => {
                 return {
                     code: (cell & 0x0000F000) >> 12,

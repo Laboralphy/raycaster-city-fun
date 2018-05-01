@@ -387,14 +387,14 @@ describe('model', function() {
 				new Mobile()
 			];
 
-			m.forEach(mob => mob.collider(collider));
+			m.forEach(mobile => mobile.collider(collider));
 
 			it('should not collide', function() {
 				m[0].size(10).location.position(new Vector(200, 155));
 				m[1].size(10).location.position(new Vector(250, 155));
 				m[2].size(10).location.position(new Vector(200, 255));
 				m[3].size(10).location.position(new Vector(250, 255));
-				m.forEach(mob => collider.track(mob._dummy));
+				m.forEach(mobile => collider.track(mobile._dummy));
 
 				expect(m[0].forces().toString()).toBe('0:0');
 				expect(m[1].forces().toString()).toBe('0:0');
@@ -407,7 +407,7 @@ describe('model', function() {
 				m[1].size(10).location.position(new Vector(203, 155));
 				m[2].size(10).location.position(new Vector(200, 255));
 				m[3].size(10).location.position(new Vector(250, 255));
-				let d = m.map(mob => mob.dummy());
+				let d = m.map(mobile => mobile.dummy());
 
 
 				expect(d[0].position().x).toBe(200);
@@ -419,8 +419,8 @@ describe('model', function() {
 				expect(m[0]._dummy.distanceTo(m[1]._dummy)).toBe(3);
 				expect(m[0]._dummy.hits(m[1]._dummy)).toBeTruthy();
 
-				m.forEach(mob => collider.track(mob._dummy));
-				m.forEach((mob, i) => mob.computeMobileCollisions(i));
+				m.forEach(mobile => collider.track(mobile._dummy));
+				m.forEach((mobile, i) => mobile.computeMobileCollisions(i));
 
 				expect(m[0].forces().toString()).toBe('-8.5:0');
 				expect(m[1].forces().toString()).toBe('8.5:0');
@@ -434,13 +434,13 @@ describe('model', function() {
 				m[1].size(10).location.position(new Vector(116, 104));
 				m[2].size(10).location.position(new Vector(110, 113));
 				m[3].size(10).location.position(new Vector(250, 255));
-				let d = m.map(mob => mob.dummy());
+				let d = m.map(mobile => mobile.dummy());
 				expect(d[0].distanceTo(d[1])).toBeCloseTo(13.341664064, 4);
 				expect(d[0].distanceTo(d[2])).toBeCloseTo(9.219544457, 4);
 				expect(d[1].distanceTo(d[2])).toBeCloseTo(10.816653826, 4);
-				m.forEach(mob => collider.track(mob._dummy));
-				m.forEach((mob, i) => mob.computeMobileCollisions());
-				let f = m.map(mob => mob.forces());
+				m.forEach(mobile => collider.track(mobile._dummy));
+				m.forEach((mobile, i) => mobile.computeMobileCollisions());
+				let f = m.map(mobile => mobile.forces());
 				expect(f[0].x).toBeCloseTo(-15.836477980599165, 4);
 				expect(f[0].y).toBeCloseTo(-2.7593186675721006, 4);
 				expect(f[1].x).toBeCloseTo(14.290913919198491, 4);

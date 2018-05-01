@@ -24,7 +24,6 @@ module.exports = class Mobile {
 		this.speed = new Vector(0, 0);
 		// ensembles des forces appliquées au mobiles
 		this._forces = [];
-		this._collider = null;
 		this._size = 16;
 		this.wallCollision = {
 			x: 0,
@@ -56,22 +55,15 @@ module.exports = class Mobile {
 		if (cm) {
 			cm.dead(true);
 			this._dummy = null;
-			this._collider = null;
 		}
 	}
 
 	/**
 	 * setter/getter du collisionneur
-	 * @param c {o876.collider.collider}
 	 * @returns {*}
 	 */
-	collider(c) {
-		if (!this._dummy) {
-			let cm = new o876.collider.Dummy();
-			cm._mobile = this;
-			this._dummy = cm;
-		}
-		return o876.SpellBook.prop(this, '_collider', c);
+	collider() {
+		return this.location.area().collider();
 	}
 
     /**
@@ -215,10 +207,17 @@ module.exports = class Mobile {
 	 * @returns {null|*}
 	 */
 	dummy() {
-		let cm = this._dummy;
+		let cm;
+        if (!this._dummy) {
+            cm = new o876.collider.Dummy();
+            cm._mobile = this;
+            this._dummy = cm;
+        } else {
+            cm = this._dummy;
+		}
 		cm.radius(this._size);
 		cm.position(this.location.position());
-		this._collider.track(cm);
+		this.collider().track(cm);
 		return cm;
 	}
 

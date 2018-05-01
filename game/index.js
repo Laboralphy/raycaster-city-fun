@@ -9,7 +9,7 @@
 
 const Core = require('../framework/engine/Core');
 const COMMANDS = require('../framework/consts/commands');
-const uniqid = require('uniqid');
+const RC = require('../framework/consts/raycaster');
 const Thinkers = require('./thinkers');
 const o876 = require('../framework/o876');
 
@@ -19,47 +19,29 @@ class Game extends Core {
 		super();
 		// déclaration de l'évènement player.command
 		// cet évènement est déclenché lorsqu'un joueur emet une commande (
-		this.emitter.on('player.command', ({mob, command}) => this.playerCommand(mob, command));
+        this.on('mobile.command', ({mobile, command}) => this.coreEventMobileCommand(mobile, command));
+        this.on('mobile.created', ({players, mobile}) => this.coreEventMobileCreated(mobile));
+        this.on('mobile.destroyed', ({players, mobile}) => this.coreEventMobileDestroyed(mobile));
 
-		/*
-		mobile.created
-		mobile.destroyed
-		player.command
-		 */
 	}
 
+    coreEventMobileCreated(mobile) {
+    }
 
-	playerCommand(mob, command) {
+    coreEventMobileDestroyed(mobile) {
+    }
+
+
+	coreEventMobileCommand(mobile, command) {
 		// identifier l'entité qui effectue la commande
 		switch (command) {
 			case COMMANDS.MOUSE_LEFT:
-                this.mobileActionPrimaryAttack(mob);
+                this.mobileActionPrimaryAttack(mobile);
                 break;
 		}
 	}
 
 
-    /**
-	 * Génère un missile
-     * @param ref
-     * @param location
-     * @param data
-	 * - speed : vitesse du missile
-     */
-	spawnMissile(ref, location, data) {
-        let idMissile = uniqid();
-        data.type = 'missile';
-        let oMissile = this.createMobile(idMissile, ref, location, data);
-        // il faut donner de la vitesse au missile ; c'est important pour que le client anime correctement le missile
-        let th = new Thinkers.Missile();
-        th.mobile(oMissile);
-        oMissile.thinker(th);
-        oMissile.flagCrash = true;
-        let angle = location.heading();
-        let v = o876.geometry.Helper.polar2rect(angle, data.speed);
-        th.setMovement({a: angle, sx: v.dx, sy: v.dy});
-        return oMissile;
-	}
 
 
 	/**
@@ -70,7 +52,7 @@ class Game extends Core {
 		// créer le projectile
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
-		let oMissile = this.spawnMissile('p_magbolt', oMobile.location, {
+		let oMissile = this.spawnMissile('p_magbolt', oMobile, {
 			speed: 16
 		});
 	}

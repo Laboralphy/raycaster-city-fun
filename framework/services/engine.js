@@ -8,11 +8,12 @@ const STATUS = require('../consts/status');
 class ServiceEngine extends ServiceAbstract {
     constructor(gameInstance) {
         super();
+        this._time = 0;
 		this._gs = gameInstance;
         setInterval(() => this.doomloop(), RC.time_factor);
 
-		gameInstance.emitter.on('mobile.created', ({players, mob}) => this.transmitMobileCreationEvent(players, mob));
-		gameInstance.emitter.on('mobile.destroyed', ({players, mob}) => this.transmitMobileDestructionEvent(players, mob));
+		gameInstance.emitter.on('mobile.created', ({players, mobile}) => this.transmitMobileCreationEvent(players, mobile));
+		gameInstance.emitter.on('mobile.destroyed', ({players, mobile}) => this.transmitMobileDestructionEvent(players, mobile));
     }
 
 	/**
@@ -20,17 +21,17 @@ class ServiceEngine extends ServiceAbstract {
 	 * Il faut Transmettre aux clients un ordre de creation de mobile
 	 * Cet ordre contient les champs tels qu'ils sont généré par la fonction ServiceEngine::buildMobileCreationPacket
 	 * @param players {array|Player} liste des clients auquels envoyé l'ordre
-	 * @param mob {mobile} mobile a partir duquel on créé l'ordre
+	 * @param mobile {mobile} mobile a partir duquel on créé l'ordre
 	 */
-	transmitMobileCreationEvent(players, mob) {
+	transmitMobileCreationEvent(players, mobile) {
 		this._emit(players, 'G_CREATE_MOBILE', {
-			mob: ServiceEngine.buildMobileCreationPacket(mob)
+			mobile: ServiceEngine.buildMobileCreationPacket(mobile)
 		});
 	}
 
-	transmitMobileDestructionEvent(players, mob) {
+	transmitMobileDestructionEvent(players, mobile) {
 		this._emit(players, 'G_DESTROY_MOBILE', {
-			mob: ServiceEngine.buildMobileCreationPacket(mob)
+			mobile: ServiceEngine.buildMobileCreationPacket(mobile)
 		});
 	}
 
@@ -41,20 +42,23 @@ class ServiceEngine extends ServiceAbstract {
 			m => this._emit(
 				m.p.map(p => p.id),
 				'G_UPDATE_MOBILE',
-				{mob: m.m}
+				{mobile: m.m}
 			)
 		);
 		// mobiles ayant besoin d'etre détruit chez les clients
-		aMutations.md.forEach(
+		/* aMutations.md.forEach(
 			m => {
 				this._emit(
 					m.p.map(p => p.id),
 					'G_DESTROY_MOBILE',
-					{mob: m.m}
+					{mobile: m.m}
 				)
 			}
-		);
-		this._gs.removeDeadMobiles()
+		);*/
+		let gs = this._gs;
+		gs.removeDeadMobiles();
+		gs.emitter.emit('tick', {time: this._time++});
+
 	}
 
     error(client, e) {
@@ -140,7 +144,7 @@ class ServiceEngine extends ServiceAbstract {
 						data = this._gs.clientHasLoadedLevel(client);
 						// transmettre au client la liste de tous les mobiles
 						this._emit(client.id, 'G_CREATE_MOBILE', {
-							mob: data.mobiles.map(m => ServiceEngine.buildMobileCreationPacket(m))
+							mobile: data.mobiles.map(m => ServiceEngine.buildMobileCreationPacket(m))
 						});
 						this._emit(client.id, 'G_CONTROL_MOBILE', {
 							id: client.id,

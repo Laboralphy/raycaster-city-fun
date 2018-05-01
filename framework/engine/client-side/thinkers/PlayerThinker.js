@@ -42,26 +42,26 @@ class PlayerThinker extends FPSThinker {
 	$active() {
 		super.$active();
 		let c = 0;
-		let mob = this.mobile();
-		let f = mob.fTheta;
-		let x = mob.x;
-		let y = mob.y;
+		let mobile = this.mobile();
+		let f = mobile.fTheta;
+		let x = mobile.x;
+		let y = mobile.y;
 		this._aCurrentEvents.forEach(e => {
 			switch (e) {
 				case 'df.c':
-					mob.moveForward();
+					mobile.moveForward();
 					break;
 
 				case 'dl.c':
-					mob.strafeLeft();
+					mobile.strafeLeft();
 					break;
 
 				case 'dr.c':
-					mob.strafeRight();
+					mobile.strafeRight();
 					break;
 
 				case 'db.c':
-					mob.moveBackward();
+					mobile.moveBackward();
 					break;
 
 				case 'b0.d':
@@ -73,11 +73,11 @@ class PlayerThinker extends FPSThinker {
 					break;
 			}
 		});
-		let sx = mob.x - x;
-		let sy = mob.y - y;
+		let sx = mobile.x - x;
+		let sy = mobile.y - y;
 
-		mob.xOfs = Math.abs(mob.xOfs) < 1 ? 0 : mob.xOfs / 2;
-		mob.yOfs = Math.abs(mob.yOfs) < 1 ? 0 : mob.yOfs / 2;
+		mobile.xOfs = Math.abs(mobile.xOfs) < 1 ? 0 : mobile.xOfs / 2;
+		mobile.yOfs = Math.abs(mobile.yOfs) < 1 ? 0 : mobile.yOfs / 2;
 		this._game.netUpdatePlayerMobile(f, x, y, sx, sy, c);
 	}
 }

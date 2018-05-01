@@ -38,16 +38,16 @@ class EngineSocket {
 		 * Serveur : vous devez créer ce ou ces mobiles.
 		 * Ce message est envoyé par ServiceEngine::transmitMobileCreationEvent
 		 */
-		socket.on('G_CREATE_MOBILE', async ({mob}) => {
-			if (Array.isArray(mob)) {
-				for (let i = 0, l = mob.length; i < l; ++i) {
-					let m = mob[i];
+		socket.on('G_CREATE_MOBILE', async ({mobile}) => {
+			if (Array.isArray(mobile)) {
+				for (let i = 0, l = mobile.length; i < l; ++i) {
+					let m = mobile[i];
 					await this.req_load_bp(m.bp);
 					game.netSpawnMobile(m);
 				}
 			} else {
-				await this.req_load_bp(mob.bp);
-				game.netSpawnMobile(mob);
+				await this.req_load_bp(mobile.bp);
+				game.netSpawnMobile(mobile);
 			}
 		});
 
@@ -69,22 +69,22 @@ class EngineSocket {
 		/**
 		 * Serveur : vous devez mettre à jour ce ou ces mobiles.
 		 */
-		socket.on('G_UPDATE_MOBILE', ({mob}) => {
-			if (Array.isArray(mob)) {
-				mob.forEach(mov => game.netUpdateMobile(mov));
+		socket.on('G_UPDATE_MOBILE', ({mobile}) => {
+			if (Array.isArray(mobile)) {
+				mobile.forEach(mov => game.netUpdateMobile(mov));
 			} else {
-				game.netUpdateMobile(mob);
+				game.netUpdateMobile(mobile);
 			}
 		});
 
 		/**
 		 * Serveur : vous devez détruire ce ou ces mobiles.
 		 */
-		socket.on('G_DESTROY_MOBILE', ({mob}) => {
-			if (Array.isArray(mob)) {
-				mob.forEach(m => game.netDestroyMobile(m));
+		socket.on('G_DESTROY_MOBILE', ({mobile}) => {
+			if (Array.isArray(mobile)) {
+				mobile.forEach(m => game.netDestroyMobile(m));
 			} else {
-				game.netDestroyMobile(mob);
+				game.netDestroyMobile(mobile);
 			}
 		});
 

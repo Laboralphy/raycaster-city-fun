@@ -10,6 +10,7 @@ const RC_CONST = {
 	mobile_type_placeable: 3, // plaçeable object (furniture, tree, pile of bones)
 	mobile_type_missile: 4, // missile of any sort (fire ball, plasma orb...)
 	mobile_type_item: 5,    // droppable item (visible on floor)
+    mobile_type_vfx: 6,     // effet special
 
 	fx_none: 0,                // no effect
 	fx_light_add: 1,            // sprite is drawn with ADD filter (good for ghosts or some explosion)
