@@ -6,7 +6,7 @@ const DataManager = require('../resource-loader/index');
 const logger = require('../logger/index');
 const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
-const MoverThinker = require('./thinkers/MoverThinker');
+const TangibleThinker = require('./thinkers/TangibleThinker');
 const MissileThinker = require('./thinkers/MissileThinker');
 const uniqid = require('uniqid');
 
@@ -477,7 +477,7 @@ class Core {
         		speed: p.character.speed
 			}
 		);
-        let oThinker = new MoverThinker();
+        let oThinker = new TangibleThinker();
 		oThinker.game(this);
 		subject.thinker(oThinker);
 		oThinker.mobile(subject);

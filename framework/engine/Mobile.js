@@ -54,6 +54,7 @@ module.exports = class Mobile {
 		let cm = this._dummy;
 		if (cm) {
 			cm.dead(true);
+            this.collider().track(cm);
 			this._dummy = null;
 		}
 	}
@@ -237,6 +238,7 @@ module.exports = class Mobile {
 				0
 			)
 		);
+		return !!aMobHits.length;
     }
 
     /**

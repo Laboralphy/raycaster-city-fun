@@ -11,7 +11,6 @@ class MissileThinker extends MoverThinker {
 	constructor() {
 		super();
 		this.owner = null;
-		this.subSpeed = 4; // vitesse de collisionnement (si le missile va trop vite, il pourrai manquer des collision)
 	}
 
     /**

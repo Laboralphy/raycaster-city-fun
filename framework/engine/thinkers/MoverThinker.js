@@ -21,7 +21,6 @@ module.exports = class MoverThinker extends Thinker {
 		let m = this._mobile;
 		m.location.heading(this._angle);
 		m.move(this._speed);
-		m.computeMobileCollisions();
 	}
 
 	/**
