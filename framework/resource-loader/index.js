@@ -1,5 +1,6 @@
 const path = require('path');
 const asyncfs = require('../asyncfs/index');
+const fs = require('fs');
 
 const DATA_PATH = 'data';
 
@@ -20,6 +21,7 @@ class ResourceLoader {
 		let sJSON = await asyncfs.readFile(path.resolve(DATA_PATH, sDir, sFile + '.json'), {encoding: 'utf-8'});
 		return JSON.parse(sJSON);
 	}
+
 
 	async loadClientData(sPlayer) {
 		return {
@@ -54,6 +56,12 @@ class ResourceLoader {
         return fullType;
     }
 
+	/**
+	 * Chargement d'une resource JSON
+	 * @param type {string} type de resource (b pour blueprint, t pour tile)
+	 * @param id {string} identifiant de la resource (genre p_magbolt)
+	 * @returns {Promise<*>}
+	 */
     async loadResource(type, id) {
 		try {
 			type = this.getResourceFolder(type);

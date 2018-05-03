@@ -212,6 +212,8 @@ module.exports = class Mobile {
         if (!this._dummy) {
             cm = new o876.collider.Dummy();
             cm._mobile = this;
+            console.log(this.data);
+            cm._tangibility = this.data.tangibility;
             this._dummy = cm;
         } else {
             cm = this._dummy;

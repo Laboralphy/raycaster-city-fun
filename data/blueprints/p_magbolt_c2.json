@@ -3,5 +3,10 @@
   "tile": "p_magbolt_c2",
   "width": 8,
   "height": 96,
-  "fx": 2
+  "fx": 2,
+  "tangibility": {
+    "self" : 2,
+    "mask" : 1
+  },
+  "speed": 16
 }

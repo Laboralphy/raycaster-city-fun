@@ -6,13 +6,27 @@ const sb = require('../SpellBook');
 const geometry = require('../geometry');
 const Helper = geometry.Helper;
 const Vector = geometry.Vector;
-const Point = geometry.Point;
 
 module.exports = class Dummy {
 	constructor() {
 		this._position = new Vector();
 		this._dead = false; // les mobile noté "dead" doivent être retiré du jeu
 		this._radius = 0;
+		this._tangibility = {
+			self: 1,
+			mask: 1
+		};
+	}
+
+	/**
+	 * Renvoie true si le masque-tangibilité de ce dummy correspond au type-tangibilité du dummy spécifié
+	 * @param dummy
+	 */
+	tangibleWith(dummy) {
+		if (!dummy._tangibility) {
+			console.log(dummy);
+		}
+		return (dummy._tangibility.self & this._tangibility.mask) !== 0;
 	}
 
     /**
@@ -67,10 +81,10 @@ module.exports = class Dummy {
 
     /**
 	 * renvoie true si les deux mobile se collisionne.
-     * @param oOther {Mobile}
+     * @param oOther {Dummy}
      * @returns {boolean}
      */
 	hits(oOther) {
-		return this.distanceTo(oOther) < this._radius + oOther.radius();
+		return this.tangibleWith(oOther) && this.distanceTo(oOther) < this._radius + oOther.radius();
 	}
 };

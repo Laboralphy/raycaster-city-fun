@@ -1,6 +1,5 @@
 {
   "character": {
-    "blueprint": "m_warlock_b",
-    "speed": 4
+    "blueprint": "h_warlock_b"
   }
 }

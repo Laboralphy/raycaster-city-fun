@@ -52,9 +52,7 @@ class Game extends Core {
 		// créer le projectile
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
-		let oMissile = this.spawnMissile('p_magbolt', oMobile, {
-			speed: 16
-		});
+		let oMissile = this.spawnMissile('p_magbolt', oMobile, {});
 	}
 }
 

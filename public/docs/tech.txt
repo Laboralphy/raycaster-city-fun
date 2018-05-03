@@ -26,3 +26,8 @@ du contenu des listes d'update ou de destroy fournies par Core::getStateMutation
 
 
 
+
+Blueprints
+----------
+Ils contiennent les information nécessaire aux clients pour afficher correctement le mobile
+

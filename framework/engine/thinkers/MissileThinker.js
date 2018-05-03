@@ -14,9 +14,7 @@ class MissileThinker extends MoverThinker {
 	}
 
     /**
-	 * Vérifie si on collisionne un mobile entre vFrom et vTo
-     * @param vFrom
-     * @param vTo
+	 * Vérifie si on collisionne un mobile
      */
 	checkMobileCollisions() {
 		this._mobile.computeMobileCollisions();

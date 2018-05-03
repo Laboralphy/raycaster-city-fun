@@ -2,7 +2,7 @@ const Player = require('./Player');
 const Mobile = require('./Mobile');
 const Area = require('./Area');
 const Emitter = require('events');
-const DataManager = require('../resource-loader/index');
+const ResourceLoader = require('../resource-loader/index');
 const logger = require('../logger/index');
 const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
@@ -26,7 +26,7 @@ class Core {
         this._mobiles = {};
 
         this.emitter = new Emitter();
-        this._dataManager = new DataManager();
+        this._resourceLoader = new ResourceLoader();
     }
 
 // #####   #####    ####   #    #     #    ######   ####
@@ -85,10 +85,10 @@ class Core {
 
 	/**
 	 * Renvoie l'instance du datamanger
-	 * @returns {DataManager}
+	 * @returns {ResourceLoader}
 	 */
 	getDataManager() {
-    	return this._dataManager;
+    	return this._resourceLoader;
 	}
 
     /**
@@ -189,7 +189,7 @@ class Core {
 		let area = new Area();
 		area.id = id;
 		area.name = id;
-		let level = await this._dataManager.loadLevel(id);
+		let level = await this._resourceLoader.loadLevel(id);
 		area.data(level);
 		logger.logfmt(STRINGS.game.level_built, id);
 		this.emitter.emit('area.built', {area});
@@ -307,11 +307,16 @@ class Core {
      * @return {Mobile}
 	 */
 	createMobile(id, ref, location, extra) {
+		if (!extra) {
+			extra = {};
+		}
         let m = new Mobile();
         m.id = id;
         m.location.assign(location);
         m.blueprint = ref;
-        m.data = extra;
+        // il faut merger les data contenu dans blueprint
+		let oBlueprint = this._resourceLoader.loadResource('b', ref);
+		m.data = Object.assign({}, oBlueprint, extra);
         this._mobiles[id] = m;
         let area = m.location.area();
         let players = this.getAreaPlayers(area).map(p => p.id);
@@ -320,7 +325,7 @@ class Core {
 			case RC.mobile_type_missile:
 				// pour les missiles, la vitesse spécifiée influence immédiatement le vecteur vitesse
 				// tandis que pour les autres entité, la vitesse spécifiée n'est qu'une indication de la vitesse max
-				m.speed.fromPolar(m.location.heading(), extra.speed);
+				m.speed.fromPolar(m.location.heading(), m.data.speed);
 				break;
 
 			case RC.mobile_type_player:
@@ -438,7 +443,7 @@ class Core {
         let id = client.id;
         let p = this._players[id];
         if (!p) {
-			let playerData = await this._dataManager.loadClientData(client.name);
+			let playerData = await this._resourceLoader.loadClientData(client.name);
 			p = await this.createPlayer(id, playerData);
 			logger.logfmt(STRINGS.game.player_created, id);
 			this._players[id] = p;
