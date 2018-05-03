@@ -23,9 +23,6 @@ module.exports = class Dummy {
 	 * @param dummy
 	 */
 	tangibleWith(dummy) {
-		if (!dummy._tangibility) {
-			console.log(dummy);
-		}
 		return (dummy._tangibility.self & this._tangibility.mask) !== 0;
 	}
 

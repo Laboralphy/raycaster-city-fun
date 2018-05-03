@@ -17,10 +17,15 @@ class ResourceLoader {
      * @param sFile
      * @return {Promise<any>}
      */
-	async loadJSON(sDir, sFile) {
-		let sJSON = await asyncfs.readFile(path.resolve(DATA_PATH, sDir, sFile + '.json'), {encoding: 'utf-8'});
-		return JSON.parse(sJSON);
-	}
+    async loadJSON(sDir, sFile) {
+        let sJSON = await asyncfs.readFile(path.resolve(DATA_PATH, sDir, sFile + '.json'), {encoding: 'utf-8'});
+        return JSON.parse(sJSON);
+    }
+
+    loadJSONSync(sDir, sFile) {
+        let sJSON = fs.readFileSync(path.resolve(DATA_PATH, sDir, sFile + '.json'), {encoding: 'utf-8'});
+        return JSON.parse(sJSON);
+    }
 
 
 	async loadClientData(sPlayer) {
@@ -76,6 +81,28 @@ class ResourceLoader {
 			throw new Error('could not load resource (type "' + type + '" - id "' + id + '") - ' + e.toString());
 		}
 	}
+
+    /**
+     * Chargement synchrone d'une resource JSON
+	 * La ressource doit déja avoir été indexée en mêmoire sinon erreur
+     * @param type {string} type de resource (b pour blueprint, t pour tile)
+     * @param id {string} identifiant de la resource (genre p_magbolt)
+     * @returns {Promise<*>}
+     */
+    loadResourceSync(type, id) {
+        try {
+            type = this.getResourceFolder(type);
+            if (!(type in this._resources)) {
+                this._resources[type] = {};
+            }
+            if (!(id in this._resources[type])) {
+                this._resources[type][id] = this.loadJSONSync(type, id);
+            }
+            return this._resources[type][id];
+        } catch (e) {
+            throw new Error('could not synchronously load resource (type "' + type + '" - id "' + id + '") - ' + e.toString());
+        }
+    }
 }
 
 module.exports = ResourceLoader;

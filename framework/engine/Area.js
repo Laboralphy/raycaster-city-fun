@@ -149,6 +149,9 @@ module.exports = class Area {
     }
 
     isSolidPoint(x, y) {
+        if (isNaN(x) || isNaN(y)) {
+            throw new Error('solid point function has found an error : ' + x + ':' + y);
+        }
     	return this.isSolid(
     		x / RC_CONST.plane_spacing | 0,
 			y / RC_CONST.plane_spacing | 0

@@ -311,15 +311,17 @@ class Core {
 			extra = {};
 		}
         let m = new Mobile();
+        this._mobiles[id] = m;
         m.id = id;
         m.location.assign(location);
         m.blueprint = ref;
-        // il faut merger les data contenu dans blueprint
-		let oBlueprint = this._resourceLoader.loadResource('b', ref);
+
+        // il faut merger les data contenu dans blueprints
+		let oBlueprint = this._resourceLoader.loadResourceSync('b', ref);
 		m.data = Object.assign({}, oBlueprint, extra);
-        this._mobiles[id] = m;
         let area = m.location.area();
         let players = this.getAreaPlayers(area).map(p => p.id);
+
         // en général ca va etre un service de socket qui va exploiter cet évènement
 		switch (extra.type) {
 			case RC.mobile_type_missile:
@@ -360,11 +362,11 @@ class Core {
         // il faut donner de la vitesse au missile ; c'est important pour que le client anime correctement le missile
         let th = new MissileThinker();
         th.mobile(oMissile);
-        th.owner = oOwner.id;
+        th.owner = oOwner;
         oMissile.thinker(th);
         oMissile.flagCrash = true;
         let angle = location.heading();
-        let v = o876.geometry.Helper.polar2rect(angle, data.speed);
+        let v = o876.geometry.Helper.polar2rect(angle, oMissile.data.speed);
         th.setMovement({a: angle, sx: v.dx, sy: v.dy});
         return oMissile;
     }
@@ -479,7 +481,6 @@ class Core {
 			p.location,
 			{ // données supplémentaires
 				type: RC.mobile_type_player,
-        		speed: p.character.speed
 			}
 		);
         let oThinker = new TangibleThinker();

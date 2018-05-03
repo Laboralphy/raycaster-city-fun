@@ -212,7 +212,6 @@ module.exports = class Mobile {
         if (!this._dummy) {
             cm = new o876.collider.Dummy();
             cm._mobile = this;
-            console.log(this.data);
             cm._tangibility = this.data.tangibility;
             this._dummy = cm;
         } else {
@@ -224,22 +223,35 @@ module.exports = class Mobile {
 		return cm;
 	}
 
+	getCollidingMobiles() {
+        return this.collider().collides(this.dummy()).map(d => d._mobile);
+	}
+
+	computeCollidingForces(aMobHits) {
+        let vPos = this.location.position();
+        let x = vPos.x;
+        let y = vPos.y;
+        let dist = o876.geometry.Helper.distance;
+        // ajouter un vecteur force à tous ces mobiles
+        aMobHits.forEach(m => {
+        	let mPos = m.location.position();
+        	let mx = mPos.x;
+        	let my = mPos.y;
+            this.force(
+                vPos.sub(m.location.position())
+                    .normalize()
+                    .scale((this._size + m._size - dist(x, y, mx, my)) / 2),
+                0
+            )
+        });
+	}
+
     /**
      * Teste si le mobile spécifié entre en collision avec un autre mobile.
      */
     computeMobileCollisions() {
-    	let cm = this.dummy();
-		let aMobHits = this.collider().collides(cm);
-		let vPos = this.location.position();
-		// ajouter un vecteur force à tous ces mobiles
-		aMobHits.forEach(m =>
-			this.force(
-				vPos.sub(m.position())
-					.normalize()
-					.scale((cm.radius() + m.radius() - cm.distanceTo(m)) / 2),
-				0
-			)
-		);
+    	let aMobHits = this.getCollidingMobiles();
+    	this.computeCollidingForces(aMobHits);
 		return !!aMobHits.length;
     }
 

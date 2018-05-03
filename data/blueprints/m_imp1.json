@@ -6,7 +6,7 @@
   "fx": 0,
   "tangibility": {
     "self" : 1,
-    "mask" : 3
+    "mask" : 1
   },
   "speed": 4
 }

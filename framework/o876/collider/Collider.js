@@ -69,40 +69,39 @@ module.exports = class Collider {
 	/**
 	 * Registers an object in the sector it belongs
 	 * Unregisters the objet in all other sector
-	 * @param oObject {Mobile}
+	 * @param oDummy {Dummy}
 	 */
-	track(oObject) {
-		let oOldSector = oObject.colliderSector;
-		let v = oObject.position().sub(this._origin);
-		let s = oObject.dead() ? null : this.sector(v);
+	track(oDummy) {
+		let oOldSector = oDummy.colliderSector;
+		let v = oDummy.position().sub(this._origin);
+		let s = oDummy.dead() ? null : this.sector(v);
 		if (s && oOldSector && s === oOldSector) {
 			return;
 		}
 		if (oOldSector) {
-			oOldSector.remove(oObject);
+			oOldSector.remove(oDummy);
 		}
 		if (s) {
-			s.add(oObject);
+			s.add(oDummy);
 		}
-		oObject.colliderSector = s;
+		oDummy.colliderSector = s;
 		return this;
 	}
 
 	/**
 	 * Effectue tous les test de collision entre un objet et tous les autres objets
 	 * contenus dans les secteur adjacent a celui de l'objet
-	 * @param oObject {Mobile}
-	 * @return {Mobile[]} liste d'objet collisionnant
+	 * @param oDummy {Dummy}
+	 * @return {Dummy[]} liste d'objet collisionnant
 	 */
-	collides(oObject) {
-		let aObjects = [];
-		let oSector = this.sector(oObject.position().sub(this._origin));
+	collides(oDummy) {
+		let a = [];
+		let oSector = this.sector(oDummy.position().sub(this._origin));
 		if (!oSector) {
-			return aObjects;
+			return a;
 		}
 		let x = oSector.x;
 		let y = oSector.y;
-		let a = [];
 		let xMin = Math.max(0, x - 1);
 		let yMin = Math.max(0, y - 1);
 		let xMax = Math.min(this.width() - 1, x + 1);
@@ -110,7 +109,7 @@ module.exports = class Collider {
 		let ix, iy;
 		for (iy = yMin; iy <= yMax; ++iy) {
 			for (ix = xMin; ix <= xMax; ++ix) {
-				a = a.concat(this.sector(ix, iy).collides(oObject));
+				a = a.concat(this.sector(ix, iy).collides(oDummy));
 			}
 		}
 		return a;

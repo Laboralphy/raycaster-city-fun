@@ -17,19 +17,26 @@ class MissileThinker extends MoverThinker {
 	 * Vérifie si on collisionne un mobile
      */
 	checkMobileCollisions() {
-		this._mobile.computeMobileCollisions();
+		let owner = this.owner;
+		let aMobHits = this._mobile.getCollidingMobiles().filter(m => m !== owner);
+		// tous les mobiles sus mentionnés se prennent le missile dans la courge.
+		if (aMobHits.length) {
+            this.state('explode');
+		}
+	}
+
+	checkWallCollisions() {
+        let mobile = this._mobile;
+        if (mobile.hasHitWall()) {
+            // il y a eu collision
+            this.state('explode');
+        }
 	}
 
 	$move() {
 		super.$move();
         this.checkMobileCollisions();
-		// il va faloir déterminer si le missile à traversé un mobile.
-		// choc avec un mur
-		let mobile = this._mobile;
-		if (mobile.hasHitWall()) {
-			// il y a eu collision
-			this.state('explode');
-		}
+		this.checkWallCollisions();
 	}
 
 	$explode_enter() {

@@ -32,6 +32,7 @@ module.exports = class MoverThinker extends Thinker {
 		let loc = m.location;
 		let pos = loc.position();
 		let spd = m.speed;
+		console.log(spd);
 		let mov = {
 			id: m.id,
 			a: loc.heading(),
