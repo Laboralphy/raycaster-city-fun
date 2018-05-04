@@ -3,6 +3,8 @@ const logger = require('../logger/index');
 const RC = require('../consts/raycaster');
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
+const o876 = require('../o876');
+const Vector = o876.geometry.Vector;
 
 
 class ServiceEngine extends ServiceAbstract {
@@ -45,16 +47,6 @@ class ServiceEngine extends ServiceAbstract {
 				{mobile: m.m}
 			)
 		);
-		// mobiles ayant besoin d'etre détruit chez les clients
-		/* aMutations.md.forEach(
-			m => {
-				this._emit(
-					m.p.map(p => p.id),
-					'G_DESTROY_MOBILE',
-					{mobile: m.m}
-				)
-			}
-		);*/
 		let gs = this._gs;
 		gs.removeDeadMobiles();
 		gs.emitter.emit('tick', {time: this._time++});
@@ -85,7 +77,7 @@ class ServiceEngine extends ServiceAbstract {
 	static buildMobileCreationPacket(m) {
 		let mloc = m.location;
 		let mpos = mloc.position();
-		let mspd = m.speed; // vecteur de vitesse actuelle
+		let mspd = m.inertia(); // vecteur de vitesse actuelle
 		return {
 			id: m.id,
 			x: mpos.x,
@@ -105,13 +97,14 @@ class ServiceEngine extends ServiceAbstract {
 	static buildMobileUpdatePacket(m) {
 		let mloc = m.location;
 		let mpos = mloc.position();
-		let mspd = m.speed;
+		let mspd = m.inertia(); // vecteur de vitesse actuelle
 		return {
 			id: m.id,
 			x: mpos.x,
 			y: mpos.y,
 			a: mloc.heading(),
-			s: mspd
+			sx: mspd.x,
+			sy: mspd.y,
 		};
 	}
 

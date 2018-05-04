@@ -322,26 +322,15 @@ class Core {
         let area = m.location.area();
         let players = this.getAreaPlayers(area).map(p => p.id);
 
-        // en général ca va etre un service de socket qui va exploiter cet évènement
-		switch (extra.type) {
-			case RC.mobile_type_missile:
-				// pour les missiles, la vitesse spécifiée influence immédiatement le vecteur vitesse
-				// tandis que pour les autres entité, la vitesse spécifiée n'est qu'une indication de la vitesse max
-				m.speed.fromPolar(m.location.heading(), m.data.speed);
-				break;
-
-			case RC.mobile_type_player:
-				break;
-
-			case RC.mobile_type_mob:
-				break;
-
-			case RC.mobile_type_vfx:
-				break;
-
-			default:
-				throw new Error('this type of mobile is unknown (allowed values are "player", "missile", "mobile", "vfx", "static")');
+        // initialiser l'inertie (si jamais on doit transmettre une vitesse initiale
+		let angle = m.location.heading();
+		if (!('speed' in m.data)) {
+			throw new Error('no initial speed defined for mobile #', id);
 		}
+		let fInitialSpeed = m.data.speed;
+		let vInertia = o876.geometry.Helper.polar2rect(angle, fInitialSpeed);
+		m.inertia().set(vInertia.dx, vInertia.dy);
+
         this.emitter.emit('mobile.created', { players, mobile: m });
         return m;
     }
@@ -413,12 +402,14 @@ class Core {
 				}
 			}
 		}
+		let pos = loc.position();
+		let spd = mobile.inertia();
 		return {
 			a: loc.heading(),
-			x: loc.position().x,
-			y: loc.position().y,
-			sx: mobile.speed.x,
-			sy: mobile.speed.y,
+			x: pos.x,
+			y: pos.y,
+			sx: spd.x,
+			sy: spd.y,
 			id: id
 		};
 	}

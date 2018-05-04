@@ -21,7 +21,7 @@ module.exports = class Mobile {
 		// position & angle
 		this.location = new Location();
 		// vitesse de déplacement
-		this.speed = new Vector(0, 0);
+		this._inertia = new Vector(0, 0); // ce vecteur est rétro-renseignée d'après computeWallcollision
 		// ensembles des forces appliquées au mobiles
 		this._forces = [];
 		this._size = 16;
@@ -100,6 +100,10 @@ module.exports = class Mobile {
      */
 	size(n) {
 		return o876.SpellBook.prop(this, '_size', n);
+	}
+
+	inertia(v) {
+		return o876.SpellBook.prop(this, '_inertia', v);
 	}
 
 	thinker(th) {
@@ -257,6 +261,7 @@ module.exports = class Mobile {
 
     /**
 	 * Déplace le mobile selon le vector spécifié
+	 * Ceci est un déplacement ponctuel
 	 * Gestion des collisions
 	 * @param {Vector} vSpeed
 	 */
@@ -278,8 +283,9 @@ module.exports = class Mobile {
             bCrashWall,
 			(x, y) => area.isSolidPoint(x, y)
         );
-		this.speed = r.speed;
+		this.inertia().translate(r.speed);
 		vPos.set(r.pos);
         this.wallCollision = r.wcf;
 	}
+
 };

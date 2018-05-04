@@ -11,14 +11,15 @@ const Vector = o876.geometry.Vector;
 module.exports = class MoverThinker extends Thinker {
 	constructor() {
 		super();
-		this._speed = new Vector();
+		this._speed = new Vector(); // véritable vitesse qui controle le déplacement du mobile
 		this._angle = 0;
-		this._prevMovement = null;
+		this._bHasChangedMovement = true;
 		this.state('move');
 	}
 
 	$move() {
 		let m = this._mobile;
+		m.inertia().set(0, 0);
 		m.location.heading(this._angle);
 		m.move(this._speed);
 	}
@@ -28,12 +29,17 @@ module.exports = class MoverThinker extends Thinker {
 	 *  = si sa vitesse aux axes, ou son angle de cap ont changé de valeur
 	 */
 	hasChangedMovement() {
+		let b = this._bHasChangedMovement;
+		this._bHasChangedMovement = false;
+		return b;
+	}
+
+	getMovement() {
 		let m = this._mobile;
 		let loc = m.location;
 		let pos = loc.position();
-		let spd = m.speed;
-		console.log(spd);
-		let mov = {
+		let spd = m.inertia();
+		return {
 			id: m.id,
 			a: loc.heading(),
 			x: pos.x,
@@ -41,24 +47,16 @@ module.exports = class MoverThinker extends Thinker {
 			sx: spd.x,
 			sy: spd.y
 		};
-		let pmov = this._prevMovement;
-		if (!pmov) {
-			this._prevMovement = mov;
-			return true;
-		} else if (pmov.sx !== mov.sx || pmov.sy !== mov.sy || pmov.a !== mov.a) {
-			this._prevMovement = mov;
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	getMovement() {
-		return this._prevMovement;
 	}
 
 	setMovement({a, sx, sy}) {
-		this._speed.set(sx, sy);
-		this._angle = a;
+		if (a !== this._angle) {
+			this._bHasChangedMovement = true;
+			this._angle = a;
+		}
+		if (sx !== this._speed.x || sy !== this._speed.y) {
+			this._bHasChangedMovement = true;
+			this._speed.set(sx, sy);
+		}
 	}
 };
