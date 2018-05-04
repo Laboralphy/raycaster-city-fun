@@ -699,7 +699,7 @@
     "filter": false
   },
   "walls": {
-    "src": "resources\/tiles\/f24c8125ed254b07a7442b2aab1c288c.png",
+    "src": "resources\/textures\/f24c8125ed254b07a7442b2aab1c288c.png",
     "codes": [
       null,
       [
@@ -722,7 +722,7 @@
     ]
   },
   "flats": {
-    "src": "resources\/tiles\/66d3fa2ebc920f9f136f1ca9d9fcc944.png",
+    "src": "resources\/textures\/66d3fa2ebc920f9f136f1ca9d9fcc944.png",
     "codes": [
       null,
       null,

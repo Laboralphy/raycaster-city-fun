@@ -6379,14 +6379,12 @@ O2.createClass('O876_Raycaster.Horde',  {
 	oTiles : null,
 	nTileCount : 0,
 	oImageLoader : null,
-	oMobileDispenser : null,
 	xTonari: [ 0, 0, 1, 1, 1, 0, -1, -1, -1 ],
 	yTonari: [ 0, -1, -1, 0, 1, 1, 1, 0, -1 ],
 
 	__construct : function(r) {
 		this.oRaycaster = r;
 		this.oImageLoader = this.oRaycaster.oImages;
-		this.oMobileDispenser = new O876_Raycaster.MobileDispenser();
 		this.aMobiles = [];
 		this.aStatics = [];
 		this.aSprites = [];
@@ -6410,7 +6408,6 @@ O2.createClass('O876_Raycaster.Horde',  {
 				}
 				aDiscarded.push(oMobile);
 				this.unlinkMobile(oMobile);
-				this.oMobileDispenser.pushMobile(oMobile.oSprite.oBlueprint.sId, oMobile);
 			}
 		}
 		return aDiscarded;
@@ -6443,7 +6440,6 @@ O2.createClass('O876_Raycaster.Horde',  {
 		}
 		oBP.sId = sId;
 		this.oBlueprints[sId] = oBP;
-		this.oMobileDispenser.registerBlueprint(sId);
 		return oBP;
 	},
 
@@ -6465,11 +6461,22 @@ O2.createClass('O876_Raycaster.Horde',  {
 		return oMobile;
 	},
 
+	unlinkSprite: function(oSprite) {
+		var nSpriteRank = this.aSprites.indexOf(oSprite);
+		if (nSpriteRank >= 0) {
+			ArrayTools.removeItem(this.aSprites, nSpriteRank);
+		}
+	},
+
 	unlinkMobile : function(oMobile) {
 		var nHordeRank = this.aMobiles.indexOf(oMobile);
 		if (nHordeRank < 0) {
 			this.unlinkStatic(oMobile);
 			return;
+		}
+		if (oMobile.oSprite) {
+			this.unlinkSprite(oMobile.oSprite);
+
 		}
 		ArrayTools.removeItem(this.aMobiles, nHordeRank);
 	},
@@ -6527,20 +6534,14 @@ O2.createClass('O876_Raycaster.Horde',  {
 	 * @return O876_Raycaster.Mobile
 	 */
 	spawnMobile : function(sBlueprint, x, y, fTheta) {
-		var oMobile = this.oMobileDispenser.popMobile(sBlueprint);
-		if (!oMobile) {
-			var aData = {
-				blueprint : sBlueprint,
-				x : x,
-				y : y,
-				angle : fTheta
-			};
-			oMobile = this.defineMobile(aData);
-		} else {
-			this.linkMobile(oMobile);
-			oMobile.fTheta = fTheta;
-			oMobile.setXY(x, y);
-		}
+		var oMobile;
+		var aData = {
+			blueprint : sBlueprint,
+			x : x,
+			y : y,
+			angle : fTheta
+		};
+		oMobile = this.defineMobile(aData);
 		return oMobile;
 	},
 
@@ -6749,7 +6750,7 @@ O2.createObject('MAIN', {
             	throw new Error('"namespace" key is mandatory in CONFIG.game while using autorun feature');
 			}
             var ns = MAIN.config.game.namespace;
-            var gcn = ns + '.Engine';
+            var gcn = ns + '.Game';
             var gc = O2.loadObject(gcn);
             var data = LEVEL_DATA[Object.keys(LEVEL_DATA)[0]];
             MAIN.run(new gc(MAIN.config));
@@ -7231,7 +7232,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 	 */
 	computeWallCollisions: function(vPos, vSpeed, nSize, nPlaneSpacing, bCrashWall, pSolidFunction) {
 		// par defaut pas de colision détectée
-		var oWallCollision = {x: 0, y: 0};
+		var oWallCollision = {x: 0, y: 0, c: false};
 		var dx = vSpeed.x;
 		var dy = vSpeed.y;
 		var x = vPos.x;
@@ -7257,6 +7258,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 			xClip = pSolidFunction((ix + dx) / nPlaneSpacing | 0, iy / nPlaneSpacing | 0);
 			yClip = pSolidFunction(ix / nPlaneSpacing | 0, (iy + dy) / nPlaneSpacing | 0);
 			if (xClip) {
+				oWallCollision.c = true;
 				dx = 0;
 				if (bCrashWall) {
 					dy = 0;
@@ -7266,6 +7268,7 @@ O2.createClass('O876_Raycaster.Mobile', {
 				bCorrection = true;
 			}
 			if (yClip) {
+				oWallCollision.c = true;
 				dy = 0;
 				if (bCrashWall) {
 					dx = 0;
@@ -7290,12 +7293,18 @@ O2.createClass('O876_Raycaster.Mobile', {
 			} else if (oWallCollision.y < 0) {
 				y = (y / nPlaneSpacing | 0) * nPlaneSpacing + nSize;
 			}
+			return {
+				pos: {x: x, y: y},
+				speed: {x: x - vPos.x, y: y - vPos.y},
+				wcf: oWallCollision
+			};
+		} else {
+			return {
+				pos: {x: x, y: y},
+				speed: {x: dx, y: dy},
+				wcf: oWallCollision
+			};
 		}
-		return {
-			pos: {x: x, y: y},
-			speed: {x: x - vPos.x, y: y - vPos.y},
-			wcf: oWallCollision
-		};
 	},
 
 
@@ -7329,7 +7338,7 @@ O2.createClass('O876_Raycaster.Mobile', {
         this.ySpeed = r.speed.y;
         var wcf = r.wcf;
         this.oWallCollision = wcf;
-        this.bWallCollision = wcf.x !== 0 || wcf.y !== 0;
+        this.bWallCollision = wcf.c;
     },
 
 
@@ -7411,56 +7420,6 @@ O2.createClass('O876_Raycaster.Mobile', {
 });
 
 O2.mixin(O876_Raycaster.Mobile, O876.Mixin.Data);
-
-/** Classe de distribution optimisée de mobiles
- * O876 Raycaster project
- * @date 2012-04-04
- * @author Raphaël Marandet 
- * 
- * Classe gérant une liste de mobile qui seront réutilisé à la demande.
- * Cette classe permet de limiter le nom de d'instanciation/destruction
- */
-O2.createClass('O876_Raycaster.MobileDispenser', {
-  aBlueprints: null,
-
-  __construct: function() {
-    this.aBlueprints = {};
-  },
-
-  registerBlueprint: function(sId) {
-    this.aBlueprints[sId] = [];
-  },
-
-  /** Ajoute un mobile dans sa pile de catégorie
-   */
-  pushMobile: function(sBlueprint, oMobile) {
-    this.aBlueprints[sBlueprint].push(oMobile);
-  },
-
-  /**
-   * @return O876_Raycaster.Mobile
-   */
-	popMobile: function(sBlueprint) {
-		if (!(sBlueprint in this.aBlueprints)) {
-			throw new Error('no such blueprint : "' + sBlueprint + '"');
-		}
-		if (this.aBlueprints[sBlueprint].length) {
-			return this.aBlueprints[sBlueprint].pop();
-		} else {
-			return null;
-		}  
-	},
-
-  render: function() {
-    var sRender = '';
-    for (var sBlueprint in this.aBlueprints) {
-      if (this.aBlueprints[sBlueprint].length) {
-        sRender += '[' + sBlueprint + ': ' + this.aBlueprints[sBlueprint].length.toString() + ']';
-      }
-    }
-    return sRender;
-  }
-});
 
 /** Registres des mobiles. Permet d'enregistrer les mobile dans les secteurs composant le labyrinthe et de pouvoir
  * Organiser plus efficacement les collisions inter-mobile (on n'effectue les tests de collision qu'entre les mobiles des secteur proches).
@@ -9254,7 +9213,7 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 			return;
 		}
 		var oTile = oSprite.oBlueprint.oTile;
-		var oCam = this.oCam
+		var oCam = this.oCamera;
 		var dx = oMobile.x + oMobile.xOfs - oCam.x - oCam.xOfs;
 		var dy = oMobile.y + oMobile.yOfs - oCam.y - oCam.yOfs;
 
@@ -9976,6 +9935,8 @@ O2.createClass('O876_Raycaster.Raycaster',  {
 	}
 });
 
+O876_Raycaster.Raycaster.version = 180431;
+
 /**
  * @class O876_Raycaster.Scheduler
  * Temporise et retarde l'exécution de certaines commandes
@@ -10142,14 +10103,28 @@ O2.createClass('O876_Raycaster.Thinker', {
  */
 O2.createClass('O876_Raycaster.ThinkerManager', {
 	oGameInstance : null,
+	oThinkerAlias : null,
+
+	/**
+	 * Permet de créér un alias de thinker utilisable dans les blueprint
+	 * @param sThinker
+	 * @param pClass
+	 */
+	defineAlias: function(sThinker, pClass) {
+		if (!this.oThinkerAlias) {
+			this.oThinkerAlias = {};
+		}
+		this.oThinkerAlias[sThinker] = pClass;
+	},
 
 	createThinker : function(sThinker) {
 		// Les thinkers attaché a un device particulier ne peuvent pas être initialisé
 		// transmettre la config du raycaster ? 
 		if (sThinker === undefined || sThinker === null) {
+			// pas de thinker déclaré
 			return null;
 		}
-		var pThinker = O2.loadObject(sThinker + 'Thinker');
+		var pThinker = sThinker in this.oThinkerAlias ? this.oThinkerAlias[sThinker] : O2.loadObject(sThinker + 'Thinker');
 		if (pThinker !== null) {
 			var oThinker = new pThinker();
 			oThinker.oGame = this.oGameInstance;
@@ -12358,6 +12333,7 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	// protected
 	_oFrameCounter: null,
 	_nTimeStamp : 0,
+	_nTicks: 0,
 	_nShadedTiles : 0,
 	_nShadedTileCount : 0,
 	_oConfig: null,
@@ -12439,7 +12415,10 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 		if (this.oMouseDevice) {
 			this.oMouseDevice.unplugHandlers();
 		}
-        this.oRaycaster.finalize();
+		if (this.oRaycaster) {
+			this.oRaycaster.finalize();
+			this.oRaycaster = null;
+		}
 	},
 
 	/**
@@ -12498,6 +12477,14 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 	 */
 	getTime: function() {
 		return this._nTimeStamp;
+	},
+
+	/**
+	 * Nombre de fois que la doomloop a calculé d'updates
+	 * @return {number}
+	 */
+	getTicks: function() {
+		return this._nTicks;
 	},
 
 	/**
@@ -12685,7 +12672,7 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
 
     stateUpdate: function() {
 		var nTime = performance.now();
-        var nFrames = 0;
+        var nLoops = 0;
         var rc = this.oRaycaster;
         if (this._nTimeStamp === null) {
             this._nTimeStamp = nTime;
@@ -12694,14 +12681,15 @@ O2.extendClass('O876_Raycaster.Engine', O876_Raycaster.Transistate, {
             rc.frameProcess();
             this._callGameEvent('onDoomLoop');
             this._nTimeStamp += this.nInterval;
-            nFrames++;
-            if (nFrames > 10) {
+            nLoops++;
+            if (nLoops > 10) {
                 // too many frames, the window has been minimized for too long
                 // restore time stamp
                 this._nTimeStamp = nTime;
             }
         }
-        if (nFrames) {
+        if (nLoops) {
+        	this._nTicks += nLoops;
             rc.frameRender();
             var eng = this;
             this._callGameEvent('onFrameRendered');

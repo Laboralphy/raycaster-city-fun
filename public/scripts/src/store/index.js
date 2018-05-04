@@ -1,5 +1,5 @@
-import modules from './modules';
-import plugins from './plugins';
+import modules from './modules/index';
+import plugins from './plugins/index';
 
 import Vue from "vue";
 import Vuex from "vuex";

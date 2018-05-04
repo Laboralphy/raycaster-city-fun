@@ -1,0 +1,12 @@
+{
+  "type": 1,
+  "tile": "m_imp1",
+  "width": 16,
+  "height": 96,
+  "fx": 0,
+  "tangibility": {
+    "self" : 1,
+    "mask" : 1
+  },
+  "speed": 4
+}
