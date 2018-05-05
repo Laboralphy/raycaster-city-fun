@@ -29,12 +29,7 @@ dans le jeu à des fins de décoration ou d'interaction avec les joueurs.
 Les blueprints définissent principalement les PNJ, les plaçables, les missiles etc...
 
 
-Les caractéristiques définies sont généralement :
-- __tile__ : tile utilisée
-- __width__ : taille physique en texel (pour les collisions)
-- __height__ : hauteur physique un texel (pour les collision) , mais cette données n'est pas exploitée
-- __type__ : type d'entité (plaçable, pnj, missile... voir le fichier framework/const/raycaster.js)
-
+Les caractéristiques des blueprint sont décrite dans les fichier md correspondant
 
 
 ### dossier : ./levels

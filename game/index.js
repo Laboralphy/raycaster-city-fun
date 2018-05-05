@@ -10,6 +10,7 @@
 const Core = require('../framework/engine/Core');
 const COMMANDS = require('../framework/consts/commands');
 const RC = require('../framework/consts/raycaster');
+const EVENTS = require('../framework/consts/events');
 const Thinkers = require('./thinkers');
 const o876 = require('../framework/o876');
 
@@ -19,9 +20,9 @@ class Game extends Core {
 		super();
 		// déclaration de l'évènement player.command
 		// cet évènement est déclenché lorsqu'un joueur emet une commande (
-        this.on('mobile.command', ({mobile, command}) => this.coreEventMobileCommand(mobile, command));
-        this.on('mobile.created', ({players, mobile}) => this.coreEventMobileCreated(mobile));
-        this.on('mobile.destroyed', ({players, mobile}) => this.coreEventMobileDestroyed(mobile));
+        this.on(EVENTS.MOBILE_COMMAND, ({mobile, command}) => this.coreEventMobileCommand(mobile, command));
+        this.on(EVENTS.MOBILE_CREATED, ({players, mobile}) => this.coreEventMobileCreated(mobile));
+        this.on(EVENTS.MOBILE_DESTROYED, ({players, mobile}) => this.coreEventMobileDestroyed(mobile));
 
 	}
 
@@ -35,7 +36,7 @@ class Game extends Core {
 	coreEventMobileCommand(mobile, command) {
 		// identifier l'entité qui effectue la commande
 		switch (command) {
-			case COMMANDS.MOUSE_LEFT:
+			case COMMANDS.PRIMARY_ACTION:
                 this.mobileActionPrimaryAttack(mobile);
                 break;
 		}

@@ -65,7 +65,7 @@ class PlayerThinker extends FPSThinker {
 					break;
 
 				case 'b0.d':
-					c |= COMMANDS.MOUSE_LEFT;
+					c |= COMMANDS.PRIMARY_ACTION;
 					break;
 
 				case 'u.d':
