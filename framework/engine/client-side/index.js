@@ -345,12 +345,15 @@ class Engine extends O876_Raycaster.GameAbstract {
 	 * @param sy {number} vitesse
 	 * @param a {number} angle
 	 */
-	netUpdateMobile({id, a, x, y, sx, sy}) {
+	netUpdateMobile({id, a, x, y, sx, sy, f}) {
 		if (id === this.localId()) {
 			return;
 		}
 		if (id in this._mobiles) {
 			this._mobiles[id].getThinker().setMovement(a, x, y, sx, sy);
+			if (f.length) {
+
+			}
 		}
 	}
 

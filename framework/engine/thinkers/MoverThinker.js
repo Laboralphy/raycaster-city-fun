@@ -54,7 +54,7 @@ module.exports = class MoverThinker extends Thinker {
 			x: pos.x,
 			y: pos.y,
 			sx: spd.x,
-			sy: spd.y
+			sy: spd.y,
 		};
 	}
 

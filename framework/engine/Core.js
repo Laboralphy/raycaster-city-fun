@@ -353,7 +353,7 @@ class Core {
 			let m = mobiles[id];
 			m.think();
 			let area = m.location.area().id;
-			if (m.thinker().hasChangedMovement()) {
+			if (m.thinker().hasChangedMovement() || m.hasForces()) {
 				if (!m.isDead()) {
 					if (!(area in updateTheseMobiles)) {
 						updateTheseMobiles[area] = [];

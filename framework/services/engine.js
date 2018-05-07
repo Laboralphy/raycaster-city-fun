@@ -104,6 +104,8 @@ class ServiceEngine extends ServiceAbstract {
 		let mloc = m.location;
 		let mpos = mloc.position();
 		let mspd = m.inertia(); // vecteur de vitesse actuelle
+		let f = m.getNewForces();
+		m.resetForces();
 		return {
 			id: m.id,
 			x: mpos.x,
@@ -111,6 +113,7 @@ class ServiceEngine extends ServiceAbstract {
 			a: mloc.heading(),
 			sx: mspd.x,
 			sy: mspd.y,
+			f
 		};
 	}
 

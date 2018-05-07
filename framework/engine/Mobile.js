@@ -38,6 +38,7 @@ module.exports = class Mobile {
 		// flags
 		this.flagCrash = false; // ne glisse pas sur les mur ; explose.
 		this.forceField = new ForceField();
+		this.bUnderForceEffect = false;
 	}
 
 	die() {
@@ -99,7 +100,11 @@ module.exports = class Mobile {
 	 * si proche de zero, le vecteur force s'epuise presque instantanément.
      */
 	force(v, f) {
-		this.forceField(v, f);
+		this.forceField.force(v, f, {n: true});
+	}
+
+	hasForces() {
+		return this.forceField.forces().length;
 	}
 
 	/**
@@ -108,11 +113,17 @@ module.exports = class Mobile {
 	 * les forces devenue trop faible (moins de 1% de leur intensité initiale), disparraissent
 	 */
 	applyForces() {
-		let f = this.forceField.forces();
+		let ff = this.forceField;
+		let f = ff.computeForces();
 		if (f.x !== 0 || f.y !==  0) {
 			this.move(f);
+			this.thinker().changeMovement();
+			this.bUnderForceEffect = true;
+		} else if (this.bUnderForceEffect) {
+			this.bUnderForceEffect = false;
+			this.thinker().changeMovement();
 		}
-		this.reduceForces();
+		ff.reduceForces();
 	}
 
 	/**
@@ -234,11 +245,11 @@ module.exports = class Mobile {
         let y = vPos.y;
         let dist = o876.geometry.Helper.distance;
         // ajouter un vecteur force à tous ces mobiles
-        aMobHits.forEach(m => {
+        return aMobHits.map(m => {
         	let mPos = m.location.position();
         	let mx = mPos.x;
         	let my = mPos.y;
-            this.force(
+            return this.force(
                 vPos.sub(m.location.position())
                     .normalize()
                     .scale((this._size + m._size - dist(x, y, mx, my)) / 2),
@@ -247,12 +258,14 @@ module.exports = class Mobile {
         });
 	}
 
+
     /**
      * Teste si le mobile spécifié entre en collision avec un autre mobile.
      */
     computeMobileCollisions() {
     	let aMobHits = this.getCollidingMobiles();
-    	this.computeCollidingForces(aMobHits);
+    	let aForces = this.computeCollidingForces(aMobHits);
+    	// aForces est la liste des force engendrée par la collision
 		return !!aMobHits.length;
     }
 

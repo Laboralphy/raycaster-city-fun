@@ -15,7 +15,6 @@ class NetThinker extends AbstractThinker {
 		this.state('alive');
 	}
 
-
 	/**
 	 * Modification du mouvement/position du mobile
 	 * @param a {number} nouvel angle de visée
@@ -23,8 +22,9 @@ class NetThinker extends AbstractThinker {
 	 * @param y {number} coordonnée y
 	 * @param sx {number} vitesse selon axe x
 	 * @param sy {number} vitesse selon axe y
+	 * @param f {array} ensemble de vecteurs de répulsion
 	 */
-	setMovement(a, x, y, sx, sy) {
+	setMovement(a, x, y, sx, sy, f) {
 		this.mobile().setXY(x, y);
 		let fMovSpeed =
 			sy === undefined ?
