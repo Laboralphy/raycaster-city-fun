@@ -88,6 +88,14 @@ class EngineSocket {
 			}
 		});
 
+        socket.on('G_DOOR_OPEN', ({x, y}) => {
+            this._game.openDoor(x, y, true);
+        });
+
+        socket.on('G_DOOR_CLOSE', ({x, y}) => {
+            this._game.closeDoor(x, y);
+        });
+
 
 	}
 

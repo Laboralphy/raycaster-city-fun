@@ -8,6 +8,7 @@ const RC_CONST = require('../consts/raycaster');
 const Door = require('./Door');
 const ActiveList = require('./ActiveList');
 const o876 = require('../o876');
+const Emitter = require('events');
 
 
 module.exports = class Area {
@@ -32,6 +33,8 @@ module.exports = class Area {
         this._startpoint = null;
         // collider
         this._collider = new o876.collider.Collider();
+        // Emitter
+        this.emitter = new Emitter();
     }
 
     collider() {
@@ -54,6 +57,15 @@ module.exports = class Area {
 				}
             }
         }
+    }
+
+    /**
+     * Permet d'etablir l'état de toutes les porte du niveau
+     * Afin que le client qui vient de charger le niveau
+     * puisse correctement ouvrir ou fermer les portes comme sur le serveur
+     */
+    getDoorState() {
+
     }
 
 	/**
@@ -87,8 +99,11 @@ module.exports = class Area {
                 .height(d.map.length)
                 .cellWidth(RC_CONST.plane_spacing)
                 .cellHeight(RC_CONST.plane_spacing);
-            this._physicMap = d.map.map(row => row.map(cell => {
+            this._physicMap = d.map.map((row, y) => row.map((cell, x) => {
                 return {
+                    area: this,
+                    x,
+                    y,
                     code: (cell & 0x0000F000) >> 12,
                     door: null
                 };
@@ -104,7 +119,11 @@ module.exports = class Area {
                     this._doorList.push(oDoor);
                     oDoor.events.on('opening', door => {
                         this._activeDoorList.link(door);
+                        this.emitter.emit('door.open', {door});
                     });
+                    oDoor.events.on('closing', door => {
+                        this.emitter.emit('door.close', {door});
+                    })
                 }
             }));
             this._startpoint = d.startpoint;
@@ -116,6 +135,12 @@ module.exports = class Area {
     	return x >= 0 && x < a.length;
 	}
 
+    /**
+     * Renvoie le block de la carte physique, dont les coordonnées sont spécifiées
+     * @param x
+     * @param y
+     * @return {*}
+     */
     getCell(x, y) {
     	let pm = this._physicMap;
 		if (this._checkRange(pm, y) && this._checkRange(pm[y], x)) {

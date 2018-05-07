@@ -34,6 +34,15 @@ module.exports = class MoverThinker extends Thinker {
 		return b;
 	}
 
+    /**
+	 * indique que le mobile a vu la course naturelle de son movement etre modifiée
+	 * soit par un changement dans les controles utilisateur
+	 * soit par des force externes (explosions... repulsions...)
+     */
+	changeMovement() {
+        this._bHasChangedMovement = true;
+	}
+
 	getMovement() {
 		let m = this._mobile;
 		let loc = m.location;
@@ -51,11 +60,11 @@ module.exports = class MoverThinker extends Thinker {
 
 	setMovement({a, sx, sy}) {
 		if (a !== this._angle) {
-			this._bHasChangedMovement = true;
+			this.changeMovement();
 			this._angle = a;
 		}
 		if (sx !== this._speed.x || sy !== this._speed.y) {
-			this._bHasChangedMovement = true;
+            this.changeMovement();
 			this._speed.set(sx, sy);
 		}
 	}

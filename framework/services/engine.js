@@ -16,6 +16,10 @@ class ServiceEngine extends ServiceAbstract {
 
 		gameInstance.emitter.on('mobile.created', ({players, mobile}) => this.transmitMobileCreationEvent(players, mobile));
 		gameInstance.emitter.on('mobile.destroyed', ({players, mobile}) => this.transmitMobileDestructionEvent(players, mobile));
+        gameInstance.emitter.on('door.open', ({players, x, y}) => {
+        	this._emit(players, 'G_DOOR_OPEN', {x, y})
+        });
+        gameInstance.emitter.on('door.close', ({players, x, y}) => this._emit(players, 'G_DOOR_CLOSE', {x, y}));
     }
 
 	/**
@@ -37,7 +41,9 @@ class ServiceEngine extends ServiceAbstract {
 		});
 	}
 
+
     doomloop() {
+		this._gs.processDoors();
 		let aMutations = this._gs.getStateMutations();
 		// mobiles ayant besoin d'etre mis à jours chez les clients
 		aMutations.mu.forEach(

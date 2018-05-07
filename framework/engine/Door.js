@@ -29,6 +29,7 @@ class Door {
         this.nAutocloseTime = 0;
         // si true alors la porte est vérouillée et ne peut pas s'ouvrir
         this.bLocked = false;
+        this.bObstructed = false; // obstruction externe de la porte : elle ne peut pas se refermer
         // type de porte
         // h1 : porte 1 battant ouverture horizontale
         // h2 : porte 2 battants ouverture horizontale
@@ -130,9 +131,13 @@ class Door {
 						this.nextSecretDoor.open();
 					}
                 } else if (this.bAutoclose && --this.nAutocloseTime <= 0) {
-                    this.nAutocloseTime = 0;
-                    ++this.nState;
-					this.events.emit('closing', this);
+                    if (this.bObstructed) {
+                        this.nAutocloseTime = this.nAutocloseDelay >> 1;
+                    } else {
+                        this.nAutocloseTime = 0;
+                        ++this.nState;
+                        this.events.emit('closing', this);
+                    }
                 }
                 break;
 

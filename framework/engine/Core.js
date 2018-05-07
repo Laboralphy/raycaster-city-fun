@@ -1,19 +1,24 @@
 const Player = require('./Player');
 const Mobile = require('./Mobile');
 const Area = require('./Area');
-const Emitter = require('events');
+const Location = require('./Location');
+
+// thinkers
+const TangibleThinker = require('./thinkers/TangibleThinker');
+const MissileThinker = require('./thinkers/MissileThinker');
+
 const ResourceLoader = require('../resource-loader/index');
 const logger = require('../logger/index');
 const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
-const TangibleThinker = require('./thinkers/TangibleThinker');
-const MissileThinker = require('./thinkers/MissileThinker');
-const uniqid = require('uniqid');
 
+const Emitter = require('events');
+const uniqid = require('uniqid');
 
 const STRINGS = require('../consts/strings');
 const STATUS = require('../consts/status');
 const COMMANDS = require('../consts/commands');
+const EVENTS = require('../consts/events')
 const RC = require('../consts/raycaster');
 
 /**
@@ -56,19 +61,113 @@ class Core {
      * @return {module.Vector|*}
      */
 	static getMobileLocation(mobile) {
-		return new mobile.location;
+		return mobile.location;
 	}
 
+    /**
+	 * Renvoie les coordonnéed d'un locator
+     * @param location {Location}
+     * @return {Vector}
+     */
     static getLocationPosition(location) {
         return location.position();
     }
 
+    /**
+     * Renvoie la zone du locator spécifié
+     * @param location {Location}
+     * @return {Area}
+     */
     static getLocationArea(location) {
         return location.area();
     }
 
+    /**
+	 * Renvoie le nom de la zone spécifiée
+     * @param area {Area}
+     * @return {String}
+     */
     static getAreaName(area) {
 		return area.name;
+	}
+
+    /**
+	 * Renvoie des information relative au block qui se trouve à la location spécifiée
+     * @param location
+     */
+	static getBlockAtLocation(location) {
+		let pos = location.position();
+		let x = pos.x / RC.plane_spacing | 0;
+		let y = pos.y / RC.plane_spacing | 0;
+		return location.area().getCell(x, y);
+	}
+
+    /**
+	 * Renvoie une nouvelle location située devant la location spécifiée, à une certaine distance
+	 * Si la distance n'est pas spécifiée on prend plane_spacing comme valeur par defaut
+     * @param location
+     * @param distance
+     */
+	static getFrontLocation(location, distance) {
+		if (distance === undefined) {
+			distance = RC.plane_spacing;
+		}
+        let pos = location.position();
+        let angle = location.heading();
+        let x = pos.x + distance * Math.cos(angle);
+        let y = pos.y + distance * Math.sin(angle);
+        let locNew = new Location();
+        locNew.assign(location);
+        locNew.position().set(x, y);
+        return locNew;
+	}
+
+    /**
+     * renvoie true si la porte est verrouillée
+     * @param block
+	 * @return {boolean}
+     */
+	static isDoorLocked(block) {
+		return !!block.door && block.door.bLocked;
+	}
+
+    /**
+     * Verouille une porte
+     * @param block
+     */
+    static lockDoor(block) {
+        if (block.door) {
+            block.door.bLocked = true;
+        }
+    }
+
+    /**
+	 * Déverouille une porte
+     * @param block
+     */
+    static unlockDoor(block) {
+        if (block.door) {
+            block.door.bLocked = false;
+        }
+    }
+
+    /**
+	 * Ouverture d'une porte
+     * @param block {*} structure de description du block
+     * @param nAutoCloseDelay {number} durée au dela de laquelle la porte se referme
+	 * si pas spécifié alors la porte ne se referme pas
+	 * @return {boolean} renvoie true si la porte s'est bien ouverte, ou false sinon (verrou, ou pas vraiment une porte)
+     */
+	static openDoor(block, nAutoCloseDelay) {
+		if (block.door) {
+			let oDoor = block.door;
+			if (nAutoCloseDelay && oDoor.type !== RC.phys_secret_block) {
+				oDoor.bAutoclose = true;
+				oDoor.nAutocloseDelay = nAutoCloseDelay / RC.time_factor | 0;
+			}
+            // il faut indiquer à tous les clients de la zone qu'une porte est ouverte
+            block.area.openDoor(block.x, block.y);
+		}
 	}
 
 
@@ -193,6 +292,20 @@ class Core {
 		area.data(level);
 		logger.logfmt(STRINGS.game.level_built, id);
 		this.emitter.emit('area.built', {area});
+        area.emitter.on(EVENTS.DOOR_OPEN, ({door}) => {
+            this.emitter.emit(EVENTS.DOOR_OPEN, {
+                players: this.getAreaPlayers(area).map(p => p.id),
+                x: door.x,
+                y: door.y
+            })
+        });
+        area.emitter.on(EVENTS.DOOR_CLOSE, ({door}) => {
+            this.emitter.emit(EVENTS.DOOR_CLOSE, {
+            	players: this.getAreaPlayers(area).map(p => p.id),
+                x: door.x,
+                y: door.y
+            })
+        });
 		return area;
 	}
 
@@ -206,6 +319,23 @@ class Core {
  // #    #  #    #  #    #  #    #  #       #    #  #    #  #
  // #####    ####    ####   #    #  ######   ####    ####   #
 
+    /**
+	 * Effectue le traitemenbt sur les portes
+     */
+	processDoors() {
+		for (let a in this._areas) {
+			let area = this._areas[a];
+			let collider = area.collider();
+			// le soucis c'est que des mobiles peuvent coincer les portes
+			area._activeDoorList.items.forEach(door => {
+				let x = door.x;
+				let y = door.y;
+				// isoler le secteur x y
+				door.bObstructed = collider.sector(x, y).objects().length > 0;
+			});
+			area.processDoors();
+		}
+	}
 
 	/**
 	 * renvoie la modification de l'état du jeu, afin de transmettre cela aux différents clients
@@ -398,7 +528,7 @@ class Core {
 			// décomposer...
 			for (let i = 1; i <= COMMANDS.LAST_COMMAND; i <<= 1) {
 				if (c & i) {
-                    this.emitter.emit('mobile.command', {mobile, command: i});
+                    this.emitter.emit(EVENTS.MOBILE_COMMAND, {mobile, command: i});
 				}
 			}
 		}

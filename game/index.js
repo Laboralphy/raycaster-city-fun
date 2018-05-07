@@ -39,21 +39,38 @@ class Game extends Core {
 			case COMMANDS.PRIMARY_ACTION:
                 this.mobileActionPrimaryAttack(mobile);
                 break;
+
+			case COMMANDS.ACTIVATE:
+				this.mobileActivateSomething(mobile);
+				break;
 		}
 	}
 
 
-
-
 	/**
 	 * Effectue un tir d'arme principale
-	 * @param oMobile {*} identifiant du mobile qui effectue l'action
+	 * @param oMobile {*} mobile qui effectue l'action
 	 */
 	mobileActionPrimaryAttack(oMobile) {
 		// créer le projectile
 		// adjoindre des données extra de propriété du projectile
 		// indiquer au client un mouvement de son arme
 		let oMissile = this.spawnMissile('p_magbolt', oMobile, {});
+	}
+
+    /**
+	 * un mobile active un element du décors cela peut être un mur ou une porte
+     * @param oMobile
+     */
+	mobileActivateSomething(oMobile) {
+		// verifier si un un block devant
+		// tenter ouvrir une porte si le block de devant est une porte
+		let locMob = Core.getMobileLocation(oMobile);
+		let locFront = Core.getFrontLocation(locMob);
+		let block = Core.getBlockAtLocation(locFront);
+		if (block.door) {
+			Core.openDoor(block, RC.time_door_autoclose);
+		}
 	}
 }
 

@@ -14,7 +14,7 @@ module.exports = class Dummy {
 		this._radius = 0;
 		this._tangibility = {
 			self: 1,
-			mask: 1
+			hitmask: 1
 		};
 	}
 
@@ -23,7 +23,7 @@ module.exports = class Dummy {
 	 * @param dummy
 	 */
 	tangibleWith(dummy) {
-		return (dummy._tangibility.self & this._tangibility.mask) !== 0;
+		return (dummy._tangibility.self & this._tangibility.hitmask) !== 0;
 	}
 
     /**
