@@ -7,9 +7,9 @@ const RIGHT 			= 1 << 1;
 const DOWN 				= 1 << 2;
 const LEFT 				= 1 << 3;
 const ACTIVATE 			= 1 << 4;
-const MOUSE_LEFT 		= 1 << 5;
-const MOUSE_MIDDLE 		= 1 << 6;
-const MOUSE_RIGHT 		= 1 << 7;
+const PRIMARY_ACTION 	= 1 << 5;
+const TERTIARY_ACTION 	= 1 << 6;
+const SECONDARY_ACTION 	= 1 << 7;
 const COMMAND_0			= 1 << 8;
 const COMMAND_1			= 1 << 9;
 const COMMAND_2			= 1 << 10;
@@ -25,9 +25,9 @@ module.exports = {
 	LEFT,
 	DOWN,
 	ACTIVATE,
-	MOUSE_LEFT,
-	MOUSE_MIDDLE,
-	MOUSE_RIGHT,
+	PRIMARY_ACTION,
+	TERTIARY_ACTION,
+	SECONDARY_ACTION,
 	COMMAND_0,
 	COMMAND_1,
 	COMMAND_2,

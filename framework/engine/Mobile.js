@@ -8,6 +8,7 @@ const o876 = require('../o876/index');
 const Vector = o876.geometry.Vector;
 const RC_CONST = require('../consts/raycaster');
 const Location = require('./Location');
+const ForceField = require('./ForceField');
 
 const FORCE_NORM = 10;
 
@@ -23,7 +24,6 @@ module.exports = class Mobile {
 		// vitesse de déplacement
 		this._inertia = new Vector(0, 0); // ce vecteur est rétro-renseignée d'après computeWallcollision
 		// ensembles des forces appliquées au mobiles
-		this._forces = [];
 		this._size = 16;
 		this.wallCollision = {
 			x: 0,
@@ -37,6 +37,7 @@ module.exports = class Mobile {
 		this.data = {};
 		// flags
 		this.flagCrash = false; // ne glisse pas sur les mur ; explose.
+		this.forceField = new ForceField();
 	}
 
 	die() {
@@ -68,33 +69,6 @@ module.exports = class Mobile {
 	}
 
     /**
-	 * ajoute une force
-     * @param v {Vector} vecteur de force
-     * @param f {number} facteur d'atténuation
-     */
-	force(v, f) {
-		this._forces.push([v, f]);
-	}
-
-    /**
-	 * Somme de toutes les forces agissant sur le système
-	 * @return Vector
-     */
-	forces() {
-		return this._forces.reduce((prev, f) => prev.add(f[0]), Vector.zero());
-	}
-
-    /**
-	 * fait appliquer les forces en bougeant le mobile
-	 * toutes les forces diminuent d'intensité selon leur facteur
-	 * les forces devenue trop faible (moins de 1% de leur intensité initiale), disparraissent
-     */
-	applyForces() {
-		this.move(this.forces());
-        this._forces = this._forces.filter(v => v[0].scale(v[1]).normalize() < 0.01);
-	}
-
-    /**
      * Défini la taille physique du mobile, pour les collisions
      * @param n {number}
      */
@@ -116,6 +90,29 @@ module.exports = class Mobile {
 
 	hasHitWall() {
 		return this.wallCollision.c;
+	}
+
+    /**
+	 * Applique une nouvelle force a ce mobile
+     * @param v {Vector}
+     * @param f {number} taux de maintient de cette force, si proche de 1, ce vecteur de force ne s'epuise pas
+	 * si proche de zero, le vecteur force s'epuise presque instantanément.
+     */
+	force(v, f) {
+		this.forceField(v, f);
+	}
+
+	/**
+	 * fait appliquer les forces en bougeant le mobile
+	 * toutes les forces diminuent d'intensité selon leur facteur
+	 * les forces devenue trop faible (moins de 1% de leur intensité initiale), disparraissent
+	 */
+	applyForces() {
+		let f = this.forceField.forces();
+		if (f.x !== 0 || f.y !==  0) {
+			this.move(f);
+		}
+		this.reduceForces();
 	}
 
 	/**
