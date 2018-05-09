@@ -76,8 +76,8 @@ class PlayerThinker extends FPSThinker {
 		let sx = mobile.x - x;
 		let sy = mobile.y - y;
 
-		mobile.xOfs = Math.abs(mobile.xOfs) < 1 ? 0 : mobile.xOfs / 2;
-		mobile.yOfs = Math.abs(mobile.yOfs) < 1 ? 0 : mobile.yOfs / 2;
+		mobile.xOfs = Math.abs(mobile.xOfs) < 1 ? 0 : mobile.xOfs * 0.5;
+		mobile.yOfs = Math.abs(mobile.yOfs) < 1 ? 0 : mobile.yOfs * 0.5;
 		this._game.netUpdatePlayerMobile(f, x, y, sx, sy, c);
 	}
 }
