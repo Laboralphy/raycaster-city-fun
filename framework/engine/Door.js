@@ -40,6 +40,15 @@ class Door {
         this.nextSecretDoor = null;
     }
 
+    state(s) {
+        return {
+            x: this.x,
+            y: this.y,
+            offset: this.nOffset,
+            state: this.nState
+        };
+    }
+
     /**
      * Il existe plusieurs sortes de portes ayant chacunes leurs temps d'ouverture
      * cette method permet de defini des preset

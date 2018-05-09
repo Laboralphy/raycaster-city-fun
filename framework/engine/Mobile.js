@@ -120,6 +120,8 @@ module.exports = class Mobile {
 			this.thinker().changeMovement();
 			this.bUnderForceEffect = true;
 		} else if (this.bUnderForceEffect) {
+			// nous étions toujours sous influence de forces, mais celles ci viennent de retomber à zero
+			// indiquer néanmoins les changement un e dernière fois
 			this.bUnderForceEffect = false;
 			this.thinker().changeMovement();
 		}

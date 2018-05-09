@@ -573,7 +573,9 @@ class Core {
         }
         let area = p.location.area();
         logger.logfmt(STRINGS.game.player_downloading_area, id, area.name);
-        let live = null;
+        let live = {
+        	doors: area.getDoorState()
+		};
         return {area, live};
 	}
 

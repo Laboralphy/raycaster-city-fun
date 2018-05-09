@@ -58,6 +58,14 @@ class Engine extends O876_Raycaster.GameAbstract {
 		this.initRaycaster(data);
 		let tm = this.oRaycaster.oThinkerManager;
 		tm.defineAlias('Net', Thinkers.Net);
+
+		// définir l'état initial des portes
+		let rc = this.oRaycaster;
+		let doors = liveDate.doors;
+		for (let d in doors) {
+			let door = doors[d];
+
+		}
     }
 
 	/**
