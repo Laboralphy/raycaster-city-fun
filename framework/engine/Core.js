@@ -49,7 +49,7 @@ class Core {
     /**
 	 * Renvoie le type de mobile parmis ceux des constante MOBILE_TYPE_*
      * @param mobile
-     * @return {*}
+     * @return {string}
      */
 	static getMobileType(mobile) {
     	return mobile.data.type;
@@ -58,7 +58,7 @@ class Core {
     /**
 	 * Renvoie les coordonnées (sous forme de vecteur) d'un mobile
      * @param mobile
-     * @return {module.Vector|*}
+     * @return {Location}
      */
 	static getMobileLocation(mobile) {
 		return mobile.location;
@@ -93,7 +93,8 @@ class Core {
 
     /**
 	 * Renvoie des information relative au block qui se trouve à la location spécifiée
-     * @param location
+     * @param location {Location} position du block qu'on souhaite étudier
+	 * @return {*}
      */
 	static getBlockAtLocation(location) {
 		let pos = location.position();
@@ -105,8 +106,9 @@ class Core {
     /**
 	 * Renvoie une nouvelle location située devant la location spécifiée, à une certaine distance
 	 * Si la distance n'est pas spécifiée on prend plane_spacing comme valeur par defaut
-     * @param location
-     * @param distance
+	 * l'angle de heading est utilisé pour déterminer l'avant de la location
+     * @param location {Location}
+     * @param distance {number} défaut : 64
      */
 	static getFrontLocation(location, distance) {
 		if (distance === undefined) {
@@ -120,6 +122,15 @@ class Core {
         locNew.assign(location);
         locNew.position().set(x, y);
         return locNew;
+	}
+
+	/**
+	 * Renvoie true si le block spécifié est en fait une porte
+	 * @param block
+	 * @returns {boolean}
+	 */
+	static isDoor(block) {
+		return !!block.door
 	}
 
     /**

@@ -52,21 +52,14 @@ class Engine extends O876_Raycaster.GameAbstract {
 	/**
 	 * Ordonne le chargement d'un niveau par initialisation du Raycaster
 	 * @param data {*} donnée du niveau
+	 * @param liveData {*} donnée du niveau
 	 */
 	loadLevel(data, liveData) {
 		this._levelLiveData = liveData;
 		this.initRaycaster(data);
 		let tm = this.oRaycaster.oThinkerManager;
 		tm.defineAlias('Net', Thinkers.Net);
-
-		// définir l'état initial des portes
-		let rc = this.oRaycaster;
-		let doors = liveDate.doors;
-		for (let d in doors) {
-			let door = doors[d];
-
-		}
-    }
+	}
 
 	/**
 	 * Renvoie l'instance du raycaster
@@ -88,7 +81,22 @@ class Engine extends O876_Raycaster.GameAbstract {
 		return o876.SpellBook.prop(this, '_localId', id);
 	}
 
-
+	/**
+	 * définir l'état initial des portes
+	 */
+	setDoorsInitialState(doors) {
+		// définir l'état initial des portes
+		let rc = this.oRaycaster;
+		for (let d in doors) {
+			let door = doors[d];
+			let x = door.x,	y = door.y;
+			this.openDoor(x, y);
+			let oThisDoor = rc.getDoor(x, y);
+			if (oThisDoor) {
+				oThisDoor.setPhase(door.state, door.offset);
+			}
+		}
+	}
 
 
 
@@ -153,6 +161,7 @@ class Engine extends O876_Raycaster.GameAbstract {
 		player.setThinker(ct);
         ct.on('use.down', () => this.activateWall(player));
         let lld = this._levelLiveData;
+		this.setDoorsInitialState(lld.doors);
         // exploitation des level live data
 		// puis transmission
         this.trigger('level.live.data', lld);
@@ -359,8 +368,8 @@ class Engine extends O876_Raycaster.GameAbstract {
 		}
 		if (id in this._mobiles) {
 			this._mobiles[id].getThinker().setMovement(a, x, y, sx, sy);
-			if (f.length) {
-
+			if (f && f.length) {
+				// on va pas pouvoir gérer les vecteurs force : cela va retro agir avec le serveur...
 			}
 		}
 	}

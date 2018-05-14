@@ -40,7 +40,7 @@ class Door {
         this.nextSecretDoor = null;
     }
 
-    state(s) {
+    state() {
         return {
             x: this.x,
             y: this.y,

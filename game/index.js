@@ -68,8 +68,10 @@ class Game extends Core {
 		let locMob = Core.getMobileLocation(oMobile);
 		let locFront = Core.getFrontLocation(locMob);
 		let block = Core.getBlockAtLocation(locFront);
-		if (block.door) {
+		if (Core.isDoor(block)) {
 			Core.openDoor(block, RC.time_door_autoclose);
+		} else {
+			// ce n'est pas une porte, peut etre un objet accroché, ou un intérrupteur
 		}
 	}
 }

@@ -65,7 +65,7 @@ module.exports = class Area {
      * puisse correctement ouvrir ou fermer les portes comme sur le serveur
      */
     getDoorState() {
-    	const adl = this._activeDoorList;
+    	const adl = this._activeDoorList.items;
     	let oState = [];
 		for (let d in adl) {
 			let door = adl[d];
